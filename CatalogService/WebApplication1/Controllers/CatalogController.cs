@@ -7,7 +7,6 @@ using Domain.Exceptions;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using WebApplication1.Controllers.Validators;
 
 namespace WebApplication1.Controllers;
 
