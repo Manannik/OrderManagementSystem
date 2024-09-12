@@ -3,12 +3,15 @@ using Domain.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using OrderManagementSystem.Infrastructure.Repository;
 using OrderManagementSystem.Persistance;
+using WebApplication1.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddControllers();
+builder.Services.AddSingleton(typeof(CatalogServiceExceptionHandlerMiddleware));
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddMediatR(configuration =>
@@ -30,5 +33,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<CatalogServiceExceptionHandlerMiddleware>();
+
+app.UseAuthorization();
+
+app.MapControllers();
 
 app.Run();
