@@ -2,17 +2,12 @@
 using Microsoft.EntityFrameworkCore;
 using OrderManagementSystem.Infrastructure.Configuration;
 
-namespace OrderManagementSystem.Persistance;
+namespace OrderManagementSystem.Infrastructure;
 
-public class CatalogDbContext : DbContext
+public class CatalogDbContext(DbContextOptions<CatalogDbContext> options) : DbContext(options)
 {
     public DbSet<Product> Products { get; set; }
     public DbSet<Category> Categories { get; set; }
-
-    public CatalogDbContext(DbContextOptions<CatalogDbContext> options) : base(options)
-    {
-
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

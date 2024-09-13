@@ -1,7 +1,6 @@
 ﻿using Domain.Abstractions;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using OrderManagementSystem.Persistance;
 
 namespace OrderManagementSystem.Infrastructure.Repository;
 
