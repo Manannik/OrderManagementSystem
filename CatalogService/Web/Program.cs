@@ -3,11 +3,17 @@ using Domain.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using OrderManagementSystem.Infrastructure.Repository;
 using OrderManagementSystem.Persistance;
+using Serilog;
 using WebApplication1.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+builder.Host.UseSerilog((context, configuration) =>
+{
+    configuration.ReadFrom.Configuration(context.Configuration);
+});
 
 builder.Services.AddControllers();
 builder.Services.AddSingleton(typeof(CatalogServiceExceptionHandlerMiddleware));
@@ -31,6 +37,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
 
