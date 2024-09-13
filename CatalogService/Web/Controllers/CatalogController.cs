@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace WebApplication1.Controllers;
 
 [Route("[controller]")]
+[ApiController]
 public class CatalogController(IMediator mediator,
     IValidator<CreateProductRequest> createProductRequestValidator,
     IValidator<UpdateProductRequest> updateProductRequestValidator) : ControllerBase
@@ -23,15 +24,24 @@ public class CatalogController(IMediator mediator,
         {
             return BadRequest(validationResult.ToDictionary());
         }
-        await mediator.Send(new CreateProductCommand(request.Name, request.Description, request.Category,
-            request.Price, request.Quantity), ct);
+        await mediator.Send(new CreateProductCommand()
+        {
+            Name = request.Name, 
+            Description = request.Description, 
+            CategoriesModelDtos = request.CategoryModelDtos,
+            Price = request.Price, 
+            Quantity = request.Quantity
+        }, ct);
         return Ok();
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken ct)
     {
-        var result = await mediator.Send(new GetProductQuery(id), ct);
+        var result = await mediator.Send(new GetProductQuery()
+        {
+            ProductId = id
+        }, ct);
         return Ok(result);
     }
 
@@ -44,14 +54,21 @@ public class CatalogController(IMediator mediator,
         {
             return BadRequest(validationResult.ToDictionary());
         }
-        var result = await mediator.Send(new UpdateProductCommand(id, request), ct);
+        var result = await mediator.Send(new UpdateProductCommand()
+        {
+            Id = id, 
+            Request = request
+        }, ct);
         return Ok(result);
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken ct)
     {
-        await mediator.Send(new DeleteProductCommand(id), ct);
+        await mediator.Send(new DeleteProductCommand()
+        {
+            Id = id
+        }, ct);
         return Ok();
     }
 
@@ -62,7 +79,11 @@ public class CatalogController(IMediator mediator,
         {
             throw new QuantityException();
         }
-        var productModel = await mediator.Send(new UpdateQuantityCommand(id, newQuantity), ct);
+        var productModel = await mediator.Send(new UpdateQuantityCommand()
+        {
+            Id = id,
+            NewQuantity = newQuantity
+        }, ct);
         return Ok(productModel);
     }
 }

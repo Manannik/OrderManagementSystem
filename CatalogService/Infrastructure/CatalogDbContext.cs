@@ -1,5 +1,6 @@
 ﻿using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using OrderManagementSystem.Infrastructure.Configuration;
 
 namespace OrderManagementSystem.Persistance;
 
@@ -15,20 +16,9 @@ public class CatalogDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Product>(option =>
-        {
-            option.HasKey(f => f.Id);
-        });
 
-        modelBuilder.Entity<Category>(option =>
-        {
-            option.HasKey(f => f.Id);
-
-            option.HasMany(f => f.Products)
-                .WithOne(f => f.Category)
-                .HasForeignKey(f => f.CategoryId);
-        });
-
+        modelBuilder.ApplyConfiguration(new ProductConfiguration());
+        modelBuilder.ApplyConfiguration(new CategoryConfiguration());
         var categories = new[]
         {
             new Category()

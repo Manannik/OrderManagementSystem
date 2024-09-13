@@ -7,11 +7,6 @@ namespace Application.BusinessLogic.Commands.DeleteProduct;
 public class DeleteProductCommand : IRequest
 {
     public Guid Id { get; set; }
-
-    public DeleteProductCommand(Guid id)
-    {
-        Id = id;
-    }
 }
 
 public class DeleteProductCommandHandle(IProductRepository productRepository) : IRequestHandler<DeleteProductCommand>

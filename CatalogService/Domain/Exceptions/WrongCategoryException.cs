@@ -3,11 +3,12 @@ namespace Domain.Exceptions;
 
 public class WrongCategoryException : CatalogServiceException
 {
-    public string Name { get; set; }
+    public List<string> Names { get; set; }
 
-    public WrongCategoryException(string name) : base($"Категории с таким наименованием {name} не существует", 409)
+    public WrongCategoryException(List<string> names) : 
+        base($"Категории с таким наименованиями {string.Join(", ", names)} не существует", 409)
     {
-        Name = name;
+        Names = names;
     }
 }
 

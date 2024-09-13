@@ -5,18 +5,14 @@ using MediatR;
 
 namespace Application.BusinessLogic.Queries
 {
-    public class GetProductQuery : IRequest<ProductModel>
+    public class GetProductQuery : IRequest<ProductModelDto>
     {
         public Guid ProductId { get; set; }
-        public GetProductQuery(Guid productId)
-        {
-            ProductId = productId;
-        }
     }
 
-    public class GetProductQueryHandler(IProductRepository productRepository) : IRequestHandler<GetProductQuery, ProductModel>
+    public class GetProductQueryHandler(IProductRepository productRepository) : IRequestHandler<GetProductQuery, ProductModelDto>
     {
-        public async Task<ProductModel> Handle(GetProductQuery request, CancellationToken ct)
+        public async Task<ProductModelDto> Handle(GetProductQuery request, CancellationToken ct)
         {
             var existingProduct = await productRepository.GetByIdAsync(request.ProductId, ct);
 
@@ -25,15 +21,15 @@ namespace Application.BusinessLogic.Queries
                 throw new ProductDoesNotExistException(request.ProductId);
             }
 
-            var productModel = new ProductModel()
+            var productModel = new ProductModelDto()
             {
                 Id = existingProduct.Id,
                 Name = existingProduct.Name,
                 Description = existingProduct.Description,
-                Category = new CategoryModel()
+                CategoriesModelDtos = existingProduct.Categories.Select(f=>new CategoryModelDto()
                 {
-                    Name = existingProduct.Category.Name,
-                },
+                    Name = f.Name
+                }).ToList(),
                 Price = existingProduct.Price,
                 Quantity = existingProduct.Quantity,
                 CreatedDateUtc = existingProduct.CreatedDateUtc,

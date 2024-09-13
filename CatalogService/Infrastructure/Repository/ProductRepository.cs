@@ -15,8 +15,8 @@ public class ProductRepositoryy(CatalogDbContext dbContext) : IProductRepository
 
     public async Task<Product?> GetByIdAsync(Guid id, CancellationToken ct)
     {
-        return await dbContext.Products.Include(f=>f.Category)
-            .FirstOrDefaultAsync(p => p.Id == id);
+        return await dbContext.Products.Include(f=>f.Categories)
+            .FirstOrDefaultAsync(p => p.Id == id,ct);
     }
 
     public async Task UpdateAsync(Product product, CancellationToken ct)
@@ -28,12 +28,12 @@ public class ProductRepositoryy(CatalogDbContext dbContext) : IProductRepository
     public async Task DeleteAsync(Product product, CancellationToken ct)
     {
         dbContext.Products.Remove(product);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(ct);
     }
 
     public async Task<bool> ExistAsync(string name, CancellationToken ct)
     {
-        return await dbContext.Products.FirstOrDefaultAsync(f => f.Name.ToLower() == name.ToLower()) != null;
+        return await dbContext.Products.AnyAsync(f=>f.Name==name,ct);
     }
 
     public async Task UpdateQuantityAsync(Product product, CancellationToken ct)

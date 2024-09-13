@@ -12,7 +12,7 @@ namespace OrderManagementSystem.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Categories",
+                name: "CategoriesModelDtos",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -42,13 +42,13 @@ namespace OrderManagementSystem.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_Products_Categories_CategoryId",
                         column: x => x.CategoryId,
-                        principalTable: "Categories",
+                        principalTable: "CategoriesModelDtos",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
-                table: "Categories",
+                table: "CategoriesModelDtos",
                 columns: new[] { "Id", "Name" },
                 values: new object[] { new Guid("6af8acea-bfa5-438d-ac76-2767b6f2d651"), "Одежда" });
 
@@ -65,7 +65,7 @@ namespace OrderManagementSystem.Infrastructure.Migrations
                 name: "Products");
 
             migrationBuilder.DropTable(
-                name: "Categories");
+                name: "CategoriesModelDtos");
         }
     }
 }

@@ -10,21 +10,14 @@ public class CreateProductCommand : IRequest
 {
     public string Name { get; set; }
     public string Description { get; set; }
-    public CategoryModel Category { get; set; }
+    public List<CategoryModelDto> CategoriesModelDtos { get; set; }
     public decimal Price { get; set; }
     public int Quantity { get; set; }
-
-    public CreateProductCommand(string name, string description, CategoryModel category, decimal price, int quantity)
-    {
-        Name = name;
-        Description = description;
-        Category = category;
-        Price = price;
-        Quantity = quantity;
-    }
+    
 }
 
-public class CreateProductCommandHandler(IProductRepository productRepository,
+public class CreateProductCommandHandler(
+    IProductRepository productRepository,
     ICategoryRepository categoryRepository) : IRequestHandler<CreateProductCommand>
 {
     public async Task Handle(CreateProductCommand request, CancellationToken ct)
@@ -37,17 +30,24 @@ public class CreateProductCommandHandler(IProductRepository productRepository,
         }
 
         // стоит ли проверять категорию продукта ?
-        var existingCategory = await categoryRepository.GetByNameAsync(request.Category.Name, ct);
-        if (existingCategory == null)
+        var categoriesNames = request.CategoriesModelDtos.Select(f => f.Name).ToList();
+        var existingCategories = await categoryRepository.GetByNamesAsync(categoriesNames, ct);
+
+        var intersectedCategoriesNames = existingCategories
+            .Select(f => f.Name)
+            .Intersect(categoriesNames)
+            .ToList();
+
+        if (intersectedCategoriesNames != null)
         {
-            throw new WrongCategoryException(request.Category.Name);
+            throw new WrongCategoryException(intersectedCategoriesNames);
         }
 
         var product = new Product()
         {
             Name = request.Name,
             Description = request.Description,
-            Category = existingCategory,
+            Categories = existingCategories,
             Price = request.Price,
             Quantity = request.Quantity,
             CreatedDateUtc = DateTime.UtcNow,

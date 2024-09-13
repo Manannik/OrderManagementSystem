@@ -12,9 +12,9 @@ public class CategoryRepository(CatalogDbContext dbContext) : ICategoryRepositor
         throw new NotImplementedException();
     }
 
-    public async Task<Category?> GetByNameAsync(string name, CancellationToken ct)
+    public async Task<List<Category>> GetByNamesAsync(List<string> names, CancellationToken ct)
     {
-        return await dbContext.Categories.FirstOrDefaultAsync(f => f.Name.ToLower() == name.ToLower());
+        return await dbContext.Categories.Where(f=>names.Contains(f.Name)).ToListAsync(ct);
     }
 
     public Task<Category> UpdateAsync(Category category, CancellationToken ct)

@@ -34,7 +34,7 @@ namespace OrderManagementSystem.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("CategoriesModelDtos");
 
                     b.HasData(
                         new

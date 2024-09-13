@@ -5,20 +5,15 @@ using MediatR;
 
 namespace Application.BusinessLogic.Commands.UpdateProduct;
 
-public class UpdateQuantityCommand : IRequest<ProductModel>
+public class UpdateQuantityCommand : IRequest<ProductModelDto>
 {
     public Guid Id { get; set; }
     public int NewQuantity { get; set; }
-    public UpdateQuantityCommand(Guid id,int newQuantity)
-    {
-        NewQuantity = newQuantity;
-        Id = id;
-    }
 }
 
-public class UpdateQuantityCommandHandler(IProductRepository productRepository) : IRequestHandler<UpdateQuantityCommand,ProductModel>
+public class UpdateQuantityCommandHandler(IProductRepository productRepository) : IRequestHandler<UpdateQuantityCommand,ProductModelDto>
 {
-    public async Task<ProductModel> Handle(UpdateQuantityCommand request, CancellationToken ct)
+    public async Task<ProductModelDto> Handle(UpdateQuantityCommand request, CancellationToken ct)
     {
         var existingProduct = await productRepository.GetByIdAsync(request.Id, ct);
         if (existingProduct == null)
@@ -31,16 +26,16 @@ public class UpdateQuantityCommandHandler(IProductRepository productRepository) 
         
         await productRepository.UpdateQuantityAsync(existingProduct, ct);
 
-        return new ProductModel()
+        return new ProductModelDto()
         {
             Id = existingProduct.Id,
             Name = existingProduct.Name,
             Description = existingProduct.Description,
             Price = existingProduct.Price,
-            Category = new CategoryModel()
+            CategoriesModelDtos = existingProduct.Categories.Select(f=>new CategoryModelDto()
             {
-                Name = existingProduct.Category.Name
-            },
+                Name = f.Name
+            }).ToList(),
             Quantity = existingProduct.Quantity,
             CreatedDateUtc = existingProduct.CreatedDateUtc,
             UpdatedDateUtc = existingProduct.UpdatedDateUtc

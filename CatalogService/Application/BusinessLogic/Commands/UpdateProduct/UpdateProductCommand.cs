@@ -7,22 +7,16 @@ using MediatR;
 
 namespace Application.BusinessLogic.Commands.UpdateProduct;
 
-public class UpdateProductCommand : IRequest<ProductModel>
+public class UpdateProductCommand : IRequest<ProductModelDto>
 {
     public Guid Id { get; set; }
     public UpdateProductRequest Request { get; set; }
-
-    public UpdateProductCommand(Guid id, UpdateProductRequest request)
-    {
-        Id = id;
-        Request = request;
-    }
 }
 
 public class UpdateProductCommandHandle(IProductRepository productRepository, 
-    ICategoryRepository categoryRepository) : IRequestHandler<UpdateProductCommand, ProductModel>
+    ICategoryRepository categoryRepository) : IRequestHandler<UpdateProductCommand, ProductModelDto>
 {
-    public async Task<ProductModel> Handle(UpdateProductCommand request, CancellationToken ct)
+    public async Task<ProductModelDto> Handle(UpdateProductCommand request, CancellationToken ct)
     {
         var existingProduct = await productRepository.GetByIdAsync(request.Id, ct);
         
@@ -39,16 +33,15 @@ public class UpdateProductCommandHandle(IProductRepository productRepository,
 
         await productRepository.UpdateAsync(existingProduct, ct);
 
-        var result = new ProductModel()
+        var result = new ProductModelDto()
         {
             Id = existingProduct.Id,
             Name = existingProduct.Name,
             Description = existingProduct.Description,
-            Category = new CategoryModel()
+            CategoriesModelDtos = existingProduct.Categories.Select(f=>new CategoryModelDto()
             {
-                Name = existingProduct.Category.Name,
-            },
-            Price = existingProduct.Price,
+                Name = f.Name
+            }).ToList(),
             Quantity = existingProduct.Quantity,
             CreatedDateUtc = existingProduct.CreatedDateUtc,
             UpdatedDateUtc = existingProduct.UpdatedDateUtc,
