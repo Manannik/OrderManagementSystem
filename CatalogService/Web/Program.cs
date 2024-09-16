@@ -1,9 +1,7 @@
-using Application.BusinessLogic.Commands.CreateProduct;
-using Domain.Abstractions;
-using Microsoft.EntityFrameworkCore;
-using OrderManagementSystem.Infrastructure;
-using OrderManagementSystem.Infrastructure.Repository;
+using Application.Extentions;
+using OrderManagementSystem.Infrastructure.Extentions;
 using Serilog;
+using WebApplication1.Extentions;
 using WebApplication1.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,18 +14,14 @@ builder.Host.UseSerilog((context, configuration) =>
 });
 
 builder.Services.AddControllers();
-builder.Services.AddSingleton(typeof(CatalogServiceExceptionHandlerMiddleware));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddMediatR(configuration =>
-    configuration.RegisterServicesFromAssemblyContaining<CreateProductCommand>());
-builder.Services.AddScoped<IProductRepository, ProductRepositoryy>();
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddDbContext<CatalogDbContext>(options =>
-{
-    options.UseNpgsql(builder.Configuration.GetConnectionString("CatalogServiceConnectionString"));
-});
+
+builder.Services.Web();
+builder.Services.Application();
+builder.Services.Persistance(builder.Configuration);
+
 
 var app = builder.Build();
 

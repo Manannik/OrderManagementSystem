@@ -29,18 +29,17 @@ public class CreateProductCommandHandler(
             throw new ProductAlreadyExistException(request.Name);
         }
 
-        // стоит ли проверять категорию продукта ?
-        var categoriesNames = request.CategoriesModelDtos.Select(f => f.Name).ToList();
-        var existingCategories = await categoryRepository.GetByNamesAsync(categoriesNames, ct);
-
-        var intersectedCategoriesNames = existingCategories
-            .Select(f => f.Name)
-            .Intersect(categoriesNames)
+        var categoriesId = request.CategoriesModelDtos.Select(f => f.Id).ToList();
+        var existingCategories = await categoryRepository.GetByIdAsync(categoriesId, ct);
+        // комментарий для себя продебажить
+        var intersectedCategoriesId = existingCategories
+            .Select(f => f.Id)
+            .Except(categoriesId)
             .ToList();
 
-        if (intersectedCategoriesNames != null)
+        if (intersectedCategoriesId != null)
         {
-            throw new WrongCategoryException(intersectedCategoriesNames);
+            throw new WrongCategoryException(intersectedCategoriesId);
         }
 
         var product = new Product()

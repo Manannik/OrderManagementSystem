@@ -40,7 +40,7 @@ public class UpdateProductCommandHandle(IProductRepository productRepository,
             Description = existingProduct.Description,
             CategoriesModelDtos = existingProduct.Categories.Select(f=>new CategoryModelDto()
             {
-                Name = f.Name
+                Id = f.Id
             }).ToList(),
             Quantity = existingProduct.Quantity,
             CreatedDateUtc = existingProduct.CreatedDateUtc,

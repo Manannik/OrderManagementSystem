@@ -28,7 +28,7 @@ namespace Application.BusinessLogic.Queries
                 Description = existingProduct.Description,
                 CategoriesModelDtos = existingProduct.Categories.Select(f=>new CategoryModelDto()
                 {
-                    Name = f.Name
+                    Id = f.Id,
                 }).ToList(),
                 Price = existingProduct.Price,
                 Quantity = existingProduct.Quantity,

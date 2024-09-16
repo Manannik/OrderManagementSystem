@@ -34,7 +34,7 @@ public class UpdateQuantityCommandHandler(IProductRepository productRepository) 
             Price = existingProduct.Price,
             CategoriesModelDtos = existingProduct.Categories.Select(f=>new CategoryModelDto()
             {
-                Name = f.Name
+                Id = f.Id
             }).ToList(),
             Quantity = existingProduct.Quantity,
             CreatedDateUtc = existingProduct.CreatedDateUtc,
