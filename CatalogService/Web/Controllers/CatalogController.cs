@@ -23,21 +23,15 @@ public class CatalogController(
     {
         _logger.LogInformation("запуск метод Create, request: {@Request}", request);
 
-        var validationResult = createProductRequestValidator.Validate(request);
-        if (!validationResult.IsValid)
-        {
-            _logger.LogWarning("ошибка валидации при работе метода Create: {@Errors}", validationResult.Errors);
-            return BadRequest(validationResult.ToDictionary());
-        }
-
-        await mediator.Send(new CreateProductCommand()
-        {
-            Name = request.Name,
-            Description = request.Description,
-            CategoriesModelDtos = request.CategoryModelDtos,
-            Price = request.Price,
-            Quantity = request.Quantity
-        }, ct);
+         await mediator.Send(new CreateProductCommand()
+         {
+             Name = request.Name,
+             Description = request.Description,
+             CategoriesModelDtos = request.CategoryModelDtos,
+             Price = request.Price,
+             Quantity = request.Quantity
+         }, ct);
+        
         _logger.LogInformation("в результате работы метода Create, продукт успешно создан");
         return Ok();
     }
@@ -51,7 +45,9 @@ public class CatalogController(
         {
             ProductId = id
         }, ct);
+        
         _logger.LogInformation("продукт с таким {id}, успешно получен", id);
+        
         return Ok(result);
     }
 
@@ -61,19 +57,14 @@ public class CatalogController(
     {
         _logger.LogInformation("Вызван метод UpdateProduct с id: {Id} и request: {@Request}", id, request);
 
-        var validationResult = updateProductRequestValidator.Validate(request);
-        if (!validationResult.IsValid)
-        {
-            _logger.LogWarning("ошибка валидации при работе метода UpdateProduct: {@Errors}", validationResult.Errors);
-            return BadRequest(validationResult.ToDictionary());
-        }
-
         var result = await mediator.Send(new UpdateProductCommand()
         {
             Id = id,
             Request = request
         }, ct);
+        
         _logger.LogInformation("продукт с таким {id}, успешно обновлен", id);
+        
         return Ok(result);
     }
 
@@ -87,28 +78,25 @@ public class CatalogController(
             Id = id
         }, ct);
         _logger.LogInformation("продукт с таким {id}, успешно удален", id);
+        
         return Ok();
     }
 
     [HttpPut("ChangeQuantity/{id:guid}/{newQuantity:int}")]
-    public async Task<IActionResult> UpdateQuantity([FromRoute] Guid id, [FromRoute] int newQuantity,
+    public async Task<IActionResult> UpdateQuantity([FromRoute] Guid id, [FromBody] UpdateProductQuantityRequest request,
         CancellationToken ct)
     {
         _logger.LogInformation("Вызван метод UpdateQuantity с id: {Id} и новым количеством товара {newQuantity}", id,
-            newQuantity);
-
-        if (newQuantity < 0)
-        {
-            _logger.LogInformation("Нельзя задать количество меньше 0");
-            throw new QuantityException();
-        }
-
-        var productModel = await mediator.Send(new UpdateQuantityCommand()
-        {
-            Id = id,
-            NewQuantity = newQuantity
-        }, ct);
+            request.NewQuantity);
+        
+         var productModel = await mediator.Send(new UpdateQuantityCommand()
+         {
+             Id = id,
+             Request = request
+         }, ct);
+        
         _logger.LogInformation("Для продукт с {id}, успешно обновлено количество товара", id);
+        
         return Ok(productModel);
     }
 }

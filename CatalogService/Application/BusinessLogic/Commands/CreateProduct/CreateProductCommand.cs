@@ -13,7 +13,6 @@ public class CreateProductCommand : IRequest
     public List<CategoryModelDto> CategoriesModelDtos { get; set; }
     public decimal Price { get; set; }
     public int Quantity { get; set; }
-    
 }
 
 public class CreateProductCommandHandler(
@@ -31,13 +30,14 @@ public class CreateProductCommandHandler(
 
         var categoriesId = request.CategoriesModelDtos.Select(f => f.Id).ToList();
         var existingCategories = await categoryRepository.GetByIdAsync(categoriesId, ct);
+        
         // комментарий для себя продебажить
         var intersectedCategoriesId = existingCategories
             .Select(f => f.Id)
-            .Except(categoriesId)
+            .Intersect(categoriesId)
             .ToList();
 
-        if (intersectedCategoriesId != null)
+        if (intersectedCategoriesId.Count==0)
         {
             throw new WrongCategoryException(intersectedCategoriesId);
         }

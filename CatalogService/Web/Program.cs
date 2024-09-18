@@ -1,7 +1,7 @@
-using Application.Extentions;
-using OrderManagementSystem.Infrastructure.Extentions;
+using Application.Extensions;
+using OrderManagementSystem.Infrastructure.Extensions;
 using Serilog;
-using WebApplication1.Extentions;
+using WebApplication1.Extensions;
 using WebApplication1.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,15 +13,14 @@ builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration);
 });
 
-builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.Web();
-builder.Services.Application();
-builder.Services.Persistance(builder.Configuration);
-
+builder.Services.AddWeb();
+builder.Services.AddApplication();
+builder.Services.AddPersistence(builder.Configuration);
 
 var app = builder.Build();
 

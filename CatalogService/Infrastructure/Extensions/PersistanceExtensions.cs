@@ -4,11 +4,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OrderManagementSystem.Infrastructure.Repository;
 
-namespace OrderManagementSystem.Infrastructure.Extentions;
+namespace OrderManagementSystem.Infrastructure.Extensions;
 
-public static class PersistanceExtentions
+public static class PersistanceExtensions
 {
-    public static IServiceCollection Persistance(
+    public static IServiceCollection AddPersistence(
         this IServiceCollection services,IConfiguration configuration)
     {
         services.AddScoped<IProductRepository, ProductRepositoryy>();

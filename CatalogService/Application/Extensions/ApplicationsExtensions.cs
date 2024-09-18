@@ -1,12 +1,11 @@
 ﻿using Application.BusinessLogic.Commands.CreateProduct;
-using Domain.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Application.Extentions;
+namespace Application.Extensions;
 
-public static class ApplicationsExtentions
+public static class ApplicationsExtensions
 {
-    public static IServiceCollection Application(
+    public static IServiceCollection AddApplication(
         this IServiceCollection services)
     {
         services.AddMediatR(configuration =>

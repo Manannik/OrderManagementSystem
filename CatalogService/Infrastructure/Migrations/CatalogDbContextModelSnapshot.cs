@@ -41,6 +41,16 @@ namespace OrderManagementSystem.Infrastructure.Migrations
                         {
                             Id = new Guid("6af8acea-bfa5-438d-ac76-2767b6f2d651"),
                             Name = "Одежда"
+                        },
+                        new
+                        {
+                            Id = new Guid("6af8acea-bfa5-438d-ac76-2767b6f2d652"),
+                            Name = "Джинсы"
+                        },
+                        new
+                        {
+                            Id = new Guid("6af8acea-bfa5-438d-ac76-2767b6f2d653"),
+                            Name = "Куртка"
                         });
                 });
 

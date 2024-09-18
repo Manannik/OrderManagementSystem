@@ -1,4 +1,5 @@
 ﻿using Application.BusinessLogic.Models;
+using Application.Models;
 using Domain.Abstractions;
 using Domain.Exceptions;
 using MediatR;
@@ -8,7 +9,7 @@ namespace Application.BusinessLogic.Commands.UpdateProduct;
 public class UpdateQuantityCommand : IRequest<ProductModelDto>
 {
     public Guid Id { get; set; }
-    public int NewQuantity { get; set; }
+    public UpdateProductQuantityRequest Request { get; set; }
 }
 
 public class UpdateQuantityCommandHandler(IProductRepository productRepository) : IRequestHandler<UpdateQuantityCommand,ProductModelDto>
@@ -21,7 +22,7 @@ public class UpdateQuantityCommandHandler(IProductRepository productRepository) 
             throw new ProductDoesNotExistException(request.Id);
         }
 
-        existingProduct.Quantity = request.NewQuantity;
+        existingProduct.Quantity = request.Request.NewQuantity;
         existingProduct.UpdatedDateUtc = DateTime.UtcNow;
         
         await productRepository.UpdateQuantityAsync(existingProduct, ct);
