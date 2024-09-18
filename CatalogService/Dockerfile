@@ -14,4 +14,4 @@ RUN dotnet build -c $BUILD_CONFIGURATION -o /app/build
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/build .
-ENTRYPOINT ["dotnet", "CatalogService.Web.dll"]
+ENTRYPOINT ["dotnet", "Web.dll"]
