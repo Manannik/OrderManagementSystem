@@ -3,6 +3,7 @@ using Application.BusinessLogic.Commands.UpdateProduct;
 using Application.BusinessLogic.Models;
 using Application.Models;
 using Domain.Abstractions;
+using Domain.Entities;
 using Moq;
 
 namespace Tests;
@@ -10,16 +11,14 @@ namespace Tests;
 public class UpdateProductCommandHandlerTests
 {
     private readonly Mock<IProductRepository> _productRepositoryMock;
-    private readonly Mock<ICategoryRepository> _categoryRepositoryMock;
 
     public UpdateProductCommandHandlerTests()
     {
         _productRepositoryMock = new();
-        _categoryRepositoryMock = new();
     }
     
     [Fact]
-    public Task Handle_Should_ReturnFailureResult_WhenProductExist()
+    public async Task Handle_Should_ReturnSuccessResult_WhenProductUpdated()
     {
         //Arrange
         var command = new UpdateProductCommand()
@@ -37,15 +36,53 @@ public class UpdateProductCommandHandlerTests
             }
         };
 
+        var existingProduct = new Product()
+        {
+            Id =Guid.Parse("29ada098-6fe2-4c4c-ba6e-1a9788abd04b"),
+            Name = "Одежда1",
+            Description ="Одежда1",
+            Categories = new List<Category>()
+            {
+                new Category()
+                {
+                    Id =Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d651"),
+                    Name = "Одежда"
+                }
+            },
+            Price = 800,
+            Quantity = 10,
+            CreatedDateUtc = DateTime.UtcNow
+        };
+        
+        _productRepositoryMock.Setup(f => f.GetByIdAsync(command.Id,default))
+            .ReturnsAsync(existingProduct);
+        
         var handler = new UpdateProductCommandHandle(
-            _productRepositoryMock.Object,
-            _categoryRepositoryMock.Object);
+            _productRepositoryMock.Object);
         
         //Act
-        var act = () => handler.Handle(command, default);
+        var updatedProductModelDto = await handler.Handle(command, default);
 
         //Assert
+
+        var mappedCommand = new ProductModelDto()
+        {
+            Id = existingProduct.Id,
+            Name = command.Request.Name,
+            Description = command.Request.Description,
+            CreatedDateUtc = existingProduct.CreatedDateUtc,
+            UpdatedDateUtc = updatedProductModelDto.UpdatedDateUtc,
+            Quantity = command.Request.Quantity,
+            CategoriesModelDtos = new()
+            {
+                new()
+                {
+                    Id = command.Request.Category.Id
+                }
+            },
+            Price = command.Request.Price
+        };
         
-        
+        Assert.Equal(mappedCommand,updatedProductModelDto);
     }
 }

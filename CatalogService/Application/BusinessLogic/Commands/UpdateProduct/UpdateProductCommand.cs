@@ -13,8 +13,7 @@ public class UpdateProductCommand : IRequest<ProductModelDto>
     public UpdateProductRequest Request { get; set; }
 }
 
-public class UpdateProductCommandHandle(IProductRepository productRepository, 
-    ICategoryRepository categoryRepository) : IRequestHandler<UpdateProductCommand, ProductModelDto>
+public class UpdateProductCommandHandle(IProductRepository productRepository) : IRequestHandler<UpdateProductCommand, ProductModelDto>
 {
     public async Task<ProductModelDto> Handle(UpdateProductCommand request, CancellationToken ct)
     {
@@ -42,6 +41,7 @@ public class UpdateProductCommandHandle(IProductRepository productRepository,
             {
                 Id = f.Id
             }).ToList(),
+            Price = existingProduct.Price,
             Quantity = existingProduct.Quantity,
             CreatedDateUtc = existingProduct.CreatedDateUtc,
             UpdatedDateUtc = existingProduct.UpdatedDateUtc,

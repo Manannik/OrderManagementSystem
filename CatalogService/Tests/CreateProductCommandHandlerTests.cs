@@ -37,28 +37,12 @@ public class CreateProductCommandHandlerTests
             Quantity = 4
         };
 
-        var product = new Product()
-        {
-            Name = command.Name,
-            Description = command.Description,
-            Categories = new List<Category>()
-            {
-                new Category()
-                {
-                    Id =Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d651"),
-                    Name = "Одежда"
-                }
-            },
-            Price = command.Price,
-            Quantity = command.Quantity,
-            CreatedDateUtc = DateTime.UtcNow
-        };
-
         _productRepositoryMock.Setup(f => f.ExistAsync(command.Name,default)).ReturnsAsync(true);
         
         var handler = new CreateProductCommandHandler(
             _productRepositoryMock.Object,
             _categoryRepositoryMock.Object);
+        
         
         //Act
         var act = () => handler.Handle(command, default);
@@ -86,24 +70,8 @@ public class CreateProductCommandHandlerTests
             Quantity = 4
         };
 
-        var product = new Product()
-        {
-            Name = "Одежда2",
-            Description ="Одежда2",
-            Categories = new List<Category>()
-            {
-                new Category()
-                {
-                    Id =Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d651"),
-                    Name = "Одежда"
-                }
-            },
-            Price = 100,
-            Quantity = 100,
-            CreatedDateUtc = DateTime.UtcNow
-        };
-
-        _productRepositoryMock.Setup(f => f.ExistAsync(command.Name,default)).ReturnsAsync(false);
+        _productRepositoryMock.Setup(f => f.ExistAsync(command.Name,default))
+            .ReturnsAsync(false);
         
         var handler = new CreateProductCommandHandler(
             _productRepositoryMock.Object,
