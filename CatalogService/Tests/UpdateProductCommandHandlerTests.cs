@@ -19,7 +19,7 @@ public class UpdateProductCommandHandlerTests
     }
     
     [Fact]
-    public async Task Handle_Should_ReturnFailureResult_WhenProductExist()
+    public Task Handle_Should_ReturnFailureResult_WhenProductExist()
     {
         //Arrange
         var command = new UpdateProductCommand()
