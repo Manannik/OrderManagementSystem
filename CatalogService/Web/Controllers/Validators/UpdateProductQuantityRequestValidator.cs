@@ -3,11 +3,11 @@ using FluentValidation;
 
 namespace WebApplication1.Controllers.Validators;
 
-public class UpdateProductQuantityRequestValidator:AbstractValidator<UpdateProductQuantityRequest>
+public class UpdateProductQuantityRequestValidator:AbstractValidator<OrderedQuantity>
 {
     public UpdateProductQuantityRequestValidator()
     {
-        RuleFor(f => f.NewQuantity)
+        RuleFor(f => f.Quantity)
             .NotEmpty()
             .GreaterThanOrEqualTo(0);
     }

@@ -15,7 +15,7 @@ public static class WebExtensions
         services.AddControllers();
         services.AddTransient<IValidator<CreateProductRequest>, CreateProductRequestValidator>();
         services.AddTransient<IValidator<UpdateProductRequest>, UpdateProductRequestValidator>();
-        services.AddTransient<IValidator<UpdateProductQuantityRequest>, UpdateProductQuantityRequestValidator>();
+        services.AddTransient<IValidator<OrderedQuantity>, UpdateProductQuantityRequestValidator>();
         
         services.AddTransient<IRequestPreProcessor<CreateProductRequest>, CreateProductRequestPreProcessor>();
         // services.AddTransient(typeof(IRequestPreProcessor<>), typeof(GenericRequestPreProcessor<>));
