@@ -1,4 +1,3 @@
-using Application.BusinessLogic.Commands.CreateProduct;
 using Application.BusinessLogic.Commands.UpdateProduct;
 using Application.BusinessLogic.Models;
 using Application.Models;
@@ -83,6 +82,6 @@ public class UpdateProductCommandHandlerTests
             Price = command.Request.Price
         };
         
-        Assert.Equal(mappedCommand,updatedProductModelDto);
+        Assert.Equivalent(mappedCommand,updatedProductModelDto);
     }
 }

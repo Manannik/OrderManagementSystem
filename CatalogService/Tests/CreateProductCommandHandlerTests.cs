@@ -1,7 +1,6 @@
 using Application.BusinessLogic.Commands.CreateProduct;
 using Application.BusinessLogic.Models;
 using Domain.Abstractions;
-using Domain.Entities;
 using Domain.Exceptions;
 using Moq;
 
