@@ -11,25 +11,7 @@ public class CatalogDbContext(DbContextOptions<CatalogDbContext> options) : DbCo
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-
         modelBuilder.ApplyConfiguration(new ProductConfiguration());
         modelBuilder.ApplyConfiguration(new CategoryConfiguration());
-        var categories = new[]
-        {
-            new Category()
-            {
-                Id =Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d651"),
-                Name = "Одежда"
-            },
-            new Category() {
-                Id =Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d652"),
-                Name = "Джинсы"
-            },
-            new Category() {
-                Id =Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d653"),
-                Name = "Куртка"
-            },
-        };
-        modelBuilder.Entity<Category>().HasData(categories);
     }
 }

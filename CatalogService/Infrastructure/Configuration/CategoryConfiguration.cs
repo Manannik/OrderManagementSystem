@@ -25,14 +25,18 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
         {
             new Category()
             {
-                Id = Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d651"),
+                Id =Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d651"),
+                Name = "Одежда"
+            },
+            new Category() {
+                Id =Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d652"),
+                Name = "Джинсы"
+            },
+            new Category() {
+                Id =Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d653"),
                 Name = "Куртка"
             },
-            new Category()
-            {
-                Id = Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d652"),
-                Name = "Кофта"
-            }
         };
+        builder.HasData(categories);
     }
 }

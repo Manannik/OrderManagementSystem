@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.BusinessLogic.Commands.CreateProduct;
 
-public class CreateProductCommand : IRequest<Guid>
+public class CreateProductCommand : IRequest
 {
     public string Name { get; set; }
     public string Description { get; set; }
@@ -17,9 +17,9 @@ public class CreateProductCommand : IRequest<Guid>
 
 public class CreateProductCommandHandler(
     IProductRepository productRepository,
-    ICategoryRepository categoryRepository) : IRequestHandler<CreateProductCommand,Guid>
+    ICategoryRepository categoryRepository) : IRequestHandler<CreateProductCommand>
 {
-    public async Task<Guid> Handle(CreateProductCommand request, CancellationToken ct)
+    public async Task Handle(CreateProductCommand request, CancellationToken ct)
     {
         var isProductExist = await productRepository.ExistAsync(request.Name, ct);
 
@@ -45,7 +45,7 @@ public class CreateProductCommandHandler(
         var product = new Product()
         {
             //id создавать в БД?
-            Id = Guid.NewGuid(),
+            // Id = Guid.NewGuid(),
             Name = request.Name,
             Description = request.Description,
             Categories = existingCategories,
@@ -56,6 +56,6 @@ public class CreateProductCommandHandler(
 
         await productRepository.CreateAsync(product, ct);
         
-        return product.Id;
+        // return product.Id;
     }
 }
