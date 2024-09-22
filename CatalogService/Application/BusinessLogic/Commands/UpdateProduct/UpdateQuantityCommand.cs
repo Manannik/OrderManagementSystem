@@ -9,10 +9,11 @@ namespace Application.BusinessLogic.Commands.UpdateProduct;
 public class UpdateQuantityCommand : IRequest<ProductModelDto>
 {
     public Guid Id { get; set; }
-    public UpdateProductQuantityRequest Request { get; set; }
+    public OrderedQuantity Request { get; set; }
 }
 
-public class UpdateQuantityCommandHandler(IProductRepository productRepository) : IRequestHandler<UpdateQuantityCommand,ProductModelDto>
+public class UpdateQuantityCommandHandler(IProductRepository productRepository)
+    : IRequestHandler<UpdateQuantityCommand, ProductModelDto>
 {
     public async Task<ProductModelDto> Handle(UpdateQuantityCommand request, CancellationToken ct)
     {
@@ -22,10 +23,16 @@ public class UpdateQuantityCommandHandler(IProductRepository productRepository) 
             throw new ProductDoesNotExistException(request.Id);
         }
 
-        existingProduct.Quantity = request.Request.NewQuantity;
+        existingProduct.Quantity -= request.Request.Quantity;
+
+        if (existingProduct.Quantity < 0)
+        {
+            throw new QuantityException();
+        }
+
         existingProduct.UpdatedDateUtc = DateTime.UtcNow;
-        
-        await productRepository.UpdateQuantityAsync(existingProduct, ct);
+
+        await productRepository.UpdateAsync(existingProduct, ct);
 
         return new ProductModelDto()
         {
@@ -33,7 +40,7 @@ public class UpdateQuantityCommandHandler(IProductRepository productRepository) 
             Name = existingProduct.Name,
             Description = existingProduct.Description,
             Price = existingProduct.Price,
-            CategoriesModelDtos = existingProduct.Categories.Select(f=>new CategoryModelDto()
+            CategoriesModelDtos = existingProduct.Categories.Select(f => new CategoryModelDto()
             {
                 Id = f.Id
             }).ToList(),

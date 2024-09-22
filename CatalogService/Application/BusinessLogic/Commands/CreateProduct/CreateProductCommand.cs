@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.BusinessLogic.Commands.CreateProduct;
 
-public class CreateProductCommand : IRequest
+public class CreateProductCommand : IRequest<Guid>
 {
     public string Name { get; set; }
     public string Description { get; set; }
@@ -17,9 +17,9 @@ public class CreateProductCommand : IRequest
 
 public class CreateProductCommandHandler(
     IProductRepository productRepository,
-    ICategoryRepository categoryRepository) : IRequestHandler<CreateProductCommand>
+    ICategoryRepository categoryRepository) : IRequestHandler<CreateProductCommand,Guid>
 {
-    public async Task Handle(CreateProductCommand request, CancellationToken ct)
+    public async Task<Guid> Handle(CreateProductCommand request, CancellationToken ct)
     {
         var isProductExist = await productRepository.ExistAsync(request.Name, ct);
 
@@ -30,20 +30,22 @@ public class CreateProductCommandHandler(
 
         var categoriesId = request.CategoriesModelDtos.Select(f => f.Id).ToList();
         var existingCategories = await categoryRepository.GetByIdAsync(categoriesId, ct);
-        
+
         // комментарий для себя продебажить
         var intersectedCategoriesId = existingCategories
             .Select(f => f.Id)
             .Intersect(categoriesId)
             .ToList();
 
-        if (intersectedCategoriesId.Count==0)
+        if (intersectedCategoriesId.Count == 0)
         {
             throw new WrongCategoryException(intersectedCategoriesId);
         }
 
         var product = new Product()
         {
+            //id создавать в БД?
+            Id = Guid.NewGuid(),
             Name = request.Name,
             Description = request.Description,
             Categories = existingCategories,
@@ -53,5 +55,7 @@ public class CreateProductCommandHandler(
         };
 
         await productRepository.CreateAsync(product, ct);
+        
+        return product.Id;
     }
 }

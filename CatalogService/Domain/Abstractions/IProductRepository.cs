@@ -9,5 +9,4 @@ public interface IProductRepository
     public Task UpdateAsync(Product product, CancellationToken ct);
     public Task DeleteAsync(Product product, CancellationToken ct);
     public Task<bool> ExistAsync(string name, CancellationToken ct);
-    public Task UpdateQuantityAsync(Product product, CancellationToken ct);
 }

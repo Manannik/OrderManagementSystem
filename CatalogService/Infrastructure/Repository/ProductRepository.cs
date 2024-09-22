@@ -34,10 +34,5 @@ public class ProductRepositoryy(CatalogDbContext dbContext) : IProductRepository
     {
         return await dbContext.Products.AnyAsync(f=>f.Name==name,ct);
     }
-
-    public async Task UpdateQuantityAsync(Product product, CancellationToken ct)
-    {
-        dbContext.Products.Update(product);
-        await dbContext.SaveChangesAsync(ct);
-    }
+    
 }
