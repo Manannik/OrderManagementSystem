@@ -31,21 +31,15 @@ public class CreateProductCommandHandler(
         var categoriesId = request.CategoriesModelDtos.Select(f => f.Id).ToList();
         var existingCategories = await categoryRepository.GetByIdAsync(categoriesId, ct);
 
-        // комментарий для себя продебажить
-        var intersectedCategoriesId = existingCategories
-            .Select(f => f.Id)
-            .Intersect(categoriesId)
-            .ToList();
+        var exceptedCategoriesIds = categoriesId.Except(existingCategories.Select(f => f.Id)).ToList();
 
-        if (intersectedCategoriesId.Count == 0)
+        if (exceptedCategoriesIds.Count() != 0)
         {
-            throw new WrongCategoryException(intersectedCategoriesId);
+            throw new WrongCategoryException(exceptedCategoriesIds);
         }
 
         var product = new Product()
         {
-            //id создавать в БД?
-            // Id = Guid.NewGuid(),
             Name = request.Name,
             Description = request.Description,
             Categories = existingCategories,
@@ -55,7 +49,7 @@ public class CreateProductCommandHandler(
         };
 
         await productRepository.CreateAsync(product, ct);
-        
+
         // return product.Id;
     }
 }

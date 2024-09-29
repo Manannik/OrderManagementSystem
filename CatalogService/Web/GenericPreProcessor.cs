@@ -3,13 +3,13 @@ using MediatR.Pipeline;
 
 namespace WebApplication1;
 
-public class GenericRequestPreProcessor<TRequest> : IRequestPreProcessor<TRequest>
+public class GenericValidatorPreProcessor<TRequest> : IRequestPreProcessor<TRequest>
 {
     private readonly IValidator<TRequest> _validator;
-    private readonly ILogger<GenericRequestPreProcessor<TRequest>> _logger;
+    private readonly ILogger<GenericValidatorPreProcessor<TRequest>> _logger;
 
-    public GenericRequestPreProcessor(IValidator<TRequest> validator, 
-        ILogger<GenericRequestPreProcessor<TRequest>> logger)
+    public GenericValidatorPreProcessor(IValidator<TRequest> validator, 
+        ILogger<GenericValidatorPreProcessor<TRequest>> logger)
     {
         _validator = validator;
         _logger = logger;

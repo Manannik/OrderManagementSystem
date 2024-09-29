@@ -42,7 +42,6 @@ public class CreateProductCommandHandlerTests
             _productRepositoryMock.Object,
             _categoryRepositoryMock.Object);
         
-        
         //Act
         var act = () => handler.Handle(command, default);
 
