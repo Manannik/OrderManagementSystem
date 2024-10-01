@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Application.BusinessLogic.Commands.CreateProduct;
 using Application.BusinessLogic.Models;
 using Domain.Abstractions;
@@ -8,15 +9,9 @@ namespace Tests;
 
 public class CreateProductCommandHandlerTests
 {
-    private readonly Mock<IProductRepository> _productRepositoryMock;
-    private readonly Mock<ICategoryRepository> _categoryRepositoryMock;
+    private readonly Mock<IProductRepository> _productRepositoryMock = new();
+    private readonly Mock<ICategoryRepository> _categoryRepositoryMock = new();
 
-    public CreateProductCommandHandlerTests()
-    {
-        _productRepositoryMock = new();
-        _categoryRepositoryMock = new();
-    }
-    
     [Fact]
     public async Task Handle_Should_ReturnFailureResult_WhenProductExist()
     {
@@ -112,7 +107,7 @@ public class CreateProductCommandHandlerTests
         var act = () => handler.Handle(command, default);
 
         //Assert
-        await Assert.ThrowsAsync<ProductNameIsEmptyException>(act);
+        await Assert.ThrowsAsync<ValidationException>(act);
     }
     
     [Fact]
@@ -145,6 +140,6 @@ public class CreateProductCommandHandlerTests
         var act = () => handler.Handle(command, default);
 
         //Assert
-        await Assert.ThrowsAsync<ProductDescriptionIsEmptyException>(act);
+        await Assert.ThrowsAsync<ValidationException>(act);
     }
 }
