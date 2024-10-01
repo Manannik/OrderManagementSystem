@@ -25,13 +25,13 @@ public class CreateProductCommandHandlerTests
         {
             Name = "Одежда1",
             Description = "Одежда1",
-            CategoriesModelDtos = new List<CategoryModelDto>()
-            {
+            CategoriesModelDtos =
+            [
                 new CategoryModelDto()
                 {
                     Id = Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d651")
                 }
-            },
+            ],
             Price = 777,
             Quantity = 4
         };
@@ -50,20 +50,20 @@ public class CreateProductCommandHandlerTests
     }
     
     [Fact]
-    public async Task Handle_Should_ReturnSuccessResult_WhenProductDoesNotExist()
+    public async Task Handle_Should_ReturnFailureResult_WhenProductDoesNotExist()
     {
         //Arrange
         var command = new CreateProductCommand()
         {
             Name = "Одежда1",
             Description = "Одежда1",
-            CategoriesModelDtos = new List<CategoryModelDto>()
-            {
+            CategoriesModelDtos =
+            [
                 new CategoryModelDto()
                 {
                     Id = Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d651")
                 }
-            },
+            ],
             Price = 777,
             Quantity = 4
         };
@@ -79,5 +79,72 @@ public class CreateProductCommandHandlerTests
         var act = () => handler.Handle(command, default);
 
         //Assert
+        await Assert.ThrowsAsync<ProductAlreadyExistException>(act);
+    }
+    
+    [Fact]
+    public async Task Handle_Should_ReturnFailureResult_WhenProductNameEmpty()
+    {
+        //Arrange
+        var command = new CreateProductCommand()
+        {
+            Name = "",
+            Description = "Одежда1",
+            CategoriesModelDtos =
+            [
+                new CategoryModelDto()
+                {
+                    Id = Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d651")
+                }
+            ],
+            Price = 777,
+            Quantity = 4
+        };
+
+        _productRepositoryMock.Setup(f => f.ExistAsync(command.Name,default))
+            .ReturnsAsync(false);
+        
+        var handler = new CreateProductCommandHandler(
+            _productRepositoryMock.Object,
+            _categoryRepositoryMock.Object);
+        
+        //Act
+        var act = () => handler.Handle(command, default);
+
+        //Assert
+        await Assert.ThrowsAsync<ProductNameIsEmptyException>(act);
+    }
+    
+    [Fact]
+    public async Task Handle_Should_ReturnFailureResult_WhenProductDescriptionEmpty()
+    {
+        //Arrange
+        var command = new CreateProductCommand()
+        {
+            Name = "Одежда1",
+            Description = "",
+            CategoriesModelDtos =
+            [
+                new CategoryModelDto()
+                {
+                    Id = Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d651")
+                }
+            ],
+            Price = 777,
+            Quantity = 4
+        };
+
+        _productRepositoryMock.Setup(f => f.ExistAsync(command.Name,default))
+            .ReturnsAsync(false);
+        
+        var handler = new CreateProductCommandHandler(
+            _productRepositoryMock.Object,
+            _categoryRepositoryMock.Object);
+        
+        //Act
+        var act = () => handler.Handle(command, default);
+
+        //Assert
+        await Assert.ThrowsAsync<ProductDescriptionIsEmptyException>(act);
     }
 }

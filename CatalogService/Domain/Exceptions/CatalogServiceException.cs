@@ -1,14 +1,8 @@
 ﻿namespace Domain.Exceptions;
 
-public class CatalogServiceException : Exception
+public class CatalogServiceException(string message, int statusCode) : Exception
 {
-    public string Message { get; set; }
-    
-    public int StatusCode { get; set; }
+    public string Message { get; set; } = message;
 
-    public CatalogServiceException(string message, int statusCode)
-    {
-        Message = message;
-        StatusCode = statusCode;
-    }
+    public int StatusCode { get; set; } = statusCode;
 }
