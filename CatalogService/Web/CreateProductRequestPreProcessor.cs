@@ -4,18 +4,12 @@ using MediatR.Pipeline;
 
 namespace WebApplication1;
 
-public class CreateProductRequestPreProcessor : IRequestPreProcessor<CreateProductRequest>
+public class CreateProductRequestPreProcessor(IValidator<CreateProductRequest> validator)
+    : IRequestPreProcessor<CreateProductRequest>
 {
-    private readonly IValidator<CreateProductRequest> _validator;
-
-    public CreateProductRequestPreProcessor(IValidator<CreateProductRequest> validator)
-    {
-        _validator = validator;
-    }
-
     public async Task Process(CreateProductRequest request, CancellationToken ct)
     {
-        var validationResult = await _validator.ValidateAsync(request, ct);
+        var validationResult = await validator.ValidateAsync(request, ct);
         if (!validationResult.IsValid)
         {
             throw new ValidationException(validationResult.Errors);

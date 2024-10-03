@@ -81,7 +81,7 @@ public class CatalogController(
     }
 
     [HttpPut("ChangeQuantity/{id:guid}/{newQuantity:int}")]
-    public async Task<IActionResult> OrderPorductQuantity([FromRoute] Guid id, [FromBody] OrderedQuantity request,
+    public async Task<IActionResult> OrderProductQuantity([FromRoute] Guid id, [FromBody] OrderedQuantity request,
         CancellationToken ct)
     {
         _logger.LogInformation("Вызван метод UpdateQuantity с id: {Id} и новым количеством товара {newQuantity}", id,

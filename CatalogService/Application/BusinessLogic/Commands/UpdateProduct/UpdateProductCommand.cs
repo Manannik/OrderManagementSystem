@@ -13,7 +13,9 @@ public class UpdateProductCommand : IRequest<ProductModelDto>
     public UpdateProductRequest Request { get; set; }
 }
 
-public class UpdateProductCommandHandle(IProductRepository productRepository) : IRequestHandler<UpdateProductCommand, ProductModelDto>
+public class UpdateProductCommandHandle(IProductRepository productRepository, 
+    ICategoryRepository categoryRepository)
+    : IRequestHandler<UpdateProductCommand, ProductModelDto>
 {
     public async Task<ProductModelDto> Handle(UpdateProductCommand request, CancellationToken ct)
     {
@@ -24,12 +26,28 @@ public class UpdateProductCommandHandle(IProductRepository productRepository) : 
             throw new ProductDoesNotExistException(request.Id);
         }
 
+        var categoriesRequestIds = request.Request.Category
+            .Select(f => f.Id)
+            .ToList();
+
+        var existingCategories = await categoryRepository
+            .GetByIdAsync(categoriesRequestIds, ct);
+        
+        var exceptedCategoriesIds = categoriesRequestIds
+            .Except(existingCategories.Select(f => f.Id)).ToList();
+        
+        if (exceptedCategoriesIds.Count != 0)
+        {
+            throw new WrongCategoryException(exceptedCategoriesIds);
+        }
+        
         existingProduct.Name = request.Request.Name;
         existingProduct.Description = request.Request.Description;
         existingProduct.Price = request.Request.Price;
         existingProduct.Quantity = request.Request.Quantity;
         existingProduct.UpdatedDateUtc = DateTime.UtcNow;
-
+        existingProduct.Categories = existingCategories;
+        
         await productRepository.UpdateAsync(existingProduct, ct);
 
         var result = new ProductModelDto()

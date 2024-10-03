@@ -49,7 +49,5 @@ public class CreateProductCommandHandler(
         };
 
         await productRepository.CreateAsync(product, ct);
-
-        // return product.Id;
     }
 }
