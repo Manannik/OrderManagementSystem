@@ -14,11 +14,9 @@ namespace WebApplication1.Controllers;
 [ApiController]
 public class CatalogController(
     IMediator mediator,
-    IValidator<CreateProductRequest> createProductRequestValidator,
-    IValidator<UpdateProductRequest> updateProductRequestValidator,
     ILogger<CatalogController> _logger) : ControllerBase
 {
-    [HttpPost("Create")]
+    [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateProductRequest request, CancellationToken ct)
     {
         _logger.LogInformation("запуск метод Create, request: {@Request}", request);

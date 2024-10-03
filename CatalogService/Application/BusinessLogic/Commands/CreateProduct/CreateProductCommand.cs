@@ -32,8 +32,8 @@ public class CreateProductCommandHandler(
         var existingCategories = await categoryRepository.GetByIdAsync(categoriesId, ct);
 
         var exceptedCategoriesIds = categoriesId.Except(existingCategories.Select(f => f.Id)).ToList();
-
-        if (exceptedCategoriesIds.Count() != 0)
+        
+        if (exceptedCategoriesIds.Count != 0)
         {
             throw new WrongCategoryException(exceptedCategoriesIds);
         }
