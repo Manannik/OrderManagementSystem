@@ -169,7 +169,8 @@ public class CreateProductCommandHandlerTests
         //Assert
         await Assert.ThrowsAsync<ValidationException>(act);
     }
-
+    
+    [Fact]
     public async Task Handle_Should_ReturnFailureResult_WhenCategoryDoesNotExist()
     {
         //Arrange
