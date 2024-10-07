@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Application.BusinessLogic.Commands.CreateProduct;
 using Application.BusinessLogic.Models;
+using AutoFixture;
 using Domain.Abstractions;
 using Domain.Entities;
 using Domain.Exceptions;
@@ -17,22 +18,35 @@ public class CreateProductCommandHandlerTests
     public async Task Handle_Should_ReturnSuccess()
     {
         //Arrange
-        var command = new CreateProductCommand()
-        {
-            Name = "Одежда1",
-            Description = "Одежда1",
-            CategoriesModelDtos =
-            [
-                new CategoryModelDto()
-                {
-                    Id = Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d651")
-                }
-            ],
-            Price = 777,
-            Quantity = 4
-        };
+        var fixture = new Fixture();
+        var categoriesModelDto = fixture.CreateMany<CategoryModelDto>(2).ToList();
+        var createProductCommand = fixture.Build<CreateProductCommand>()
+            .With(f=>f.CategoriesModelDtos, categoriesModelDto)
+            .Create();
 
-        _productRepositoryMock.Setup(f => f.ExistAsync(command.Name,default))
+        var categoriesId = createProductCommand.CategoriesModelDtos.Select(f => f.Id).ToList();
+
+        var categories = new List<Category>();
+        foreach (var modelDto in categoriesModelDto)
+        {
+            var category = fixture.Build<Category>()
+                .With(f => f.Id, modelDto.Id)
+                .Create();
+            categories.Add(category);
+        }
+
+        _categoryRepositoryMock.Setup(f => f.GetByIdAsync(categoriesId, default))
+            .ReturnsAsync(categories);
+        
+        // _categoryRepositoryMock.Setup(f => f.GetByIdAsync(categoriesId,default))
+        //     .ReturnsAsync(categoriesId.Select(f =>
+        //     {
+        //        return fixture.Build<Category>()
+        //             .With(g => g.Id, f)
+        //             .Create();
+        //     }).ToList());
+        
+        _productRepositoryMock.Setup(f => f.ExistAsync(createProductCommand.Name,default))
             .ReturnsAsync(false);
         
         var handler = new CreateProductCommandHandler(
@@ -40,40 +54,31 @@ public class CreateProductCommandHandlerTests
             _categoryRepositoryMock.Object);
         
         //Act
-        var act = () => handler.Handle(command, default);
+        await handler.Handle(createProductCommand, default);
 
         //Assert
-        Assert.True(true);
+        _productRepositoryMock.Verify(f => f.ExistAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()));
     }
     
     [Fact]
-    public async Task Handle_Should_ReturnFailureResult_WhenProductExist()
+    public async Task Handle_Should_ReturnFailureResult_WhenProductAlreadyExist()
     {
         //Arrange
-        var command = new CreateProductCommand()
-        {
-            Name = "Одежда1",
-            Description = "Одежда1",
-            CategoriesModelDtos =
-            [
-                new CategoryModelDto()
-                {
-                    Id = Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d651")
-                }
-            ],
-            Price = 777,
-            Quantity = 4
-        };
+        var fixture = new Fixture();
+        var categoryModelDto = fixture.CreateMany<CategoryModelDto>(2).ToList();
+        var createProductCommand = fixture.Build<CreateProductCommand>()
+            .With(f=>f.CategoriesModelDtos, categoryModelDto)
+            .Create();
 
-        _productRepositoryMock.Setup(f => f.ExistAsync(command.Name,default))
-            .ReturnsAsync(true);
+        var product = fixture.Build<Product>()
+            .With(f => f.Categories, new List<Category>());
         
         var handler = new CreateProductCommandHandler(
             _productRepositoryMock.Object,
             _categoryRepositoryMock.Object);
         
         //Act
-        var act = () => handler.Handle(command, default);
+        var act = () => handler.Handle(createProductCommand, default);
 
         //Assert
         await Assert.ThrowsAsync<ProductAlreadyExistException>(act);
@@ -83,22 +88,13 @@ public class CreateProductCommandHandlerTests
     public void Handle_Should_ReturnNullResult_WhenProductDoesNotExist()
     {
         //Arrange
-        var command = new CreateProductCommand()
-        {
-            Name = "Одежда1",
-            Description = "Одежда1",
-            CategoriesModelDtos =
-            [
-                new CategoryModelDto()
-                {
-                    Id = Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d651")
-                }
-            ],
-            Price = 777,
-            Quantity = 4
-        };
+        var fixture = new Fixture();
+        var categoryModelDto = fixture.CreateMany<CategoryModelDto>(2).ToList();
+        var createProductCommand = fixture.Build<CreateProductCommand>()
+            .With(f=>f.CategoriesModelDtos, categoryModelDto)
+            .Create();
 
-        _productRepositoryMock.Setup(f => f.ExistAsync(command.Name,default))
+        _productRepositoryMock.Setup(f => f.ExistAsync(createProductCommand.Name,default))
             .ReturnsAsync(false);
         
         var handler = new CreateProductCommandHandler(
@@ -106,36 +102,30 @@ public class CreateProductCommandHandlerTests
             _categoryRepositoryMock.Object);
         
         //Act
-        var act = () => handler.Handle(command, default);
+        var act = () => handler.Handle(createProductCommand, default);
 
         //Assert
-        Assert.Null(act);
+        Assert.ThrowsAsync<ProductDoesNotExistException>(act);
     }
     
     [Fact]
     public async Task Handle_Should_ReturnFailureResult_WhenProductNameEmpty()
     {
         //Arrange
-        var command = new CreateProductCommand()
-        {
-            Name = "",
-            Description = "Одежда1",
-            CategoriesModelDtos =
-            [
-                new CategoryModelDto()
-                {
-                    Id = Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d651")
-                }
-            ],
-            Price = 777,
-            Quantity = 4
-        };
+        var fixture = new Fixture();
+        var categoryModelDto = fixture.CreateMany<CategoryModelDto>(2).ToList();
+        
+        var createProductCommand = fixture.Build<CreateProductCommand>()
+            .With(f=>f.CategoriesModelDtos, categoryModelDto)
+            .With(f=>f.Name,string.Empty)
+            .Create();
+        
         var handler = new CreateProductCommandHandler(
             _productRepositoryMock.Object,
             _categoryRepositoryMock.Object);
         
         //Act
-        var act = () => handler.Handle(command, default);
+        var act = () => handler.Handle(createProductCommand, default);
 
         //Assert
         await Assert.ThrowsAsync<ValidationException>(act);
@@ -145,26 +135,19 @@ public class CreateProductCommandHandlerTests
     public async Task Handle_Should_ReturnFailureResult_WhenProductDescriptionEmpty()
     {
         //Arrange
-        var command = new CreateProductCommand()
-        {
-            Name = "Одежда1",
-            Description = "",
-            CategoriesModelDtos =
-            [
-                new CategoryModelDto()
-                {
-                    Id = Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d651")
-                }
-            ],
-            Price = 777,
-            Quantity = 4
-        };
+        var fixture = new Fixture();
+        var categoryModelDto = fixture.CreateMany<CategoryModelDto>(2).ToList();
+        var createProductCommand = fixture.Build<CreateProductCommand>()
+            .With(f=>f.CategoriesModelDtos, categoryModelDto)
+            .With(f=>f.Description,string.Empty)
+            .Create();
+        
         var handler = new CreateProductCommandHandler(
             _productRepositoryMock.Object,
             _categoryRepositoryMock.Object);
         
         //Act
-        var act = () => handler.Handle(command, default);
+        var act = () => handler.Handle(createProductCommand, default);
 
         //Assert
         await Assert.ThrowsAsync<ValidationException>(act);
@@ -174,31 +157,24 @@ public class CreateProductCommandHandlerTests
     public async Task Handle_Should_ReturnFailureResult_WhenCategoryDoesNotExist()
     {
         //Arrange
-        var command = new CreateProductCommand()
-        {
-            Name = "Одежда1",
-            Description = "",
-            CategoriesModelDtos =
-            [
-                new CategoryModelDto()
-                {
-                    Id = Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d651")
-                }
-            ],
-            Price = 777,
-            Quantity = 4
-        };
+        var fixture = new Fixture();
+        var categoryModelDto = fixture.CreateMany<CategoryModelDto>(2).ToList();
+        var createProductCommand = fixture.Build<CreateProductCommand>()
+            .With(f=>f.CategoriesModelDtos, categoryModelDto)
+            .Create();
+        
         //Act
         _categoryRepositoryMock
-            .Setup(f => f.GetByIdAsync(command.CategoriesModelDtos.Select(f => f.Id).ToList(), default))
+            .Setup(f => f.GetByIdAsync(categoryModelDto.Select(g=>g.Id).ToList(), default))
             .ReturnsAsync((List<Category>)null);
         
         var handler = new CreateProductCommandHandler(
             _productRepositoryMock.Object,
             _categoryRepositoryMock.Object);
         
-        var act = () => handler.Handle(command, default);
+        var act = () => handler.Handle(createProductCommand, default);
+        
         //Assert
-        Assert.Null(act);
+        await Assert.ThrowsAsync<WrongCategoryException>(act);
     }
 }

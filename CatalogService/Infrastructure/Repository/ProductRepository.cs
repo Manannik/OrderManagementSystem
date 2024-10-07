@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace OrderManagementSystem.Infrastructure.Repository;
 
-public class ProductRepositoryy(CatalogDbContext dbContext) : IProductRepository
+public class ProductRepository(CatalogDbContext dbContext) : IProductRepository
 {
     public async Task CreateAsync(Product product, CancellationToken ct)
     {
