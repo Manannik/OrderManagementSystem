@@ -31,6 +31,7 @@ public class CreateProductCommandHandlerTests
         {
             var category = fixture.Build<Category>()
                 .With(f => f.Id, modelDto.Id)
+                .Without(x => x.Products)
                 .Create();
             categories.Add(category);
         }

@@ -1,5 +1,6 @@
 ﻿using Application.Models;
 using FluentValidation;
+using MediatR;
 using MediatR.Pipeline;
 using WebApplication1.Controllers.Validators;
 
@@ -17,7 +18,7 @@ public static class WebExtensions
         services.AddTransient<IValidator<OrderedQuantity>, UpdateProductQuantityRequestValidator>();
         
         //services.AddTransient<IRequestPreProcessor<CreateProductRequest>, CreateProductRequestPreProcessor>();
-        services.AddTransient(typeof(IRequestPreProcessor<>), typeof(GenericValidatorPreProcessor<>));
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));
         return services;
     }
 }
