@@ -92,7 +92,7 @@ public class CreateProductCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_Should_ReturnFailureResult_WhenProductNameEmpty()
+    public async Task Validator_Should_ReturnFailureResult_WhenProductNameEmpty()
     {
         //Arrange
         var fixture = new Fixture();
@@ -111,7 +111,7 @@ public class CreateProductCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_Should_ReturnFailureResult_WhenProductDescriptionEmpty()
+    public async Task Validator_Should_ReturnFailureResult_WhenProductDescriptionEmpty()
     {
         //Arrange
         var fixture = new Fixture();
