@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Application.BusinessLogic.Commands.CreateProduct;
 using Application.BusinessLogic.Models;
 using Application.Models;

@@ -1,19 +1,24 @@
+﻿using System.Text;
+using Application.BusinessLogic.Models;
+using Application.Models;
 using AutoFixture;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using OrderManagementSystem.Infrastructure;
 using OrderManagementSystem.Infrastructure.Repository;
 
 namespace IntegrationsTests;
 
-public class ProductRepositoryTests : IDisposable
+public class ProductControllerTests : IDisposable
 {
     private WebApplicationFactory<Program> _webHost;
-
+    private CatalogDbContext _context;
+    private ProductRepository _productRepository;
     [SetUp]
-    public void SetupForRepository()
+    public void SetupForController()
     {
         _webHost = new WebApplicationFactory<Program>()
             .WithWebHostBuilder(builder =>
@@ -30,35 +35,36 @@ public class ProductRepositoryTests : IDisposable
                     });
                 });
             });
-/*
+
         using var scope = _webHost.Services.CreateScope();
         _context = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
         _productRepository = new ProductRepository(_context);
-*/
     }
 
     [Test]
-    public async Task CreateProduct_SavesCorrectData()
+    public async Task CreateProductController_ReturnsSuccess()
     {
         // Arrange
-        using var scope = _webHost.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
-        var productRepository = new ProductRepository(context);
-
         var fixture = new Fixture();
-        fixture.Customize<DateTime>(c => c.FromFactory(() => DateTime.UtcNow));
+        // fixture.Behaviors.Remove(new ThrowingRecursionBehavior());
+        // fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+        fixture.Customize<CreateProductRequest>(f =>
+            f.With(request => request.CategoryModelDtos, fixture.CreateMany<CategoryModelDto>(2).ToList())
+        );
+        var product = fixture.Create<CreateProductRequest>();
+
+        fixture.Customize<List<Category>>(f =>
+            f.With(g => g.Select(q=>q.Id), product.CategoryModelDtos.Select(h => h.Id).ToList())
+        );
         
-        fixture.Behaviors.Remove(new ThrowingRecursionBehavior());
-        fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-        var product = fixture.Create<Product>();
+        var client = _webHost.CreateClient();
+        var content = new StringContent(JsonConvert.SerializeObject(product), Encoding.UTF8, "application/json");
 
         // Act
-        await productRepository.CreateAsync(product, default);
+        var response = await client.PostAsync("/catalog", content);
 
         // Assert
-        var savedProduct = await context.Products.FindAsync(product.Id);
-        Assert.NotNull(savedProduct);
-        Assert.That(savedProduct.Name, Is.EqualTo(product.Name));
+        response.EnsureSuccessStatusCode();
     }
 
     [TearDown]
