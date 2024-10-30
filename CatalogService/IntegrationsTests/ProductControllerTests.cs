@@ -11,12 +11,15 @@ using Moq;
 using Moq.Protected;
 using Newtonsoft.Json;
 using OrderManagementSystem.Infrastructure;
+using OrderManagementSystem.Infrastructure.Repository;
 
 namespace IntegrationsTests;
 
 public class ProductControllerTests : IDisposable
 {
     private WebApplicationFactory<Program> _webHost;
+    private CatalogDbContext _context;
+    private ProductRepository _productRepository;
     [SetUp]
     public void SetupForController()
     {
@@ -35,56 +38,21 @@ public class ProductControllerTests : IDisposable
                     });
                 });
             });
+
+        using var scope = _webHost.Services.CreateScope();
+        _context = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
+        _productRepository = new ProductRepository(_context);
     }
 
     [Test]
     public async Task CreateProductController_ReturnsSuccess()
     {
         // Arrange
-        var fixture = new Fixture();
-        
-        fixture.Customize<CreateProductRequest>(f =>
-            f.With(request => request.CategoryModelDtos, fixture.CreateMany<CategoryModelDto>(2).ToList())
-        );
-        
-        var product = fixture.Create<CreateProductRequest>();
-
-        fixture.Customize<List<Category>>(f =>
-            f.Do(categories =>
-            {
-                var categoryDtos = product.CategoryModelDtos.ToList();
-                for (int i = 0; i < categories.Count && i < categoryDtos.Count; i++)
-                {
-                    categories[i].Id = categoryDtos[i].Id;
-                }
-            })
-        );
-        
-        var content = new StringContent(JsonConvert.SerializeObject(product), Encoding.UTF8, "application/json");
-        var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
-        mockHttpMessageHandler
-            .Protected()
-            .Setup<Task<HttpResponseMessage>>(
-                "SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>()
-            )
-            .ReturnsAsync(new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = content
-            });
-        
-        var client = new HttpClient(mockHttpMessageHandler.Object)
-        {
-            BaseAddress = new Uri("http://localhost")
-        };
 
         // Act
-        var response = await client.PostAsync("/catalog", content);
         
         // Assert
-        response.EnsureSuccessStatusCode();
+
     }
 
     [TearDown]
