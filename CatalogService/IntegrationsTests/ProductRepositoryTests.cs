@@ -30,11 +30,6 @@ public class ProductRepositoryTests : IDisposable
                     });
                 });
             });
-/*
-        using var scope = _webHost.Services.CreateScope();
-        _context = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
-        _productRepository = new ProductRepository(_context);
-*/
     }
 
     [Test]

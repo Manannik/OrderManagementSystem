@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net;
+using System.Text;
 using Application.BusinessLogic.Models;
 using Application.Models;
 using AutoFixture;
@@ -6,17 +7,16 @@ using Domain.Entities;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
+using Moq.Protected;
 using Newtonsoft.Json;
 using OrderManagementSystem.Infrastructure;
-using OrderManagementSystem.Infrastructure.Repository;
 
 namespace IntegrationsTests;
 
 public class ProductControllerTests : IDisposable
 {
     private WebApplicationFactory<Program> _webHost;
-    private CatalogDbContext _context;
-    private ProductRepository _productRepository;
     [SetUp]
     public void SetupForController()
     {
@@ -35,10 +35,6 @@ public class ProductControllerTests : IDisposable
                     });
                 });
             });
-
-        using var scope = _webHost.Services.CreateScope();
-        _context = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
-        _productRepository = new ProductRepository(_context);
     }
 
     [Test]
@@ -46,23 +42,47 @@ public class ProductControllerTests : IDisposable
     {
         // Arrange
         var fixture = new Fixture();
-        // fixture.Behaviors.Remove(new ThrowingRecursionBehavior());
-        // fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+        
         fixture.Customize<CreateProductRequest>(f =>
             f.With(request => request.CategoryModelDtos, fixture.CreateMany<CategoryModelDto>(2).ToList())
         );
+        
         var product = fixture.Create<CreateProductRequest>();
 
         fixture.Customize<List<Category>>(f =>
-            f.With(g => g.Select(q=>q.Id), product.CategoryModelDtos.Select(h => h.Id).ToList())
+            f.Do(categories =>
+            {
+                var categoryDtos = product.CategoryModelDtos.ToList();
+                for (int i = 0; i < categories.Count && i < categoryDtos.Count; i++)
+                {
+                    categories[i].Id = categoryDtos[i].Id;
+                }
+            })
         );
         
-        var client = _webHost.CreateClient();
         var content = new StringContent(JsonConvert.SerializeObject(product), Encoding.UTF8, "application/json");
+        var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+        mockHttpMessageHandler
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = content
+            });
+        
+        var client = new HttpClient(mockHttpMessageHandler.Object)
+        {
+            BaseAddress = new Uri("http://localhost")
+        };
 
         // Act
         var response = await client.PostAsync("/catalog", content);
-
+        
         // Assert
         response.EnsureSuccessStatusCode();
     }

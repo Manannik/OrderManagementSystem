@@ -41,7 +41,7 @@ public class CreateProductCommandHandlerTests
             .ReturnsAsync(categories);
 
         _productRepositoryMock.Setup(f => f.ExistAsync(createProductCommand.Name, default))
-            .ReturnsAsync(false);
+            .ReturnsAsync(false); 
 
         var handler = new CreateProductCommandHandler(
             _productRepositoryMock.Object,
