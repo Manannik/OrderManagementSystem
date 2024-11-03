@@ -1,10 +1,10 @@
 using Application.Extensions;
 using OrderManagementSystem.Infrastructure.Extensions;
 using Serilog;
-using WebApplication1.Extensions;
-using WebApplication1.Middleware;
+using WebApplication.Extensions;
+using WebApplication.Middlewares;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 

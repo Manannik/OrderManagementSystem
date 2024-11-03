@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace OrderManagementSystem.Infrastructure.Configuration;
+namespace OrderManagementSystem.Infrastructure.Configurations;
 
 public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 {

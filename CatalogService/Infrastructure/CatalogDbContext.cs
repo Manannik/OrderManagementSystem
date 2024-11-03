@@ -1,6 +1,6 @@
 ﻿using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using OrderManagementSystem.Infrastructure.Configuration;
+using OrderManagementSystem.Infrastructure.Configurations;
 
 namespace OrderManagementSystem.Infrastructure;
 

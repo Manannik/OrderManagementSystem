@@ -4,8 +4,9 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>WebApplication1</RootNamespace>
+    <RootNamespace>WebApplication</RootNamespace>
     <PreserveCompilationContext>true</PreserveCompilationContext>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>

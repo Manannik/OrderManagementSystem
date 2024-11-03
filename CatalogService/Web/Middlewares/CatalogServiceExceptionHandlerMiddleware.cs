@@ -1,6 +1,6 @@
 ﻿using Domain.Exceptions;
 
-namespace WebApplication1.Middleware;
+namespace WebApplication.Middlewares;
 
 public class CatalogServiceExceptionHandlerMiddleware(ILogger<CatalogServiceExceptionHandlerMiddleware> _logger)
     : IMiddleware

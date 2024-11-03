@@ -6,7 +6,7 @@ using OrderManagementSystem.Infrastructure.Repository;
 
 namespace OrderManagementSystem.Infrastructure.Extensions;
 
-public static class PersistanceExtensions
+public static class PersistenceExtensions
 {
     public static IServiceCollection AddPersistence(
         this IServiceCollection services,IConfiguration configuration)

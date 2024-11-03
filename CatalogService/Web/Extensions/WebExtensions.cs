@@ -2,9 +2,9 @@
 using FluentValidation;
 using MediatR;
 using MediatR.Pipeline;
-using WebApplication1.Controllers.Validators;
+using WebApplication.Controllers.Validators;
 
-namespace WebApplication1.Extensions;
+namespace WebApplication.Extensions;
 
 public static class WebExtensions
 {

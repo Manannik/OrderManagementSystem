@@ -6,7 +6,7 @@ using Domain.Abstractions;
 using Domain.Entities;
 using Domain.Exceptions;
 using Moq;
-using WebApplication1.Controllers.Validators;
+using WebApplication.Controllers.Validators;
 
 namespace Tests;
 

@@ -1,7 +1,7 @@
 ﻿using Application.Models;
 using FluentValidation;
 
-namespace WebApplication1.Controllers.Validators;
+namespace WebApplication.Controllers.Validators;
 
 public class CreateProductRequestValidator : AbstractValidator<CreateProductRequest>
 {

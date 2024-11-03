@@ -8,7 +8,6 @@ namespace Application.BusinessLogic.Commands.UpdateProduct;
 
 public class UpdateQuantityCommand : IRequest<ProductModelDto>
 {
-    public Guid Id { get; set; }
     public OrderedQuantity Request { get; set; }
 }
 
@@ -17,13 +16,13 @@ public class UpdateQuantityCommandHandler(IProductRepository productRepository)
 {
     public async Task<ProductModelDto> Handle(UpdateQuantityCommand request, CancellationToken ct)
     {
-        var existingProduct = await productRepository.GetByIdAsync(request.Id, ct);
+        var existingProduct = await productRepository.GetByIdAsync(request.Request.Id, ct);
         if (existingProduct == null)
         {
-            throw new ProductDoesNotExistException(request.Id);
+            throw new ProductDoesNotExistException(request.Request.Id);
         }
 
-        existingProduct.Quantity -= request.Request.Quantity;
+        existingProduct.Quantity -= request.Request.NewQuantity;
 
         if (existingProduct.Quantity < 0)
         {

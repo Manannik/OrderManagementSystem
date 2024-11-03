@@ -2,5 +2,6 @@
 
 public class OrderedQuantity
 {
-    public int Quantity { get; set; }
+    public Guid Id { get; set; }
+    public int NewQuantity { get; set; }
 }
