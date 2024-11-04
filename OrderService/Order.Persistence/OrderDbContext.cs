@@ -4,7 +4,7 @@ using Order.Persistence.Configurations;
 
 namespace Order.Persistence;
 
-public class OrderDbContext(DbContextOptions<OrderDbContext> options) : DbContext
+public class OrderDbContext(DbContextOptions<OrderDbContext> options) : DbContext(options)
 {
     public DbSet<Domain.Entities.Order> Orders { get; set; }
     public DbSet<ProductItem> ProductItems { get; set; }

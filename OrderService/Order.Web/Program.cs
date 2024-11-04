@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using Order.Domain.Abstractions;
+using Order.Persistence;
 using Order.Persistence.Extensions;
 using Order.Persistence.Services;
 using Order.Web.Extensions;
@@ -22,7 +24,7 @@ builder.Services.AddHttpClient<ICatalogServiceClient, CatalogServiceClient>(o =>
 });
 
 var app = builder.Build();
-
+MigrateDb(app);
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -39,3 +41,12 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+static void MigrateDb(IApplicationBuilder app)
+{
+    var scopeFactory = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
+
+    using var scope = scopeFactory.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<OrderDbContext>();
+    dbContext.Database.Migrate();
+}

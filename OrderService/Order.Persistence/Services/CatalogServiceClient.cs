@@ -5,10 +5,8 @@ using Order.Domain.Entities;
 
 namespace Order.Persistence.Services;
 
-public class CatalogServiceClient(HttpClient httpClient) : ICatalogServiceClient
+public class CatalogServiceClient(HttpClient httpClient,ILogger<CatalogServiceClient> _logger) : ICatalogServiceClient
 {
-    private readonly ILogger<CatalogServiceClient> _logger;
-    
     private static JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions()
     {
         PropertyNameCaseInsensitive = true,
@@ -18,9 +16,8 @@ public class CatalogServiceClient(HttpClient httpClient) : ICatalogServiceClient
     {
         _logger.LogInformation("Запуск метода ChangeProductQuantityAsync для продукта с ID: {Id}", id);
         
-        using (var response = await httpClient.GetAsync($"ChangeQuantity/{id}/{newQuantity}",
-                   HttpCompletionOption.ResponseContentRead,
-                   ct))
+        using (var response = await httpClient.PutAsync($"ChangeQuantity/{id}/{newQuantity}",
+                   null,ct))
         {
             response.EnsureSuccessStatusCode();
             var stream = await response.Content.ReadAsStreamAsync(ct);

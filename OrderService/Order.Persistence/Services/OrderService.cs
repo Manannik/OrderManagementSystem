@@ -7,9 +7,8 @@ using Order.Domain.Exceptions;
 
 namespace Order.Persistence.Services;
 
-public class OrderService(OrderDbContext dbContext) : IOrderService
+public class OrderService(OrderDbContext dbContext,ILogger<OrderService> _logger) : IOrderService
 {
-    private readonly ILogger<OrderService> _logger;
     public async Task<Domain.Entities.Order> CreateAsync(List<ProductItem> productItems, CancellationToken ct)
     {
         if (productItems == null || !productItems.Any())

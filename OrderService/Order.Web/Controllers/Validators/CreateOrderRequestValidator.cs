@@ -16,5 +16,12 @@ public class CreateOrderRequestValidator : AbstractValidator<CreateOrderRequest>
                 await catalogServiceClient.ProductExistsAsync(productItemModel, cancellationToken))
             .WithMessage((request, productItemModel) => 
                 $"Продукт с ID {productItemModel} не существует.");
+
+        RuleForEach(request => request.ProductItemModels)
+            .ChildRules(productItem =>
+            {
+                productItem.RuleFor(item => item.Quantity)
+                    .GreaterThan(0).WithMessage("Количество заказываемого товара должно быть больше 0");
+            });
     }
 }
