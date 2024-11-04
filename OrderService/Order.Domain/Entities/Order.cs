@@ -13,8 +13,8 @@ public class Order
         ProductItems = new List<ProductItem>();
     }
     
-    public void CalculateCost()
+    public void CalculateCost(List<ProductItem> productItems)
     {
-        Cost = ProductItems?.Sum(item => item.Price * item.Quantity) ?? 0;
+        Cost = productItems?.Sum(item => item.Price * item.Quantity) ?? 0;
     }
 }

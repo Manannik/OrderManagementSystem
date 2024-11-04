@@ -7,7 +7,7 @@ using Order.Domain.Exceptions;
 
 namespace Order.Persistence.Services;
 
-public class OrderService(OrderDbContext dbContext,ILogger<OrderService> _logger) : IOrderService
+public class OrderService(OrderDbContext dbContext, ILogger<OrderService> _logger) : IOrderService
 {
     public async Task<Domain.Entities.Order> CreateAsync(List<ProductItem> productItems, CancellationToken ct)
     {
@@ -15,37 +15,41 @@ public class OrderService(OrderDbContext dbContext,ILogger<OrderService> _logger
         {
             throw new EmptyProductsException();
         }
-        
-        _logger.LogInformation("Запуск метода CreateAsync для списка продуктов: {productItems}", productItems.Select(f=>f.Id));
-        
-        var newOrder = new Domain.Entities.Order
-        {
-            Id = Guid.NewGuid(),
-            OrderStatus = OrderStatus.Сreated,
-            ProductItems = productItems
-        };
+
+        _logger.LogInformation("Запуск метода CreateAsync для списка продуктов: {productItems}",
+            productItems.Select(f => f.Id));
 
         var existingProductItems = await dbContext.ProductItems
             .Where(f => productItems.Select(g => g.Id).Contains(f.Id))
             .ToListAsync(ct);
-        
+
         var newProductItems = productItems
             .Where(f => existingProductItems.All(e => e.Id != f.Id))
             .ToList();
-        
+
         if (newProductItems.Any())
         {
-            _logger.LogInformation("В базе недостаточно продуктов, добавляем {newProductItems}",newProductItems.Select(f=>f.Id));
+            _logger.LogInformation("В базе недостаточно продуктов, добавляем {newProductItems} с заданным количеством",
+                newProductItems.Select(f => f.Id));
             await dbContext.ProductItems.AddRangeAsync(newProductItems, ct);
-            existingProductItems.AddRange(newProductItems);
         }
+
+        var newOrder = new Domain.Entities.Order
+        {
+            Id = Guid.NewGuid(),
+            OrderStatus = OrderStatus.Сreated,
+            ProductItems = existingProductItems
+        };
         
+        existingProductItems.ForEach(f => f.Quantity += productItems.SingleOrDefault(g => g.Id == f.Id).Quantity);
         existingProductItems.ForEach(f => f.Orders.Add(newOrder));
+
+        newOrder.CalculateCost(productItems);
         
-        newOrder.CalculateCost();
         await dbContext.Orders.AddAsync(newOrder, ct);
         await dbContext.SaveChangesAsync(ct);
-        _logger.LogInformation("Успешное завершение CreateAsync для списка продуктов: {productItems}", productItems.Select(f=>f.Id));
+        _logger.LogInformation("Успешное завершение CreateAsync для списка продуктов: {productItems}",
+            productItems.Select(f => f.Id));
         return newOrder;
     }
 }
