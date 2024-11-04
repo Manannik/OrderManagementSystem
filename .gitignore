@@ -399,4 +399,4 @@ FodyWeavers.xsd
 *.sln.iml
 
 # ignore all directories with the name data
-data/
+/data/
