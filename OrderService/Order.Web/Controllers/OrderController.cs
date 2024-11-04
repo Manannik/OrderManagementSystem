@@ -44,5 +44,6 @@ public class OrderController : ControllerBase
         
         _logger.LogInformation("в результате работы метода Create, заказ успешно создан");
         return Ok();
+        
     }
 }
