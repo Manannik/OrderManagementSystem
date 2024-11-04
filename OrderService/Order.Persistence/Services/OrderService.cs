@@ -26,9 +26,9 @@ public class OrderService(OrderDbContext dbContext,ILogger<OrderService> _logger
         };
 
         var existingProductItems = await dbContext.ProductItems
-            .Where(f => productItems.Any(g => g.Id == f.Id))
+            .Where(f => productItems.Select(g => g.Id).Contains(f.Id))
             .ToListAsync(ct);
-
+        
         var newProductItems = productItems
             .Where(f => existingProductItems.All(e => e.Id != f.Id))
             .ToList();

@@ -3,5 +3,5 @@
 public class OrderedQuantity
 {
     public Guid Id { get; set; }
-    public int NewQuantity { get; set; }
+    public int OrderQuantity { get; set; }
 }

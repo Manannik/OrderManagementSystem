@@ -7,7 +7,7 @@ public class UpdateProductQuantityRequestValidator:AbstractValidator<OrderedQuan
 {
     public UpdateProductQuantityRequestValidator()
     {
-        RuleFor(f => f.NewQuantity)
+        RuleFor(f => f.OrderQuantity)
             .NotEmpty()
             .GreaterThanOrEqualTo(0);
     }

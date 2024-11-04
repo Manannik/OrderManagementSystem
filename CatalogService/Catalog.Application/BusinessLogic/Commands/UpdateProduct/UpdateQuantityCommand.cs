@@ -22,7 +22,7 @@ public class UpdateQuantityCommandHandler(IProductRepository productRepository)
             throw new ProductDoesNotExistException(request.Request.Id);
         }
 
-        existingProduct.Quantity -= request.Request.NewQuantity;
+        existingProduct.Quantity -= request.Request.OrderQuantity;
 
         if (existingProduct.Quantity < 0)
         {
@@ -43,7 +43,7 @@ public class UpdateQuantityCommandHandler(IProductRepository productRepository)
             {
                 Id = f.Id
             }).ToList(),
-            Quantity = existingProduct.Quantity,
+            Quantity = request.Request.OrderQuantity,
             CreatedDateUtc = existingProduct.CreatedDateUtc,
             UpdatedDateUtc = existingProduct.UpdatedDateUtc
         };

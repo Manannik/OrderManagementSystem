@@ -85,11 +85,11 @@ public class CatalogController(
         OrderedQuantity request = new OrderedQuantity()
         {
             Id = id,
-            NewQuantity = newQuantity
+            OrderQuantity = newQuantity
         };
         
         logger.LogInformation("Вызван метод UpdateQuantity с id: {Id} и новым количеством товара {newQuantity}", id,
-            request.NewQuantity);
+            request.OrderQuantity);
         
         var productModel = await mediator.Send(new UpdateQuantityCommand()
         {
