@@ -2,5 +2,5 @@
 
 public class CreateOrderRequest
 {
-    public List<Guid> ProductGuids { get; set; }
+    public List<ProductItemModel> ProductItemModels { get; set; }
 }

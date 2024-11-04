@@ -8,10 +8,10 @@ public class CreateOrderRequestValidator : AbstractValidator<CreateOrderRequest>
 {
     public CreateOrderRequestValidator(ICatalogServiceClient catalogServiceClient)
     {
-        RuleForEach(f => f.ProductGuids)
+        RuleForEach(f => f.ProductItemModels.Select(f=>f.Id))
             .NotEqual(Guid.Empty).WithMessage("ID продукта не должен быть пустым GUID.");
         
-        RuleForEach(request => request.ProductGuids)
+        RuleForEach(request => request.ProductItemModels.Select(f=>f.Id))
             .MustAsync(async (productItemModel, cancellationToken) =>
                 await catalogServiceClient.ProductExistsAsync(productItemModel, cancellationToken))
             .WithMessage((request, productItemModel) => 

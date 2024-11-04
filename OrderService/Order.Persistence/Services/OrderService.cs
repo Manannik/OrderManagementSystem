@@ -10,7 +10,7 @@ namespace Order.Persistence.Services;
 public class OrderService(OrderDbContext dbContext) : IOrderService
 {
     private readonly ILogger<OrderService> _logger;
-    public async Task<Guid> CreateAsync(List<ProductItem> productItems, CancellationToken ct)
+    public async Task<Domain.Entities.Order> CreateAsync(List<ProductItem> productItems, CancellationToken ct)
     {
         if (productItems == null || !productItems.Any())
         {
@@ -47,6 +47,6 @@ public class OrderService(OrderDbContext dbContext) : IOrderService
         await dbContext.Orders.AddAsync(newOrder, ct);
         await dbContext.SaveChangesAsync(ct);
         _logger.LogInformation("Успешное завершение CreateAsync для списка продуктов: {productItems}", productItems.Select(f=>f.Id));
-        return newOrder.Id;
+        return newOrder;
     }
 }

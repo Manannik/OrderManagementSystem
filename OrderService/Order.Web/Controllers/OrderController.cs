@@ -1,6 +1,9 @@
+using Confluent.Kafka;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Order.Application.Models;
 using Order.Domain.Abstractions;
+using Order.Persistence.Kafka;
 
 namespace Order.Web.Controllers;
 
@@ -11,15 +14,15 @@ public class OrderController : ControllerBase
     private readonly ILogger<OrderController> _logger;
     private readonly IOrderService _orderService;
     private readonly ICatalogServiceClient _catalogServiceClient;
-
+    private readonly IKafkaProducer _producer;
     public OrderController(ILogger<OrderController> logger,
         IOrderService orderService,
-        ICatalogServiceClient catalogServiceClient
-    )
+        ICatalogServiceClient catalogServiceClient, IKafkaProducer producer)
     {
         _logger = logger;
         _orderService = orderService;
         _catalogServiceClient = catalogServiceClient;
+        _producer = producer;
     }
 
     [HttpPost]
@@ -28,19 +31,17 @@ public class OrderController : ControllerBase
         _logger.LogInformation("запуск метод Create, request: {@Request}", request);
 
         var products = await Task.WhenAll(
-            request.ProductGuids.Select(f => _catalogServiceClient.ChangeProductQuantityAsync(f, ct))
+            request.ProductItemModels.Select(f => _catalogServiceClient.ChangeProductQuantityAsync(f.Id,f.Quantity, ct))
         );
+
+        var order = await _orderService.CreateAsync(products.ToList(), ct);
         
-        // var products = new List<ProductItem>();
-        //
-        // foreach (var id in request.ProductGuids)
-        // {
-        //     var product = await _catalogServiceClient.ChangeProductQuantityAsync(id, ct);
-        //     products.Add(product);
-        // }
-
-        await _orderService.CreateAsync(products.ToList(), ct);
-
+        await _producer.ProduceAsync("order-topic", new Message<string, string>()
+        {
+            Key = order.Id.ToString(),
+            Value = JsonConvert.SerializeObject(order)
+        });
+        
         _logger.LogInformation("в результате работы метода Create, заказ успешно создан");
         return Ok();
     }

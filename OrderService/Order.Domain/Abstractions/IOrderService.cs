@@ -4,5 +4,5 @@ namespace Order.Domain.Abstractions;
 
 public interface IOrderService
 {
-    Task<Guid> CreateAsync(List<ProductItem> productItems, CancellationToken ct);
+    Task<Entities.Order> CreateAsync(List<ProductItem> productItems, CancellationToken ct);
 }
