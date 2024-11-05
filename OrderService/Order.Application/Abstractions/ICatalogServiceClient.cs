@@ -1,6 +1,6 @@
 ﻿using Order.Domain.Entities;
 
-namespace Order.Domain.Abstractions;
+namespace Order.Application.Abstractions;
 
 public interface ICatalogServiceClient
 {

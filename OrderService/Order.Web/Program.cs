@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using Order.Domain.Abstractions;
+using Order.Application.Abstractions;
+using Order.Application.Services;
 using Order.Persistence;
 using Order.Persistence.Extensions;
-using Order.Persistence.Services;
 using Order.Web.Extensions;
 using Order.Web.Middlewares;
 

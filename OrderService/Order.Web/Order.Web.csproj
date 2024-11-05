@@ -19,6 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Messaging.Kafka\Messaging.Kafka.csproj" />
       <ProjectReference Include="..\Order.Application\Order.Application.csproj" />
       <ProjectReference Include="..\Order.Persistence\Order.Persistence.csproj" />
     </ItemGroup>

@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
+using Order.Application.Abstractions;
 using Order.Application.Models;
-using Order.Domain.Abstractions;
 
 namespace Order.Web.Controllers.Validators;
 

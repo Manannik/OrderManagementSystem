@@ -1,9 +1,9 @@
 ﻿using System.Text.Json;
 using Microsoft.Extensions.Logging;
-using Order.Domain.Abstractions;
+using Order.Application.Abstractions;
 using Order.Domain.Entities;
 
-namespace Order.Persistence.Services;
+namespace Order.Application.Services;
 
 public class CatalogServiceClient(HttpClient httpClient,ILogger<CatalogServiceClient> _logger) : ICatalogServiceClient
 {

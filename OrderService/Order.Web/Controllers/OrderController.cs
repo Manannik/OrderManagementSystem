@@ -1,9 +1,9 @@
 using Confluent.Kafka;
+using Messaging.Kafka.Kafka;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Order.Application.Abstractions;
 using Order.Application.Models;
-using Order.Domain.Abstractions;
-using Order.Persistence.Kafka;
 
 namespace Order.Web.Controllers;
 

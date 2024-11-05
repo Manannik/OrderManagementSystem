@@ -1,8 +1,8 @@
 ﻿using Order.Domain.Entities;
 
-namespace Order.Domain.Abstractions;
+namespace Order.Domain.Abstarctions;
 
-public interface IOrderService
+public interface IOrderRepository
 {
     Task<Entities.Order> CreateAsync(List<ProductItem> productItems, CancellationToken ct);
 }

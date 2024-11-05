@@ -1,11 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Order.Domain.Abstractions;
+using Order.Application.Abstractions;
 using Order.Domain.Entities;
 using Order.Domain.Enums;
 using Order.Domain.Exceptions;
+using Order.Persistence;
 
-namespace Order.Persistence.Services;
+namespace Order.Application.Services;
 
 public class OrderService(OrderDbContext dbContext, ILogger<OrderService> _logger) : IOrderService
 {
@@ -17,20 +18,20 @@ public class OrderService(OrderDbContext dbContext, ILogger<OrderService> _logge
         }
 
         _logger.LogInformation("Запуск метода CreateAsync для списка продуктов: {productItems}",
-            productItems.Select(f => f.Id));
+            productItems.Select(f => f.ProductId));
 
         var existingProductItems = await dbContext.ProductItems
-            .Where(f => productItems.Select(g => g.Id).Contains(f.Id))
+            .Where(f => productItems.Select(g => g.ProductId).Contains(f.ProductId))
             .ToListAsync(ct);
 
         var newProductItems = productItems
-            .Where(f => existingProductItems.All(e => e.Id != f.Id))
+            .Where(f => existingProductItems.All(e => e.ProductId != f.ProductId))
             .ToList();
 
         if (newProductItems.Any())
         {
             _logger.LogInformation("В базе недостаточно продуктов, добавляем {newProductItems} с заданным количеством",
-                newProductItems.Select(f => f.Id));
+                newProductItems.Select(f => f.ProductId));
             await dbContext.ProductItems.AddRangeAsync(newProductItems, ct);
         }
 
@@ -41,7 +42,7 @@ public class OrderService(OrderDbContext dbContext, ILogger<OrderService> _logge
             ProductItems = existingProductItems
         };
         
-        existingProductItems.ForEach(f => f.Quantity += productItems.SingleOrDefault(g => g.Id == f.Id).Quantity);
+        existingProductItems.ForEach(f => f.Quantity += productItems.SingleOrDefault(g => g.ProductId == f.ProductId).Quantity);
         existingProductItems.ForEach(f => f.Orders.Add(newOrder));
 
         newOrder.CalculateCost(productItems);
@@ -49,7 +50,7 @@ public class OrderService(OrderDbContext dbContext, ILogger<OrderService> _logge
         await dbContext.Orders.AddAsync(newOrder, ct);
         await dbContext.SaveChangesAsync(ct);
         _logger.LogInformation("Успешное завершение CreateAsync для списка продуктов: {productItems}",
-            productItems.Select(f => f.Id));
+            productItems.Select(f => f.ProductId));
         return newOrder;
     }
 }
