@@ -26,7 +26,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Catalog.Application\Catalog.Application.csproj" />
-      <ProjectReference Include="..\Infrastructure\Persistence.csproj" />
       <ProjectReference Include="..\Catalog.Web\Catalog.Web.csproj" />
     </ItemGroup>
 

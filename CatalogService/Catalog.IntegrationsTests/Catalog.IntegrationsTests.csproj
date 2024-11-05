@@ -28,7 +28,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Infrastructure\Persistence.csproj" />
       <ProjectReference Include="..\Catalog.Persistence\Catalog.Persistence.csproj" />
       <ProjectReference Include="..\Catalog.Web\Catalog.Web.csproj" />
     </ItemGroup>
