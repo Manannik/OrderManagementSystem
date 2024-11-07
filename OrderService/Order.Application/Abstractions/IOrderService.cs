@@ -1,8 +1,9 @@
-﻿using Order.Domain.Entities;
+﻿using Order.Application.Models;
+using Order.Domain.Entities;
 
 namespace Order.Application.Abstractions;
 
 public interface IOrderService
 {
-    Task<Domain.Entities.Order> CreateAsync(List<ProductItem> productItems, CancellationToken ct);
+    Task<Domain.Entities.Order> CreateAsync(CreateOrderRequest request, CancellationToken ct);
 }

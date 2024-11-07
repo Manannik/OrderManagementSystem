@@ -30,11 +30,7 @@ public class OrderController : ControllerBase
     {
         _logger.LogInformation("запуск метод Create, request: {@Request}", request);
 
-        var products = await Task.WhenAll(
-            request.ProductItemModels.Select(f => _catalogServiceClient.ChangeProductQuantityAsync(f.Id,f.Quantity, ct))
-        );
-
-        var order = await _orderService.CreateAsync(products.ToList(), ct);
+        var order = await _orderService.CreateAsync(request, ct);
         
         await _producer.ProduceAsync("order-topic", new Message<string, string>()
         {
