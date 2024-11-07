@@ -2,11 +2,7 @@
 using Order.Application.Abstractions;
 using Order.Application.Models;
 using Order.Domain.Abstarctions;
-using Order.Domain.Entities;
-using Order.Domain.Enums;
 using Order.Domain.Exceptions;
-using Order.Persistence;
-using Order.Persistence.Repositories;
 
 namespace Order.Application.Services;
 
