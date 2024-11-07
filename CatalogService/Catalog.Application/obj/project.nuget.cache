@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "EgZKI9cJW/mCOWDrpUFrucR0mE5hR23hO7LmwzglMGg0iXtH32iUW5mSc/TGL3PNGX4VX64siKbUiwjczf8V6w==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\user\\RiderProjects\\manalexhvac\\OrderManagementSystem\\CatalogService\\Catalog.Application\\Catalog.Application.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\user\\.nuget\\packages\\mediatr\\12.4.0\\mediatr.12.4.0.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\mediatr.contracts\\2.0.1\\mediatr.contracts.2.0.1.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.0\\microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

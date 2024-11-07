@@ -1,0 +1,16 @@
+C:\Users\user\RiderProjects\manalexhvac\OrderManagementSystem\CatalogService\Catalog.Application\bin\Debug\net8.0\Catalog.Application.deps.json
+C:\Users\user\RiderProjects\manalexhvac\OrderManagementSystem\CatalogService\Catalog.Application\bin\Debug\net8.0\Catalog.Application.dll
+C:\Users\user\RiderProjects\manalexhvac\OrderManagementSystem\CatalogService\Catalog.Application\bin\Debug\net8.0\Catalog.Application.pdb
+C:\Users\user\RiderProjects\manalexhvac\OrderManagementSystem\CatalogService\Catalog.Application\bin\Debug\net8.0\Catalog.Domain.dll
+C:\Users\user\RiderProjects\manalexhvac\OrderManagementSystem\CatalogService\Catalog.Application\bin\Debug\net8.0\Catalog.Domain.pdb
+C:\Users\user\RiderProjects\manalexhvac\OrderManagementSystem\CatalogService\Catalog.Application\obj\Debug\net8.0\Catalog.Application.csproj.AssemblyReference.cache
+C:\Users\user\RiderProjects\manalexhvac\OrderManagementSystem\CatalogService\Catalog.Application\obj\Debug\net8.0\Catalog.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\user\RiderProjects\manalexhvac\OrderManagementSystem\CatalogService\Catalog.Application\obj\Debug\net8.0\Catalog.Application.AssemblyInfoInputs.cache
+C:\Users\user\RiderProjects\manalexhvac\OrderManagementSystem\CatalogService\Catalog.Application\obj\Debug\net8.0\Catalog.Application.AssemblyInfo.cs
+C:\Users\user\RiderProjects\manalexhvac\OrderManagementSystem\CatalogService\Catalog.Application\obj\Debug\net8.0\Catalog.Application.csproj.CoreCompileInputs.cache
+C:\Users\user\RiderProjects\manalexhvac\OrderManagementSystem\CatalogService\Catalog.Application\obj\Debug\net8.0\Catalog.Application.sourcelink.json
+C:\Users\user\RiderProjects\manalexhvac\OrderManagementSystem\CatalogService\Catalog.Application\obj\Debug\net8.0\Catalog..75771DFE.Up2Date
+C:\Users\user\RiderProjects\manalexhvac\OrderManagementSystem\CatalogService\Catalog.Application\obj\Debug\net8.0\Catalog.Application.dll
+C:\Users\user\RiderProjects\manalexhvac\OrderManagementSystem\CatalogService\Catalog.Application\obj\Debug\net8.0\refint\Catalog.Application.dll
+C:\Users\user\RiderProjects\manalexhvac\OrderManagementSystem\CatalogService\Catalog.Application\obj\Debug\net8.0\Catalog.Application.pdb
+C:\Users\user\RiderProjects\manalexhvac\OrderManagementSystem\CatalogService\Catalog.Application\obj\Debug\net8.0\ref\Catalog.Application.dll
