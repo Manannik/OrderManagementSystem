@@ -23,7 +23,7 @@ public class CatalogController(
          {
              Name = request.Name,
              Description = request.Description,
-             CategoriesModelDtos = request.CategoryModelDtos,
+             CategoryModelDtos = request.CategoryModelDtos,
              Price = request.Price,
              Quantity = request.Quantity
          }, ct);

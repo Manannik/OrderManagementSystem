@@ -1,5 +1,4 @@
 ﻿using Order.Application.Models;
-using Order.Domain.Entities;
 
 namespace Order.Application.Abstractions;
 

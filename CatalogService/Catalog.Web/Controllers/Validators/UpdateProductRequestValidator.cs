@@ -25,7 +25,7 @@ public class UpdateProductRequestValidator : AbstractValidator<UpdateProductRequ
             .NotEmpty()
             .GreaterThanOrEqualTo(0);
 
-        RuleFor(f => f.Category)
+        RuleFor(f => f.CategoryModelDtos)
             .NotEmpty();
     }
 }

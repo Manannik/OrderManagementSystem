@@ -26,7 +26,7 @@ public class UpdateProductCommandHandle(IProductRepository productRepository,
             throw new ProductDoesNotExistException(request.Id);
         }
 
-        var categoriesRequestIds = request.Request.Category
+        var categoriesRequestIds = request.Request.CategoryModelDtos
             .Select(f => f.Id)
             .ToList();
 

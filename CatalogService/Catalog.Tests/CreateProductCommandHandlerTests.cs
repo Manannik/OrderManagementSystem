@@ -22,10 +22,10 @@ public class CreateProductCommandHandlerTests
         var fixture = new Fixture();
         var categoriesModelDto = fixture.CreateMany<CategoryModelDto>(2).ToList();
         var createProductCommand = fixture.Build<CreateProductCommand>()
-            .With(f => f.CategoriesModelDtos, categoriesModelDto)
+            .With(f => f.CategoryModelDtos, categoriesModelDto)
             .Create();
 
-        var categoriesId = createProductCommand.CategoriesModelDtos.Select(f => f.Id).ToList();
+        var categoriesId = createProductCommand.CategoryModelDtos.Select(f => f.Id).ToList();
 
         var categories = new List<Category>();
         foreach (var modelDto in categoriesModelDto)
@@ -73,7 +73,7 @@ public class CreateProductCommandHandlerTests
         var fixture = new Fixture();
         var categoryModelDto = fixture.CreateMany<CategoryModelDto>(2).ToList();
         var createProductCommand = fixture.Build<CreateProductCommand>()
-            .With(f => f.CategoriesModelDtos, categoryModelDto)
+            .With(f => f.CategoryModelDtos, categoryModelDto)
             .Create();
         
         _productRepositoryMock.Setup(f => f.ExistAsync(createProductCommand.Name, default))
@@ -90,42 +90,36 @@ public class CreateProductCommandHandlerTests
         await Assert.ThrowsAsync<ProductAlreadyExistException>(act);
     }
 
-    [Fact]
-    public async Task Validator_Should_ReturnFailureResult_WhenProductNameEmpty()
+    [Theory]
+    [InlineData("Name", "'Name' должно быть заполнено.")]
+    [InlineData("Description", "'Description' должно быть заполнено.")]
+    public async Task Validator_Should_ReturnFailureResult_WhenProductPropertyIsEmpty(string propertyName, 
+        string expectedErrorMessage)
     {
-        //Arrange
+        // Arrange
         var fixture = new Fixture();
         var request = fixture.Build<CreateProductRequest>()
-            .Without(x => x.Name)
+            .With(f => f.Name, "Some Name") 
+            .With(f => f.Description, "Some Description")
             .Create();
-        
-        var validator = new CreateProductRequestValidator();
-        
-        //Act
-        var result = validator.Validate(request);
-        
-        //Assert
-        Assert.False(result.IsValid);
-        // Assert.Equal("Name cannot be empty", result.Errors.First().ErrorMessage);
-    }
 
-    [Fact]
-    public async Task Validator_Should_ReturnFailureResult_WhenProductDescriptionEmpty()
-    {
-        //Arrange
-        var fixture = new Fixture();
-        var request = fixture.Build<CreateProductRequest>()
-            .Without(x => x.Description)
-            .Create();
-        
+        if (propertyName == "Name")
+        {
+            request.Name = null;
+        }
+        else if (propertyName == "Description")
+        {
+            request.Description = null;
+        }
+
         var validator = new CreateProductRequestValidator();
-        
-        //Act
+
+        // Act
         var result = validator.Validate(request);
-        
-        //Assert
+
+        // Assert
         Assert.False(result.IsValid);
-        // Assert.Equal("Description cannot be empty", result.Errors.First().ErrorMessage);
+        Assert.Equal(expectedErrorMessage, result.Errors.First().ErrorMessage);
     }
 
     [Fact]
@@ -135,10 +129,10 @@ public class CreateProductCommandHandlerTests
         var fixture = new Fixture();
         var categoryModelDto = fixture.CreateMany<CategoryModelDto>(2).ToList();
         var createProductCommand = fixture.Build<CreateProductCommand>()
-            .With(f => f.CategoriesModelDtos, categoryModelDto)
+            .With(f => f.CategoryModelDtos, categoryModelDto)
             .Create();
 
-        var categoriesId = createProductCommand.CategoriesModelDtos.Select(f => f.Id).ToList();
+        var categoriesId = createProductCommand.CategoryModelDtos.Select(f => f.Id).ToList();
         
         //Act
         _categoryRepositoryMock.Setup(f => f.GetByIdAsync(categoriesId, default))

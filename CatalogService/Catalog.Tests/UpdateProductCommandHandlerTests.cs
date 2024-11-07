@@ -1,9 +1,10 @@
+using Application.BusinessLogic.Commands.CreateProduct;
 using Application.BusinessLogic.Commands.UpdateProduct;
 using Application.BusinessLogic.Models;
 using Application.Models;
+using AutoFixture;
 using Domain.Abstractions;
 using Domain.Entities;
-using Domain.Exceptions;
 using Moq;
 
 namespace Tests;
@@ -17,81 +18,69 @@ public class UpdateProductCommandHandlerTests
     public async Task Handle_Should_ReturnSuccessResult_WhenUpdateProduct()
     {
         //Arrange
+        var fixture = new Fixture();
+        var guid = fixture.Create<Guid>();
 
-        var existingCategories = new List<Category>()
-        {
-            new Category()
-            {
-                Id = Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d651")
-            }
-        };
-
-        var existingProduct = new Product()
-        {
-            Id = Guid.Parse("29ada098-6fe2-4c4c-ba6e-1a9788abd04b"),
-            Name = "Одежда1",
-            Description = "Одежда1",
-            Categories = new List<Category>()
-            {
-                new Category()
-                {
-                    Id = Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d651"),
-                    Name = "Одежда"
-                }
-            },
-            Price = 800,
-            Quantity = 10,
-            CreatedDateUtc = DateTime.UtcNow
-        };
-
-        var command = new UpdateProductCommand()
-        {
-            Request = new UpdateProductRequest()
-            {
-                Name = "Одежда1",
-                Description = "Одежда1",
-                Category = new List<CategoryModelDto>()
-                {
-                    new CategoryModelDto()
-                    {
-                        Id = Guid.Parse("6af8acea-bfa5-438d-ac76-2767b6f2d651")
-                    }
-                },
-                Price = 777,
-                Quantity = 4
-            }
-        };
-
-        var categoriesRequest = command.Request.Category
-            .Select(f=>f.Id).ToList();
+        var categoriesModelDto = fixture.CreateMany<CategoryModelDto>(2).ToList();
         
-        _productRepositoryMock.Setup(f => f.GetByIdAsync(command.Id, default))
-            .ReturnsAsync(existingProduct);
+        var updateProductRequest = fixture.Build<UpdateProductRequest>()
+            .With(f => f.CategoryModelDtos, categoriesModelDto)
+            .Create();
         
-        _categoryRepositoryMock.Setup(f => f.GetByIdAsync(categoriesRequest, default))
-            .ReturnsAsync(existingCategories);
+        var updateProductCommand = fixture.Build<UpdateProductCommand>()
+            .With(f => f.Id, guid)
+            .With(f => f.Request, updateProductRequest)
+            .Create();
+        
+        var guids = categoriesModelDto.Select(f => f.Id).ToList();
+        
+        var categories = new List<Category>();
+        foreach (var modelDto in categoriesModelDto)
+        {
+            var category = fixture.Build<Category>()
+                .With(f => f.Id, modelDto.Id)
+                .Without(x => x.Products)
+                .Create();
+            categories.Add(category);
+        }
 
+        var product = fixture.Build<Product>()
+            .With(f => f.Id, guid)
+            .With(f=>f.Categories,categories)
+            .Create();
+
+        _productRepositoryMock.Setup(f => f.GetByIdAsync(guid, default))
+            .ReturnsAsync(product);
+
+        _categoryRepositoryMock.Setup(f => f.GetByIdAsync(guids, default))
+            .ReturnsAsync(categories);
+
+        product.Name = updateProductCommand.Request.Name;
+        product.Description = updateProductCommand.Request.Description;
+        product.Price = updateProductCommand.Request.Price;
+        product.Quantity = updateProductCommand.Request.Quantity;
+        product.UpdatedDateUtc = DateTime.UtcNow;
+        product.Categories = categories;
+
+        _productRepositoryMock.Setup(f => f.UpdateAsync(product, default))
+            .Verifiable();
+       
         var handler = new UpdateProductCommandHandle(
             _productRepositoryMock.Object,
             _categoryRepositoryMock.Object);
-
+        
         //Act
-        var updatedProductModelDto = await handler.Handle(command, default);
+
+        await handler.Handle(updateProductCommand, default);
 
         //Assert
-
-        var mappedCommand = new ProductModelDto()
-        {
-            Id = existingProduct.Id,
-            Name = command.Request.Name,
-            Description = command.Request.Description,
-            CreatedDateUtc = existingProduct.CreatedDateUtc,
-            UpdatedDateUtc = updatedProductModelDto.UpdatedDateUtc,
-            Quantity = command.Request.Quantity,
-            CategoriesModelDtos = updatedProductModelDto.CategoriesModelDtos,
-            Price = command.Request.Price
-        };
-
-        Assert.Equivalent(mappedCommand, updatedProductModelDto);
+        _productRepositoryMock.Verify(f => f.UpdateAsync(It.Is<Product>(g =>
+                g.Name == updateProductCommand.Request.Name &&
+                g.Description == updateProductCommand.Request.Description &&
+                g.Categories.Count == categories.Count &&
+                g.Price == updateProductCommand.Request.Price &&
+                g.Quantity == updateProductCommand.Request.Quantity &&
+                g.UpdatedDateUtc != DateTime.UtcNow
+        ), It.IsAny<CancellationToken>()), Times.Once);
     }
 }

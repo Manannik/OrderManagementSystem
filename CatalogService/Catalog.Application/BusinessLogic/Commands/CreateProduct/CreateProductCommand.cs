@@ -10,7 +10,7 @@ public class CreateProductCommand : IRequest
 {
     public string Name { get; set; }
     public string Description { get; set; }
-    public List<CategoryModelDto> CategoriesModelDtos { get; set; }
+    public List<CategoryModelDto> CategoryModelDtos { get; set; }
     public decimal Price { get; set; }
     public int Quantity { get; set; }
 }
@@ -28,7 +28,7 @@ public class CreateProductCommandHandler(
             throw new ProductAlreadyExistException(request.Name);
         }
 
-        var categoriesId = request.CategoriesModelDtos.Select(f => f.Id).ToList();
+        var categoriesId = request.CategoryModelDtos.Select(f => f.Id).ToList();
         var existingCategories = await categoryRepository.GetByIdAsync(categoriesId, ct);
 
         var exceptedCategoriesIds = categoriesId.Except(existingCategories.Select(f => f.Id)).ToList();
