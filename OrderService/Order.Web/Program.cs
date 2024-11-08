@@ -1,6 +1,9 @@
+using Application.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Order.Application.Abstractions;
 using Order.Application.Services;
+using Order.Infrastructure.Extensions;
+using Order.Infrastructure.Services;
 using Order.Persistence;
 using Order.Persistence.Extensions;
 using Order.Web.Extensions;
@@ -10,13 +13,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddWeb();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddTransient<OrderServiceExceptionHandlerMiddleware>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddPersistence(builder.Configuration);
+builder.Services.AddApplication();
+builder.Services.AddWeb();
+builder.Services.AddInfrastructure();
 
 builder.Services.AddHttpClient<ICatalogServiceClient, CatalogServiceClient>(o =>
 {

@@ -10,18 +10,25 @@ public class CreateOrderRequestValidator : AbstractValidator<CreateOrderRequest>
     {
         RuleForEach(f => f.ProductItemModels.Select(f=>f.Id))
             .NotEqual(Guid.Empty).WithMessage("ID продукта не должен быть пустым GUID.");
-        
+/*        
         RuleForEach(request => request.ProductItemModels.Select(f=>f.Id))
             .MustAsync(async (productItemModel, cancellationToken) =>
                 await catalogServiceClient.ProductExistsAsync(productItemModel, cancellationToken))
             .WithMessage((request, productItemModel) => 
                 $"Продукт с ID {productItemModel} не существует.");
-
+*/
         RuleForEach(request => request.ProductItemModels)
             .ChildRules(productItem =>
             {
                 productItem.RuleFor(item => item.Quantity)
                     .GreaterThan(0).WithMessage("Количество заказываемого товара должно быть больше 0");
+            });
+        
+        RuleForEach(request => request.ProductItemModels)
+            .ChildRules(productItem =>
+            {
+                productItem.RuleFor(item => item.Price)
+                    .GreaterThan(0).WithMessage("Стоимость товара не может быть меньше 0");
             });
     }
 }

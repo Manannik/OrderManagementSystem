@@ -1,6 +1,6 @@
 ﻿using Confluent.Kafka;
 
-namespace Messaging.Kafka.Kafka;
+namespace Order.Infrastructure.Kafka;
 
 public interface IKafkaProducer
 {

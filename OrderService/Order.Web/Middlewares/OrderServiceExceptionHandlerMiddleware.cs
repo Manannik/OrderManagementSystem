@@ -20,7 +20,7 @@ public class OrderServiceExceptionHandlerMiddleware(ILogger<OrderServiceExceptio
                     context.Response.StatusCode = emptyProductsException.StatusCode;
                     await context.Response.WriteAsync(emptyProductsException.Message);
                     break;
-                case NotEnoughQuantityOfProducts notEnoughQuantityOfProducts:
+                case ProductException notEnoughQuantityOfProducts:
                     _logger.LogError("Попытка создать заказ с пустым списком Products");
                     context.Response.StatusCode = notEnoughQuantityOfProducts.StatusCode;
                     await context.Response.WriteAsync(notEnoughQuantityOfProducts.Message);

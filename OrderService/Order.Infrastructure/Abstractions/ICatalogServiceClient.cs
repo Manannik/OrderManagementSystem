@@ -4,6 +4,6 @@ namespace Order.Application.Abstractions;
 
 public interface ICatalogServiceClient
 {
-    Task<ProductItem> ChangeProductQuantityAsync(Guid id, int newQuantity, CancellationToken ct);
+    Task<bool> ChangeProductQuantityAsync(Guid id, int newQuantity,decimal price, CancellationToken ct);
     Task<bool> ProductExistsAsync(Guid id, CancellationToken ct);
 }

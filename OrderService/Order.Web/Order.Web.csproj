@@ -13,14 +13,13 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="Serilog.AspNetCore" Version="8.0.2" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Messaging.Kafka\Messaging.Kafka.csproj" />
       <ProjectReference Include="..\Order.Application\Order.Application.csproj" />
+      <ProjectReference Include="..\Order.Infrastructure\Order.Infrastructure.csproj" />
       <ProjectReference Include="..\Order.Persistence\Order.Persistence.csproj" />
     </ItemGroup>
 

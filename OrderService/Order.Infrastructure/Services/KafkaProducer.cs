@@ -1,6 +1,7 @@
 ﻿using Confluent.Kafka;
+using Order.Infrastructure.Kafka;
 
-namespace Messaging.Kafka.Kafka;
+namespace Order.Infrastructure.Services;
 
 public class KafkaProducer : IKafkaProducer
 {
