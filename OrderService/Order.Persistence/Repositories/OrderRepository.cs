@@ -2,11 +2,11 @@
 using Order.Domain.Entities;
 using Order.Domain.Enums;
 
-namespace Order.Persistence.Repositories;
-
-public class OrderRepository(OrderDbContext dbContext) : IOrderRepository
+namespace Order.Persistence.Repositories
 {
-    public async Task<Domain.Entities.Order> CreateAsync(List<ProductItem> productItems, CancellationToken ct)
+    public class OrderRepository(OrderDbContext dbContext) : IOrderRepository
+    {
+        public async Task<Domain.Entities.Order> CreateAsync(List<ProductItem> productItems, CancellationToken ct)
     {
         var newOrder = new Domain.Entities.Order
         {
@@ -17,5 +17,6 @@ public class OrderRepository(OrderDbContext dbContext) : IOrderRepository
         newOrder.CalculateCost(productItems);
         await dbContext.Orders.AddAsync(newOrder, ct);
         return newOrder;
+    }
     }
 }

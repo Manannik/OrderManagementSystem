@@ -4,12 +4,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OrderManagementSystem.Infrastructure.Repository;
 
-namespace OrderManagementSystem.Infrastructure.Extensions;
-
-public static class PersistenceExtensions
+namespace OrderManagementSystem.Infrastructure.Extensions
 {
-    public static IServiceCollection AddPersistence(
-        this IServiceCollection services,IConfiguration configuration)
+    public static class PersistenceExtensions
+    {
+        public static IServiceCollection AddPersistence(
+            this IServiceCollection services,IConfiguration configuration)
     {
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -18,5 +18,6 @@ public static class PersistenceExtensions
             options.UseNpgsql(configuration.GetConnectionString("CatalogServiceConnectionString"));
         });
         return services;
+    }
     }
 }

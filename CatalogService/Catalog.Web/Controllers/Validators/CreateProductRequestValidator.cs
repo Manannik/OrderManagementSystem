@@ -1,11 +1,11 @@
 ﻿using Application.Models;
 using FluentValidation;
 
-namespace WebApplication.Controllers.Validators;
-
-public class CreateProductRequestValidator : AbstractValidator<CreateProductRequest>
+namespace WebApplication.Controllers.Validators
 {
-    public CreateProductRequestValidator()
+    public class CreateProductRequestValidator : AbstractValidator<CreateProductRequest>
+    {
+        public CreateProductRequestValidator()
     {
         RuleFor(f => f.Price)
             .NotEmpty()
@@ -27,5 +27,6 @@ public class CreateProductRequestValidator : AbstractValidator<CreateProductRequ
         
         RuleFor(f => f.CategoryModelDtos)
             .NotEmpty();
+    }
     }
 }

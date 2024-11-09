@@ -6,18 +6,17 @@ using Order.Application.Models;
 using Order.Domain.Abstarctions;
 using Order.Domain.Entities;
 using Order.Domain.Exceptions;
-using Order.Infrastructure.Kafka;
 
-namespace Order.Application.Services;
-
-public class OrderService(
-    ILogger<OrderService> logger,
-    IOrderRepository orderRepository,
-    IProductItemsRepository productItemsRepository,
-    ICatalogServiceClient catalogServiceClient,
-    IKafkaProducer _producer) : IOrderService
+namespace Order.Application.Services
 {
-    public async Task<Domain.Entities.Order> CreateAsync(CreateOrderRequest request, CancellationToken ct)
+    public class OrderService(
+        ILogger<OrderService> logger,
+        IOrderRepository orderRepository,
+        IProductItemsRepository productItemsRepository,
+        ICatalogServiceClient catalogServiceClient,
+        IKafkaProducer _producer) : IOrderService
+    {
+        public async Task<Domain.Entities.Order> CreateAsync(CreateOrderRequest request, CancellationToken ct)
     {
         foreach (var model in request.ProductItemModels)
         {
@@ -62,5 +61,6 @@ public class OrderService(
         });
 
         return newOrder;
+    }
     }
 }

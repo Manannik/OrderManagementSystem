@@ -2,11 +2,11 @@
 using Order.Domain.Abstarctions;
 using Order.Domain.Entities;
 
-namespace Order.Persistence.Repositories;
-
-public class ProductItemsRepository(OrderDbContext dbContext) : IProductItemsRepository
+namespace Order.Persistence.Repositories
 {
-    public async Task AddRangeAsync(List<ProductItem> productItems, CancellationToken ct)
+    public class ProductItemsRepository(OrderDbContext dbContext) : IProductItemsRepository
+    {
+        public async Task AddRangeAsync(List<ProductItem> productItems, CancellationToken ct)
     {
         var existingProductItems =
             await dbContext.ProductItems.Where(f => productItems.Select(g => g.ProductId).Contains(f.ProductId))
@@ -28,5 +28,6 @@ public class ProductItemsRepository(OrderDbContext dbContext) : IProductItemsRep
         }
         
         await dbContext.SaveChangesAsync(ct);
+    }
     }
 }

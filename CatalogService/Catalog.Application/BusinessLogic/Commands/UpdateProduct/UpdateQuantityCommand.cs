@@ -4,17 +4,17 @@ using Domain.Abstractions;
 using Domain.Exceptions;
 using MediatR;
 
-namespace Application.BusinessLogic.Commands.UpdateProduct;
-
-public class UpdateQuantityCommand : IRequest<ProductModelDto>
+namespace Application.BusinessLogic.Commands.UpdateProduct
 {
-    public OrderedQuantity Request { get; set; }
-}
+    public class UpdateQuantityCommand : IRequest<ProductModelDto>
+    {
+        public OrderedQuantity Request { get; set; }
+    }
 
-public class UpdateQuantityCommandHandler(IProductRepository productRepository)
-    : IRequestHandler<UpdateQuantityCommand, ProductModelDto>
-{
-    public async Task<ProductModelDto> Handle(UpdateQuantityCommand request, CancellationToken ct)
+    public class UpdateQuantityCommandHandler(IProductRepository productRepository)
+        : IRequestHandler<UpdateQuantityCommand, ProductModelDto>
+    {
+        public async Task<ProductModelDto> Handle(UpdateQuantityCommand request, CancellationToken ct)
     {
         var existingProduct = await productRepository.GetByIdAsync(request.Request.Id, ct);
         if (existingProduct == null)
@@ -47,5 +47,6 @@ public class UpdateQuantityCommandHandler(IProductRepository productRepository)
             CreatedDateUtc = existingProduct.CreatedDateUtc,
             UpdatedDateUtc = existingProduct.UpdatedDateUtc
         };
+    }
     }
 }

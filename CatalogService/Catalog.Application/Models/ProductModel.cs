@@ -1,7 +1,8 @@
-﻿namespace Application.Models;
-
-public class ProductModel
+﻿namespace Application.Models
 {
-    public Guid Id { get; set; }
-    public int Quantity { get; set; }
+    public class ProductModel
+    {
+        public Guid Id { get; set; }
+        public int Quantity { get; set; }
+    }
 }

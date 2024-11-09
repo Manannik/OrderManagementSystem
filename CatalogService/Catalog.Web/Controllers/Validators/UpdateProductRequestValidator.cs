@@ -1,11 +1,11 @@
 ﻿using Application.Models;
 using FluentValidation;
 
-namespace WebApplication.Controllers.Validators;
-
-public class UpdateProductRequestValidator : AbstractValidator<UpdateProductRequest>
+namespace WebApplication.Controllers.Validators
 {
-    public UpdateProductRequestValidator()
+    public class UpdateProductRequestValidator : AbstractValidator<UpdateProductRequest>
+    {
+        public UpdateProductRequestValidator()
     {
         RuleFor(f => f.Price)
             .NotEmpty()
@@ -27,5 +27,6 @@ public class UpdateProductRequestValidator : AbstractValidator<UpdateProductRequ
 
         RuleFor(f => f.CategoryModelDtos)
             .NotEmpty();
+    }
     }
 }

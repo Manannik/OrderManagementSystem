@@ -1,10 +1,11 @@
-﻿namespace Order.Domain.Enums;
-
-public enum OrderStatus
+﻿namespace Order.Domain.Enums
 {
-    Сreated,
-    Fulfillment,
-    Shipped,
-    Cancelled,
-    Completed
+    public enum OrderStatus
+    {
+        Сreated,
+        Fulfillment,
+        Shipped,
+        Cancelled,
+        Completed
+    }
 }

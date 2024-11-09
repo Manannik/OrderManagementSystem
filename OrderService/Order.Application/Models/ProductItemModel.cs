@@ -1,8 +1,9 @@
-﻿namespace Order.Application.Models;
-
-public class ProductItemModel
+﻿namespace Order.Application.Models
 {
-    public Guid Id { get; set; }
-    public int Quantity { get; set; }
-    public decimal Price { get; set; }
+    public class ProductItemModel
+    {
+        public Guid Id { get; set; }
+        public int Quantity { get; set; }
+        public decimal Price { get; set; }
+    }
 }

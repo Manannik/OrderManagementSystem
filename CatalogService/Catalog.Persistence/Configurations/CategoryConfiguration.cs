@@ -2,11 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace OrderManagementSystem.Infrastructure.Configurations;
-
-public class CategoryConfiguration : IEntityTypeConfiguration<Category>
+namespace OrderManagementSystem.Infrastructure.Configurations
 {
-    public void Configure(EntityTypeBuilder<Category> builder)
+    public class CategoryConfiguration : IEntityTypeConfiguration<Category>
+    {
+        public void Configure(EntityTypeBuilder<Category> builder)
     {
         builder.HasKey(f => f.Id);
         builder.Property(f => f.Name).IsRequired();
@@ -38,5 +38,6 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
             },
         };
         builder.HasData(categories);
+    }
     }
 }

@@ -1,13 +1,13 @@
 ﻿using Confluent.Kafka;
-using Order.Infrastructure.Kafka;
+using Order.Application.Abstractions;
 
-namespace Order.Infrastructure.Services;
-
-public class KafkaProducer : IKafkaProducer
+namespace Order.Infrastructure.Services
 {
-    private readonly IProducer<string, string> _producer;
+    public class KafkaProducer : IKafkaProducer
+    {
+        private readonly IProducer<string, string> _producer;
 
-    public KafkaProducer()
+        public KafkaProducer()
     {
         var config = new ConsumerConfig
         {
@@ -18,8 +18,10 @@ public class KafkaProducer : IKafkaProducer
 
         _producer = new ProducerBuilder<string, string>(config).Build();
     }
-    public Task ProduceAsync(string topic, Message<string, string> message)
+        public Task ProduceAsync(string topic, Message<string, string> message)
     {
         return _producer.ProduceAsync(topic, message);
+    }
+
     }
 }

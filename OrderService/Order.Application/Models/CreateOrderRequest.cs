@@ -1,6 +1,7 @@
-﻿namespace Order.Application.Models;
-
-public class CreateOrderRequest
+﻿namespace Order.Application.Models
 {
-    public List<ProductItemModel> ProductItemModels { get; set; }
+    public class CreateOrderRequest
+    {
+        public List<ProductItemModel> ProductItemModels { get; set; }
+    }
 }

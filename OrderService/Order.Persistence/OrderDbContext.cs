@@ -2,16 +2,17 @@
 using Order.Domain.Entities;
 using Order.Persistence.Configurations;
 
-namespace Order.Persistence;
-
-public class OrderDbContext(DbContextOptions<OrderDbContext> options) : DbContext(options)
+namespace Order.Persistence
 {
-    public DbSet<Domain.Entities.Order> Orders { get; set; }
-    public DbSet<ProductItem> ProductItems { get; set; }
+    public class OrderDbContext(DbContextOptions<OrderDbContext> options) : DbContext(options)
+    {
+        public DbSet<Domain.Entities.Order> Orders { get; set; }
+        public DbSet<ProductItem> ProductItems { get; set; }
     
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new OrderConfiguration());
         modelBuilder.ApplyConfiguration(new ProductItemConfiguration());
+    }
     }
 }

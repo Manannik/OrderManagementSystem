@@ -1,7 +1,6 @@
-using Application.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Order.Application.Abstractions;
-using Order.Application.Services;
+using Order.Application.Extensions;
 using Order.Infrastructure.Extensions;
 using Order.Infrastructure.Services;
 using Order.Persistence;
