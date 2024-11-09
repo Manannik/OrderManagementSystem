@@ -1,10 +1,10 @@
-using Application.BusinessLogic.Commands.CreateProduct;
 using Application.BusinessLogic.Commands.UpdateProduct;
 using Application.BusinessLogic.Models;
 using Application.Models;
 using AutoFixture;
 using Domain.Abstractions;
 using Domain.Entities;
+using Domain.Exceptions;
 using Moq;
 
 namespace Tests;
@@ -82,5 +82,55 @@ public class UpdateProductCommandHandlerTests
                 g.Quantity == updateProductCommand.Request.Quantity &&
                 g.UpdatedDateUtc != DateTime.UtcNow
         ), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Handle_Should_ReturnFailResult_WhenProductCategoryDoesNotExist()
+    {
+        var fixture = new Fixture();
+
+        var categoriesModelDto = fixture.CreateMany<CategoryModelDto>(3).ToList();
+        var updateProductRequest = fixture.Build<UpdateProductRequest>()
+            .With(f=>f.CategoryModelDtos,categoriesModelDto)
+            .Create();
+        
+        var updateProductCommandGuid = fixture.Create<Guid>();
+        
+        var updateProductCommand = fixture.Build<UpdateProductCommand>()
+            .With(f => f.Request, updateProductRequest)
+            .With(f => f.Id, updateProductCommandGuid)
+            .Create();
+
+        var categoriesRequestIds = categoriesModelDto.Select(f => f.Id).ToList();
+        var partialCategoriesIds = categoriesRequestIds.Take(categoriesRequestIds.Count / 2).ToList();
+        
+        var existingProduct = fixture.Build<Product>()
+            .With(x => x.Id, updateProductCommandGuid) // Важно использовать тот же ID
+            .Without(x => x.Categories)
+            .Create();
+            
+        var categoriesInDb = partialCategoriesIds.Select(id => 
+                fixture.Build<Category>()
+                    .With(f => f.Id, id)
+                    .With(f => f.Products, new List<Product> { existingProduct })
+                    .Create())
+            .ToList();
+        
+        _productRepositoryMock
+            .Setup(f => f.GetByIdAsync(updateProductCommandGuid, default))
+            .ReturnsAsync(existingProduct);
+        
+        _categoryRepositoryMock
+            .Setup(f => f.GetByIdAsync(It.Is<List<Guid>>(x => 
+                x.SequenceEqual(categoriesRequestIds)), default))
+            .ReturnsAsync(categoriesInDb);
+        
+        var handler = new UpdateProductCommandHandle(
+            _productRepositoryMock.Object,
+            _categoryRepositoryMock.Object);
+        //Act
+        var act = () => handler.Handle(updateProductCommand, default);
+        //Assert
+        await Assert.ThrowsAsync<WrongCategoryException>(act);
     }
 }
