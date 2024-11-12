@@ -1,7 +1,7 @@
 ﻿using Order.Domain.Entities;
 using Order.Domain.Enums;
 
-namespace Order.Domain.Abstarctions
+namespace Order.Domain.Abstractions
 {
     public interface IOrderRepository
     {

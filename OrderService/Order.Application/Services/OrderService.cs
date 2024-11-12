@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Order.Application.Abstractions;
 using Order.Application.Models;
-using Order.Domain.Abstarctions;
+using Order.Domain.Abstractions;
 using Order.Domain.Entities;
 using Order.Domain.Enums;
 using Order.Domain.Exceptions;

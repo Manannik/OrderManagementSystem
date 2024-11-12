@@ -1,6 +1,6 @@
 ﻿using Order.Domain.Entities;
 
-namespace Order.Domain.Abstarctions
+namespace Order.Domain.Abstractions
 {
     public interface IProductItemsRepository
     {
