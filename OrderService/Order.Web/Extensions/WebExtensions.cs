@@ -10,6 +10,7 @@ namespace Order.Web.Extensions
     {
         services.AddControllers();
         services.AddTransient<IValidator<CreateOrderRequest>, CreateOrderRequestValidator>();
+        services.AddTransient<IValidator<ChangeOrderStatusRequest>, ChangeOrderStatusRequestValidator>();
 
         return services;
     }
