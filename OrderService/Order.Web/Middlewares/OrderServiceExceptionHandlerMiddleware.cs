@@ -25,6 +25,11 @@ namespace Order.Web.Middlewares
                         context.Response.StatusCode = notEnoughQuantityOfProducts.StatusCode;
                         await context.Response.WriteAsync(notEnoughQuantityOfProducts.Message);
                         break;
+                    case OrderDoesNotExistsException doesNotExistsException:
+                        _logger.LogError($"Попытка получить несуществующий заказ");
+                        context.Response.StatusCode = doesNotExistsException.StatusCode;
+                        await context.Response.WriteAsync(doesNotExistsException.Message);
+                        break;
                     default:
                         context.Response.StatusCode = 500;
                         _logger.LogError("что то пошло не так");

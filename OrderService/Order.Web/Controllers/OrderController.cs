@@ -1,3 +1,4 @@
+using System.Data;
 using Confluent.Kafka;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -32,6 +33,17 @@ namespace Order.Web.Controllers
             _logger.LogInformation("в результате работы метода Create, заказ успешно создан");
             return Ok(order);
         
+        }
+
+        [HttpPut("ChangeStatus")]
+        public async Task<IActionResult> UpdateStatus([FromBody] ChangeOrderStatusRequest request, CancellationToken ct)
+        {
+            _logger.LogInformation("запуск метод UpdateStatus, request: {@Request}", request);
+            
+            var updatedOrder = await _orderService.UpdateAsync(request, ct);
+            
+            _logger.LogInformation("в результате работы метода UpdateStatus, статус заказа успешно изменен");
+            return Ok(updatedOrder);
         }
     }
 }
