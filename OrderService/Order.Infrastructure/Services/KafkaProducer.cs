@@ -12,8 +12,8 @@ namespace Order.Infrastructure.Services
         var config = new ConsumerConfig
         {
             GroupId = "order-group",
-            // BootstrapServers = "localhost:9092",
-            // AutoOffsetReset = AutoOffsetReset.Earliest,
+            BootstrapServers = "localhost:9092",
+            AutoOffsetReset = AutoOffsetReset.Earliest,
         };
 
         _producer = new ProducerBuilder<string, string>(config).Build();
