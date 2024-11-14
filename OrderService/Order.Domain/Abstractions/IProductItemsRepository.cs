@@ -4,6 +4,6 @@ namespace Order.Domain.Abstractions
 {
     public interface IProductItemsRepository
     {
-        Task AddRangeAsync(List<ProductItem> productItems, CancellationToken ct);
+        Task AddRangeAsync(List<ProductItem> productItems, Guid id, CancellationToken ct);
     }
 }

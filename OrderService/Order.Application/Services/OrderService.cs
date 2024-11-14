@@ -1,4 +1,5 @@
-﻿using Confluent.Kafka;
+﻿using System.Collections.Concurrent;
+using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Order.Application.Abstractions;
@@ -22,21 +23,6 @@ namespace Order.Application.Services
             logger.LogInformation("Запуск метода CreateAsync для списка продуктов: {ProductItemModels}",
                 request.ProductItemModels);
 
-            foreach (var model in request.ProductItemModels)
-            {
-                var result =
-                    await catalogServiceClient.ChangeProductQuantityAsync(model.Id, model.Quantity, model.Price, ct);
-                if (!result)
-                {
-                    throw new ProductException();
-                }
-            }
-
-            var products = await Task.WhenAll(
-                request.ProductItemModels.Select(f =>
-                    catalogServiceClient.ChangeProductQuantityAsync(f.Id, f.Quantity, f.Price, ct))
-            );
-
             var productItemModels = request.ProductItemModels.ToList();
 
             if (productItemModels == null || !productItemModels.Any())
@@ -44,15 +30,45 @@ namespace Order.Application.Services
                 throw new EmptyProductsException();
             }
 
-            var productItems = productItemModels.Select(f => new ProductItem()
+            var errors = new ConcurrentBag<(Guid id, string Message, int StatusCode)>();
+            var productItems = new List<ProductItem>();
+
+            var tasks = request.ProductItemModels.Select(async model =>
             {
-                ProductId = f.Id,
-                Quantity = f.Quantity,
-                Price = f.Price
+                try
+                {
+                    var result = await catalogServiceClient.ChangeProductQuantityAsync(model.Id, model.Quantity, ct);
+
+                    productItems.Add(new ProductItem
+                    {
+                        ProductId = model.Id,
+                        Quantity = model.Quantity,
+                        Price = result.Price
+                    });
+                }
+                catch (CatalogServiceException ex)
+                {
+                    errors.Add((model.Id, ex.Message, ex.StatusCode));
+                }
             }).ToList();
 
-            await productItemsRepository.AddRangeAsync(productItems, ct);
+            await Task.WhenAll(tasks);
+
+            if (!errors.IsEmpty)
+            {
+                logger.LogWarning("Обнаружены ошибки {Errors}", errors);
+                throw new AggregateException(errors.Select(e =>
+                    new CatalogServiceException(e.id, e.Message, e.StatusCode)));
+            }
+
             var newOrder = await orderRepository.CreateAsync(productItems, ct);
+            productItems.ForEach(item =>
+            {
+                item.OrderId = newOrder.Id;
+                item.Order = newOrder;
+            });
+
+            await productItemsRepository.AddRangeAsync(productItems, newOrder.Id, ct);
 
             logger.LogInformation("Успешное завершение CreateAsync для списка продуктов: {productItems}",
                 productItems.Select(f => f.ProductId));

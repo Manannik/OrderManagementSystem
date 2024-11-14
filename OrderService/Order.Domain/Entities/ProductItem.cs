@@ -5,10 +5,8 @@
         public Guid ProductId { get; set; }
         public decimal Price { get; set; }
         public int Quantity { get; set; }
-        public List<Order> Orders { get; set; }
-        public ProductItem()
-    {
-        Orders = new List<Order>();
-    }
+        public Guid OrderId { get; set; }
+        public Order Order { get; set; }
+
     }
 }
