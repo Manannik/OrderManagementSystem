@@ -1,7 +1,4 @@
-using System.Data;
-using Confluent.Kafka;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Order.Application.Abstractions;
 using Order.Application.Models;
 

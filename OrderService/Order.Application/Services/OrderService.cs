@@ -14,7 +14,7 @@ namespace Order.Application.Services
         IOrderRepository orderRepository,
         IProductItemsRepository productItemsRepository,
         ICatalogServiceClient catalogServiceClient,
-        IKafkaProducer<Domain.Entities.Order> _producer) : IOrderService
+        IKafkaProducer<Domain.Entities.Order> producer) : IOrderService
     {
         public async Task<Domain.Entities.Order> CreateAsync(CreateOrderRequest request, CancellationToken ct)
         {
@@ -71,7 +71,7 @@ namespace Order.Application.Services
             logger.LogInformation("Успешное завершение CreateAsync для списка продуктов: {productItems}",
                 productItems.Select(f => f.ProductId));
 
-            await _producer.ProduceAsync(newOrder, ct);
+            await producer.ProduceAsync(newOrder, ct);
 
             return newOrder;
         }
@@ -85,10 +85,9 @@ namespace Order.Application.Services
             {
                 throw new OrderDoesNotExistsException(request.Id.ToString());
             }
-
             var orderStatus = (OrderStatus)request.OrderStatusModel;
             var updatedOrder = await orderRepository.UpdateStatusAsync(existingOrder, orderStatus, ct);
-            return updatedOrder;
+            return updatedOrder!;
         }
     }
 }
