@@ -13,10 +13,10 @@ namespace Order.Web.Controllers
     {
         private readonly ILogger<OrderController> _logger;
         private readonly IOrderService _orderService;
-        private readonly IKafkaProducer _producer;
+        private readonly IKafkaProducer<Domain.Entities.Order> _producer;
         public OrderController(ILogger<OrderController> logger,
             IOrderService orderService,
-            ICatalogServiceClient catalogServiceClient, IKafkaProducer producer)
+            ICatalogServiceClient catalogServiceClient, IKafkaProducer<Domain.Entities.Order> producer)
         {
             _logger = logger;
             _orderService = orderService;

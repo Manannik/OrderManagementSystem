@@ -1,7 +1,5 @@
 ﻿using System.Collections.Concurrent;
-using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Order.Application.Abstractions;
 using Order.Application.Models;
 using Order.Domain.Abstractions;
@@ -16,7 +14,7 @@ namespace Order.Application.Services
         IOrderRepository orderRepository,
         IProductItemsRepository productItemsRepository,
         ICatalogServiceClient catalogServiceClient,
-        IKafkaProducer _producer) : IOrderService
+        IKafkaProducer<Domain.Entities.Order> _producer) : IOrderService
     {
         public async Task<Domain.Entities.Order> CreateAsync(CreateOrderRequest request, CancellationToken ct)
         {
@@ -73,11 +71,7 @@ namespace Order.Application.Services
             logger.LogInformation("Успешное завершение CreateAsync для списка продуктов: {productItems}",
                 productItems.Select(f => f.ProductId));
 
-            await _producer.ProduceAsync("order-topic", new Message<string, string>()
-            {
-                Key = newOrder.Id.ToString(),
-                Value = JsonConvert.SerializeObject(newOrder)
-            });
+            await _producer.ProduceAsync(newOrder, ct);
 
             return newOrder;
         }

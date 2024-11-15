@@ -2,8 +2,8 @@
 
 namespace Order.Application.Abstractions
 {
-    public interface IKafkaProducer
+    public interface IKafkaProducer<in TMessage> : IDisposable
     {
-        Task ProduceAsync(string topic, Message<string, string> message);
+        Task ProduceAsync(TMessage message, CancellationToken cancellationToken);
     }
 }

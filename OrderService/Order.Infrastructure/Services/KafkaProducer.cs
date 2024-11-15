@@ -1,27 +1,40 @@
 ﻿using Confluent.Kafka;
+using Microsoft.Extensions.Options;
 using Order.Application.Abstractions;
+using Order.Infrastructure.Kafka;
 
 namespace Order.Infrastructure.Services
 {
-    public class KafkaProducer : IKafkaProducer
+    public class KafkaProducer<TMessage> : IKafkaProducer<TMessage>
     {
-        private readonly IProducer<string, string> _producer;
+        private readonly IProducer<string, TMessage> producer;
+        private readonly string topic;
 
-        public KafkaProducer()
-    {
-        var config = new ConsumerConfig
+        public KafkaProducer(IOptions<KafkaSettings> kafkaSettings)
         {
-            GroupId = "order-group",
-            BootstrapServers = "localhost:9092",
-            AutoOffsetReset = AutoOffsetReset.Earliest,
-        };
+            var config = new ProducerConfig()
+            {
+                BootstrapServers = kafkaSettings.Value.BootstrapServers
+            };
 
-        _producer = new ProducerBuilder<string, string>(config).Build();
-    }
-        public Task ProduceAsync(string topic, Message<string, string> message)
-    {
-        return _producer.ProduceAsync(topic, message);
-    }
+            producer = new ProducerBuilder<string, TMessage>(config)
+                .SetValueSerializer(new KafkaJsonSerializer<TMessage>())
+                .Build();
 
+            topic = kafkaSettings.Value.Topic;
+        }
+        public async Task ProduceAsync(TMessage message, CancellationToken cancellationToken)
+        {
+            await producer.ProduceAsync(topic, new Message<string, TMessage>()
+            {
+                Key="uniq1",
+                Value = message
+            },cancellationToken);
+        }
+
+        public void Dispose()
+        {
+            producer?.Dispose();
+        }
     }
 }
