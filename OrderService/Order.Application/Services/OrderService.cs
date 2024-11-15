@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using Order.Application.Abstractions;
+using Order.Application.Enums;
 using Order.Application.Models;
 using Order.Domain.Abstractions;
 using Order.Domain.Entities;
@@ -16,7 +17,7 @@ namespace Order.Application.Services
         ICatalogServiceClient catalogServiceClient,
         IKafkaProducer<Domain.Entities.Order> producer) : IOrderService
     {
-        public async Task<Domain.Entities.Order> CreateAsync(CreateOrderRequest request, CancellationToken ct)
+        public async Task<OrderModel> CreateAsync(CreateOrderRequest request, CancellationToken ct)
         {
             logger.LogInformation("Запуск метода CreateAsync для списка продуктов: {ProductItemModels}",
                 request.ProductItemModels);
@@ -73,10 +74,17 @@ namespace Order.Application.Services
 
             await producer.ProduceAsync(newOrder, ct);
 
-            return newOrder;
+            var newOrderModel = new OrderModel()
+            {
+                Id = newOrder.Id,
+                OrderStatus = (OrderStatusModel) newOrder.OrderStatus,
+                Cost = newOrder.Cost
+            };
+            
+            return newOrderModel;
         }
 
-        public async Task<Domain.Entities.Order> UpdateAsync(ChangeOrderStatusRequest request, CancellationToken ct)
+        public async Task<OrderModel> UpdateAsync(ChangeOrderStatusRequest request, CancellationToken ct)
         {
             logger.LogInformation("Запуск метода UpdateAsync для заказа: {Id}",
                 request.Id);
@@ -87,7 +95,15 @@ namespace Order.Application.Services
             }
             var orderStatus = (OrderStatus)request.OrderStatusModel;
             var updatedOrder = await orderRepository.UpdateStatusAsync(existingOrder, orderStatus, ct);
-            return updatedOrder!;
+
+            var updatedOrderModel = new OrderModel()
+            {
+                Id = updatedOrder.Id,
+                OrderStatus = (OrderStatusModel)updatedOrder.OrderStatus,
+                Cost = updatedOrder.Cost
+            };
+            
+            return updatedOrderModel;
         }
     }
 }
