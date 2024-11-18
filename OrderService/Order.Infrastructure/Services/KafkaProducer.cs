@@ -16,7 +16,7 @@ namespace Order.Infrastructure.Services
             {
                 BootstrapServers = kafkaSettings.Value.BootstrapServers
             };
-
+            
             producer = new ProducerBuilder<string, TMessage>(config)
                 .SetValueSerializer(new KafkaJsonSerializer<TMessage>())
                 .Build();

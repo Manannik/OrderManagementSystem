@@ -13,9 +13,8 @@ namespace Order.Application.Services
     public class OrderService(
         ILogger<OrderService> logger,
         IOrderRepository orderRepository,
-        IProductItemsRepository productItemsRepository,
         ICatalogServiceClient catalogServiceClient,
-        IKafkaProducer<Domain.Entities.Order> producer) : IOrderService
+        IKafkaProducer<OrderModel> producer) : IOrderService
     {
         public async Task<OrderModel> CreateAsync(CreateOrderRequest request, CancellationToken ct)
         {
@@ -40,7 +39,7 @@ namespace Order.Application.Services
 
                     productItems.Add(new ProductItem
                     {
-                        ProductId = model.Id,
+                        ProductId = Guid.NewGuid(),
                         Quantity = model.Quantity,
                         Price = result.Price
                     });
@@ -67,13 +66,6 @@ namespace Order.Application.Services
                 item.Order = newOrder;
             });
 
-            await productItemsRepository.AddRangeAsync(productItems, newOrder.Id, ct);
-
-            logger.LogInformation("Успешное завершение CreateAsync для списка продуктов: {productItems}",
-                productItems.Select(f => f.ProductId));
-
-            await producer.ProduceAsync(newOrder, ct);
-
             var newOrderModel = new OrderModel()
             {
                 Id = newOrder.Id,
@@ -81,6 +73,10 @@ namespace Order.Application.Services
                 Cost = newOrder.Cost
             };
             
+            await producer.ProduceAsync(newOrderModel, ct);
+            
+            logger.LogInformation("Успешное завершение CreateAsync для списка продуктов: {productItems}",
+                productItems.Select(f => f.ProductId));
             return newOrderModel;
         }
 

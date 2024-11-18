@@ -1,6 +1,4 @@
-﻿using Confluent.Kafka;
-
-namespace Order.Application.Abstractions
+﻿namespace Order.Application.Abstractions
 {
     public interface IKafkaProducer<in TMessage> : IDisposable
     {

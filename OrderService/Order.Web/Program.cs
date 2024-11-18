@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Order.Application.Abstractions;
 using Order.Application.Extensions;
+using Order.Application.Models;
 using Order.Infrastructure.Extensions;
 using Order.Infrastructure.Services;
 using Order.Persistence;
@@ -20,7 +21,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddApplication();
 builder.Services.AddWeb();
-builder.Services.AddInfrastructure<Order.Domain.Entities.Order>(builder.Configuration.GetSection("Kafka:Order"));
+builder.Services.AddInfrastructure<OrderModel>(builder.Configuration.GetSection("Kafka:Order"));
 
 builder.Services.AddHttpClient<ICatalogServiceClient, CatalogServiceClient>(o =>
 {

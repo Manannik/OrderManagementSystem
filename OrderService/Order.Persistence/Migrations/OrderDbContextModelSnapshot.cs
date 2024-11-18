@@ -41,17 +41,12 @@ namespace Order.Persistence.Migrations
 
             modelBuilder.Entity("Order.Domain.Entities.ProductItem", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("ProductId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
@@ -59,39 +54,27 @@ namespace Order.Persistence.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
-                    b.HasKey("Id");
+                    b.HasKey("ProductId");
+
+                    b.HasIndex("OrderId");
 
                     b.ToTable("ProductItems");
                 });
 
-            modelBuilder.Entity("OrderProductItem", b =>
+            modelBuilder.Entity("Order.Domain.Entities.ProductItem", b =>
                 {
-                    b.Property<Guid>("OrdersId")
-                        .HasColumnType("uuid");
+                    b.HasOne("Order.Domain.Entities.Order", "Order")
+                        .WithMany("ProductItems")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<Guid>("ProductItemsId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("OrdersId", "ProductItemsId");
-
-                    b.HasIndex("ProductItemsId");
-
-                    b.ToTable("OrderProductItem");
+                    b.Navigation("Order");
                 });
 
-            modelBuilder.Entity("OrderProductItem", b =>
+            modelBuilder.Entity("Order.Domain.Entities.Order", b =>
                 {
-                    b.HasOne("Order.Domain.Entities.Order", null)
-                        .WithMany()
-                        .HasForeignKey("OrdersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Order.Domain.Entities.ProductItem", null)
-                        .WithMany()
-                        .HasForeignKey("ProductItemsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("ProductItems");
                 });
 #pragma warning restore 612, 618
         }

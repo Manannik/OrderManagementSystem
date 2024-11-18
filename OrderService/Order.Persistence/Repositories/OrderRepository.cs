@@ -17,6 +17,7 @@ namespace Order.Persistence.Repositories
         };
         newOrder.CalculateCost(productItems);
         await dbContext.Orders.AddAsync(newOrder, ct);
+        await dbContext.SaveChangesAsync(ct);
         return newOrder;
     }
 

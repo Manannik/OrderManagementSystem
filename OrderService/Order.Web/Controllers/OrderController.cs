@@ -10,14 +10,12 @@ namespace Order.Web.Controllers
     {
         private readonly ILogger<OrderController> _logger;
         private readonly IOrderService _orderService;
-        private readonly IKafkaProducer<Domain.Entities.Order> _producer;
+
         public OrderController(ILogger<OrderController> logger,
-            IOrderService orderService,
-            ICatalogServiceClient catalogServiceClient, IKafkaProducer<Domain.Entities.Order> producer)
+            IOrderService orderService)
         {
             _logger = logger;
             _orderService = orderService;
-            _producer = producer;
         }
 
         [HttpPost]
@@ -26,7 +24,7 @@ namespace Order.Web.Controllers
             _logger.LogInformation("запуск метод Create, request: {@Request}", request);
 
             var order = await _orderService.CreateAsync(request, ct);
-        
+
             _logger.LogInformation("в результате работы метода Create, заказ успешно создан");
             return Ok(order);
         }
@@ -35,9 +33,9 @@ namespace Order.Web.Controllers
         public async Task<IActionResult> UpdateStatus([FromBody] ChangeOrderStatusRequest request, CancellationToken ct)
         {
             _logger.LogInformation("запуск метод UpdateStatus, request: {@Request}", request);
-            
+
             var updatedOrder = await _orderService.UpdateAsync(request, ct);
-            
+
             _logger.LogInformation("в результате работы метода UpdateStatus, статус заказа успешно изменен");
             return Ok(updatedOrder);
         }
