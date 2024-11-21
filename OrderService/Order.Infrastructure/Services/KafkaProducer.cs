@@ -27,7 +27,7 @@ namespace Order.Infrastructure.Services
         {
             await producer.ProduceAsync(topic, new Message<string, TMessage>()
             {
-                Key="uniq1",
+                Key=Guid.NewGuid().ToString(),
                 Value = message
             },cancellationToken);
         }

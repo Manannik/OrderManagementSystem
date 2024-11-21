@@ -8,9 +8,9 @@ namespace Order.Application.Extensions
     {
         public static IServiceCollection AddApplication(
             this IServiceCollection services)
-    {
-        services.AddScoped<IOrderService, OrderService>();
-        return services;
-    }
+        {
+            services.AddScoped<IOrderService, OrderService>();
+            return services;
+        }
     }
 }

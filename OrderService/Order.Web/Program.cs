@@ -21,7 +21,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddApplication();
 builder.Services.AddWeb();
-builder.Services.AddInfrastructure<OrderModel>(builder.Configuration.GetSection("Kafka:Order"));
+builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddHttpClient<ICatalogServiceClient, CatalogServiceClient>(o =>
 {

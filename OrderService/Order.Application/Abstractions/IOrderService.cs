@@ -4,7 +4,7 @@ namespace Order.Application.Abstractions
 {
     public interface IOrderService
     {
-        Task<OrderModel> CreateAsync(CreateOrderRequest request, CancellationToken ct);
-        Task<OrderModel> UpdateAsync(ChangeOrderStatusRequest request, CancellationToken ct);
+        Task<OrderModelResponse> CreateAsync(CreateOrderRequest request, CancellationToken ct);
+        Task<OrderModelResponse> UpdateAsync(ChangeOrderStatusRequest request, CancellationToken ct);
     }
 }

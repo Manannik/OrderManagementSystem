@@ -2,7 +2,7 @@
 
 namespace Order.Application.Models;
 
-public class OrderModel
+public class OrderModelResponse
 {
     public Guid Id { get; set; }
     public decimal Cost { get; set; }

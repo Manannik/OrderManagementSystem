@@ -10,7 +10,7 @@ namespace Order.Web.Controllers.Validators
         {
             RuleForEach(f => f.ProductItemModels.Select(f=>f.Id))
                 .NotEqual(Guid.Empty).WithMessage("ID продукта не должен быть пустым GUID.");
-
+            
             RuleForEach(request => request.ProductItemModels)
                 .ChildRules(productItem =>
                 {

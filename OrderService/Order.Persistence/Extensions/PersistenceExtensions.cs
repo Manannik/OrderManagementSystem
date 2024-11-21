@@ -12,7 +12,6 @@ namespace Order.Persistence.Extensions
             this IServiceCollection services,IConfiguration configuration)
     {
         services.AddScoped<IOrderRepository, OrderRepository>();
-        services.AddScoped<IProductItemsRepository, ProductItemsRepository>();
         
         services.AddDbContext<OrderDbContext>(options =>
         {
