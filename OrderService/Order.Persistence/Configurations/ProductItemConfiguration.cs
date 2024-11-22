@@ -8,7 +8,8 @@ namespace Order.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<ProductItem> builder)
     {
-        builder.HasKey(f => f.ProductId);
+        builder.HasKey(f => f.Id);
+        builder.Property(f => f.ProductId).IsRequired();
         builder.Property(f => f.Price).IsRequired();
         builder.Property(f => f.Quantity).IsRequired();
     }

@@ -116,6 +116,7 @@ namespace Order.Application.Services
 
                     productItems.Add(new ProductItem
                     {
+                        Id = Guid.NewGuid(),
                         ProductId = model.Id,
                         Quantity = model.Quantity,
                         Price = result.Price
