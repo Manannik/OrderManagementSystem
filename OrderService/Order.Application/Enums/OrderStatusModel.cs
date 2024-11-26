@@ -2,9 +2,9 @@
 
 public enum OrderStatusModel
 {
-    Сreated,
-    Fulfillment,
+    Created,
+    InProgress,
     Shipped,
-    Cancelled,
-    Completed
+    Delivered,
+    Cancelled
 }

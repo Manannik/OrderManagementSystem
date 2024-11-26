@@ -1,4 +1,5 @@
 ﻿using Order.Application.Models;
+using Order.Application.Requests;
 
 namespace Order.Application.Abstractions
 {

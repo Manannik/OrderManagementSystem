@@ -12,7 +12,7 @@ namespace Order.Persistence.Repositories
             var newOrder = new Domain.Entities.Order
             {
                 Id = Guid.NewGuid(),
-                OrderStatus = OrderStatus.Сreated,
+                OrderStatus = OrderStatus.Created,
                 ProductItems = productItems
             };
             newOrder.CalculateCost(productItems);

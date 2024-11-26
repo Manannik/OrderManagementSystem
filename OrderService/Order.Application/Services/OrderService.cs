@@ -4,6 +4,7 @@ using Order.Application.Abstractions;
 using Order.Application.Enums;
 using Order.Application.Helpers;
 using Order.Application.Models;
+using Order.Application.Requests;
 using Order.Domain.Abstractions;
 using Order.Domain.Entities;
 using Order.Domain.Enums;
@@ -24,7 +25,6 @@ namespace Order.Application.Services
                 request.ProductItemModels);
             
             var productItemModels = request.ProductItemModels.ToList();
-            ValidateProductsItems(productItemModels);
 
             var result = await TryChangeQuantityAsync(productItemModels, catalogServiceClient, ct);
             if (!result.IsSuccess)
@@ -63,10 +63,13 @@ namespace Order.Application.Services
         {
             logger.LogInformation("Запуск метода UpdateAsync для заказа: {Id}",
                 request.Id);
+            
             var existingOrder = await orderRepository.GetByIdAsync(request.Id, ct);
             
             if (existingOrder == null)
             {
+                logger.LogInformation("Заказ с указанный Id: {Id} отсутствует",
+                    request.Id);
                 throw new OrderDoesNotExistsException(request.Id.ToString());
             }
             
@@ -89,15 +92,9 @@ namespace Order.Application.Services
                 OrderStatus = (OrderStatusModel)updatedOrder.OrderStatus,
                 Cost = updatedOrder.Cost
             };
+            logger.LogInformation("Успешное завершение UpdateAsync для заказа: {order}",
+                updatedOrderResponse);
             return updatedOrderResponse;
-        }
-
-        private void ValidateProductsItems(List<ProductItemModel> productItemModels)
-        {
-            if (productItemModels == null || !productItemModels.Any())
-            {
-                throw new EmptyProductsException();
-            }
         }
 
         private async Task<Result<List<ProductItem>, (Guid id, string Message, int StatusCode)>> TryChangeQuantityAsync(
@@ -137,6 +134,5 @@ namespace Order.Application.Services
 
             return Result<List<ProductItem>, (Guid id, string Message, int StatusCode)>.Failure(errors.ToList());
         }
-
     }
 }

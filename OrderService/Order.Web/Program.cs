@@ -22,12 +22,6 @@ builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddApplication();
 builder.Services.AddWeb();
 builder.Services.AddInfrastructure(builder.Configuration);
-
-builder.Services.AddHttpClient<ICatalogServiceClient, CatalogServiceClient>(o =>
-{
-    o.BaseAddress = new Uri("https://localhost:7186/Catalog/");
-});
-
 var app = builder.Build();
 MigrateDb(app);
 // Configure the HTTP request pipeline.
