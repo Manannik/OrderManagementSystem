@@ -8,13 +8,13 @@ namespace Order.Web.Controllers.Validators
     {
         public CreateOrderRequestValidator(ICatalogServiceClient catalogServiceClient)
         {
-            RuleForEach(f => f.ProductItemModels.Select(f=>f.Id))
+            RuleForEach(f => f.ProductItemModels.Select(f => f.Id))
                 .NotEqual(Guid.Empty).WithMessage("ID продукта не должен быть пустым GUID.");
 
             RuleFor(request => request.ProductItemModels)
                 .Must(productItemModels => productItemModels != null && productItemModels.Any())
                 .WithMessage("Товары не должны быть Null или пустыми");
-            
+
             RuleForEach(request => request.ProductItemModels)
                 .ChildRules(productItem =>
                 {

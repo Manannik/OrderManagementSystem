@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Order.Application.Abstractions;
 using Order.Application.Models;
+using Order.Application.Models.Kafka;
 using Order.Infrastructure.Services;
 
 namespace Order.Infrastructure.Extensions

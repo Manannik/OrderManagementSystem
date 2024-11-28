@@ -1,4 +1,4 @@
-﻿namespace Order.Application.Models;
+﻿namespace Order.Application.Models.Kafka;
 
 public class CreateOrderKafkaModel
 {
