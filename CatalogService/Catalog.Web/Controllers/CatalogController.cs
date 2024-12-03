@@ -97,7 +97,7 @@ public class CatalogController(
         }, ct);
         
         logger.LogInformation("Для продукт с {id}, успешно обновлено количество товара", id);
-        
+
         return Ok(productModel);
     }
 }

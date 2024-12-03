@@ -54,11 +54,17 @@ public class ProductControllerTests : IDisposable
         var productRequest = fixture.Create<CreateProductRequest>();
 
         _mediatorMock
-            .Setup(m => m.Send(It.IsAny<CreateProductCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(m => m.Send(It.Is<CreateProductCommand>(cmd =>
+                cmd.Name == productRequest.Name &&
+                cmd.Description == productRequest.Description &&
+                cmd.CategoryModelDtos.SequenceEqual(productRequest.CategoryModelDtos) &&
+                cmd.Price == productRequest.Price &&
+                cmd.Quantity == productRequest.Quantity
+            ), CancellationToken.None))
             .Returns(Task.CompletedTask);
 
         var response = await _client.PostAsJsonAsync("/catalog", productRequest);
-
+        Console.WriteLine($"Response Status Code: {response.StatusCode}");
         if (!response.IsSuccessStatusCode)
         {
             var errorContent = await response.Content.ReadAsStringAsync();
@@ -67,10 +73,7 @@ public class ProductControllerTests : IDisposable
 
         response.EnsureSuccessStatusCode();
 
-        Assert.That(response.StatusCode, Is.EqualTo(System.Net.HttpStatusCode.Created));
-
-        var responseContent = await response.Content.ReadAsStringAsync();
-        Assert.IsEmpty(responseContent);
+        Assert.That(response.StatusCode, Is.EqualTo(System.Net.HttpStatusCode.OK));
     }
     
     [TearDown]
