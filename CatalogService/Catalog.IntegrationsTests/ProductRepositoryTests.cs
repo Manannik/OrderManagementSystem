@@ -13,8 +13,8 @@ namespace IntegrationsTests;
 public class ProductRepositoryTests : IDisposable
 {
     private WebApplicationFactory<Program> _webHost;
-    private CatalogDbContext _context;
     private ProductRepository _productRepository;
+    private IServiceScope _serviceScope;
     
     [SetUp]
     public void SetupForRepository()
@@ -30,17 +30,18 @@ public class ProductRepositoryTests : IDisposable
 
                     services.AddDbContext<CatalogDbContext>(options =>
                     {
-                        options.UseInMemoryDatabase("InMemoryCatalogDB");
+                        options.UseInMemoryDatabase(Guid.NewGuid().ToString());  
                     });
                 });
             });
-        
-        using var scope = _webHost.Services.CreateScope();
-        _context = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
-        _productRepository = new ProductRepository(_context);
 
-        _context.Products.RemoveRange(_context.Products); // Очищаем базу данных
-        _context.SaveChanges();
+        _serviceScope = _webHost.Services.CreateScope();
+        var context = _serviceScope.ServiceProvider.GetRequiredService<CatalogDbContext>();
+        _productRepository = new ProductRepository(context);
+        
+        context.Products.RemoveRange(context.Products);
+        context.Categories.RemoveRange(context.Categories);
+        context.SaveChanges();
     }
 
     [Test]
@@ -58,7 +59,7 @@ public class ProductRepositoryTests : IDisposable
         await _productRepository.CreateAsync(product, CancellationToken.None);
 
         // Assert
-        var savedProduct = await _context.Products.FindAsync(product.Id);
+        var savedProduct = await _productRepository.GetByIdAsync(product.Id, CancellationToken.None);
         Assert.NotNull(savedProduct);
         Assert.That(savedProduct.Name, Is.EqualTo(product.Name));
     }
@@ -67,7 +68,6 @@ public class ProductRepositoryTests : IDisposable
     public async Task GetByIdAsync_WhenProductExists_ReturnsExpectedProduct()
     {
         // Arrange
-       
         var fixture = new Fixture();
         fixture.Behaviors.Remove(new ThrowingRecursionBehavior());
         fixture.Behaviors.Add(new OmitOnRecursionBehavior());
@@ -75,16 +75,19 @@ public class ProductRepositoryTests : IDisposable
 
         var category1 = fixture.Create<Category>();
         var category2 = fixture.Create<Category>();
-        
+
         var expectedProduct = fixture.Build<Product>()
             .With(p => p.Categories, new List<Category> { category1, category2 })
             .Create();
-        
-        await _context.Categories.AddRangeAsync(expectedProduct.Categories);
-        await _context.Products.AddAsync(expectedProduct);
-        await _context.SaveChangesAsync();
+
+        var context = _serviceScope.ServiceProvider.GetRequiredService<CatalogDbContext>();
+        await context.Categories.AddRangeAsync(expectedProduct.Categories);
+        await context.Products.AddAsync(expectedProduct);
+        await context.SaveChangesAsync();
+
         // Act
-        var actualProduct = await _productRepository.GetByIdAsync(expectedProduct.Id,default);
+        var actualProduct = await _productRepository.GetByIdAsync(expectedProduct.Id, default);
+
         // Assert
         Assert.That(actualProduct, Is.Not.Null);
         Assert.That(actualProduct.Id, Is.EqualTo(expectedProduct.Id));
@@ -106,7 +109,8 @@ public class ProductRepositoryTests : IDisposable
     public async Task GetByIdAsync_WhenProductDoesNotExists_ReturnsNull()
     {
         // Act
-        var actualProduct = await _productRepository.GetByIdAsync(Guid.NewGuid(),CancellationToken.None);
+        var actualProduct = await _productRepository.GetByIdAsync(Guid.NewGuid(), CancellationToken.None);
+
         // Assert
         Assert.That(actualProduct, Is.Null);
     }
@@ -121,25 +125,26 @@ public class ProductRepositoryTests : IDisposable
 
         var category1 = fixture.Create<Category>();
         var category2 = fixture.Create<Category>();
-        
+
         var product = fixture.Build<Product>()
             .With(p => p.Categories, new List<Category> { category1, category2 })
             .Create();
-        
-        await _context.Products.AddAsync(product);
-        await _context.SaveChangesAsync();
+
+        var context = _serviceScope.ServiceProvider.GetRequiredService<CatalogDbContext>();
+        await context.Products.AddAsync(product);
+        await context.SaveChangesAsync();
 
         // Act
         product.Name = "NewName";
         product.Description = "NewDescription";
         product.Price = 99.99m;
         product.Quantity = 19;
-    
+
         await _productRepository.UpdateAsync(product, CancellationToken.None);
 
         // Assert
-        var updatedProduct = await _context.Products.FindAsync(product.Id);
-    
+        var updatedProduct = await context.Products.FindAsync(product.Id);
+
         Assert.That(updatedProduct, Is.Not.Null);
         Assert.That(updatedProduct.Name, Is.EqualTo(product.Name));
         Assert.That(updatedProduct.Description, Is.EqualTo(product.Description));
@@ -157,17 +162,20 @@ public class ProductRepositoryTests : IDisposable
 
         var category1 = fixture.Create<Category>();
         var category2 = fixture.Create<Category>();
-        
+
         var product = fixture.Build<Product>()
             .With(p => p.Categories, new List<Category> { category1, category2 })
             .Create();
 
-        await _context.Products.AddAsync(product);
-        await _context.SaveChangesAsync();
+        var context = _serviceScope.ServiceProvider.GetRequiredService<CatalogDbContext>();
+        await context.Products.AddAsync(product);
+        await context.SaveChangesAsync();
+
         // Act
         await _productRepository.DeleteAsync(product, CancellationToken.None);
+
         // Assert
-        var deletedProduct = await _context.Products.FindAsync(product.Id);
+        var deletedProduct = await context.Products.FindAsync(product.Id);
         Assert.That(deletedProduct, Is.Null);
     }
 
@@ -181,23 +189,27 @@ public class ProductRepositoryTests : IDisposable
 
         var category1 = fixture.Create<Category>();
         var category2 = fixture.Create<Category>();
-        
+
         var product = fixture.Build<Product>()
             .With(p => p.Categories, new List<Category> { category1, category2 })
             .Create();
-        
-        await _context.Products.AddAsync(product);
-        await _context.SaveChangesAsync();
+
+        var context = _serviceScope.ServiceProvider.GetRequiredService<CatalogDbContext>();
+        await context.Products.AddAsync(product);
+        await context.SaveChangesAsync();
+
         // Act
         var result = await _productRepository.ExistAsync(product.Name, CancellationToken.None);
+
         // Assert
         Assert.That(result, Is.True);
     }
-    
+
     [TearDown]
     public void TearDown()
     {
-        _webHost.Dispose();
+        _serviceScope?.Dispose();
+        _webHost.Dispose(); 
     }
 
     public void Dispose()
