@@ -64,12 +64,6 @@ public class ProductControllerTests : IDisposable
             .Returns(Task.CompletedTask);
 
         var response = await _client.PostAsJsonAsync("/catalog", productRequest);
-        Console.WriteLine($"Response Status Code: {response.StatusCode}");
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorContent = await response.Content.ReadAsStringAsync();
-            Assert.Fail($"Request failed with status {response.StatusCode}. Response content: {errorContent}");
-        }
 
         response.EnsureSuccessStatusCode();
 
