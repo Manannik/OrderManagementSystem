@@ -33,22 +33,36 @@ public class ProductControllerEndToEndTests : IDisposable
             {
                 builder.ConfigureServices(services =>
                 {
-                    var dbDescriptor = services
-                        .SingleOrDefault(f => f.ServiceType == typeof(CatalogDbContext));
-                    services.Remove(dbDescriptor!);
+                    var dbDescriptor = services.SingleOrDefault(f => f.ServiceType == typeof(CatalogDbContext));
+                    if (dbDescriptor != null)
+                    {
+                        services.Remove(dbDescriptor);
+                    }
 
-                    services.AddScoped<IProductRepository, ProductRepository>();
-                    services.AddScoped<ICategoryRepository, CategoryRepository>();
+                    var productRepoDescriptor = services.SingleOrDefault(f => f.ServiceType == typeof(IProductRepository));
+                    if (productRepoDescriptor != null)
+                    {
+                        services.Remove(productRepoDescriptor);
+                    }
+
+                    var categoryRepoDescriptor = services.SingleOrDefault(f => f.ServiceType == typeof(ICategoryRepository));
+                    if (categoryRepoDescriptor != null)
+                    {
+                        services.Remove(categoryRepoDescriptor);
+                    }
+                    
                     services.AddDbContext<CatalogDbContext>(options =>
                     {
                         options.UseInMemoryDatabase("InMemoryCatalogDB");
-                        //options.UseNpgsql("Host=127.0.0.1;Username=postgres;Password=test;Database=testDb;Encoding=UTF8;");
                     });
+
+                    services.AddScoped<IProductRepository, ProductRepository>();
+                    services.AddScoped<ICategoryRepository, CategoryRepository>();
+
                     services.AddMediatR(configuration =>
                     {
                         configuration.RegisterServicesFromAssemblyContaining<CreateProductCommand>();
                     });
-                    services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));
                 });
             });
 
@@ -64,7 +78,6 @@ public class ProductControllerEndToEndTests : IDisposable
         context.Categories.RemoveRange(context.Categories);
         context.SaveChanges();
     }
-
     [Test]
     public async Task CreateProduct_ReturnsCreatedResponse()
     {
@@ -97,6 +110,7 @@ public class ProductControllerEndToEndTests : IDisposable
         await context.SaveChangesAsync();
         
         Assert.That(await context.Categories.CountAsync(), Is.EqualTo(categories.Count));
+        Console.WriteLine($"Context in test: {context.GetHashCode()}");
         
         var response = await _client.PostAsJsonAsync("/catalog", request);
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created));
