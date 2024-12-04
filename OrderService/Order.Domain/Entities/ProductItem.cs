@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
+﻿
 namespace Order.Domain.Entities
 {
     public class ProductItem

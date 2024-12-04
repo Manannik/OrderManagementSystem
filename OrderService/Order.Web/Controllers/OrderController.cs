@@ -12,8 +12,8 @@ namespace Order.Web.Controllers
     {
         private readonly ILogger<OrderController> _logger;
         private readonly IOrderService _orderService;
-        private readonly IValidator<CreateOrderRequest> createOrderRequestValidator;
-        private readonly IValidator<ChangeOrderStatusRequest> changeOrderStatusRequestValidator;
+        private readonly IValidator<CreateOrderRequest> _createOrderRequestValidator;
+        private readonly IValidator<ChangeOrderStatusRequest> _changeOrderStatusRequestValidator;
         public OrderController(ILogger<OrderController> logger,
             IOrderService orderService, 
             IValidator<CreateOrderRequest> createOrderRequestValidator, 
@@ -21,8 +21,8 @@ namespace Order.Web.Controllers
         {
             _logger = logger;
             _orderService = orderService;
-            this.createOrderRequestValidator = createOrderRequestValidator;
-            this.changeOrderStatusRequestValidator = changeOrderStatusRequestValidator;
+            _createOrderRequestValidator = createOrderRequestValidator;
+            _changeOrderStatusRequestValidator = changeOrderStatusRequestValidator;
         }
 
         [HttpPost]
@@ -30,7 +30,7 @@ namespace Order.Web.Controllers
         {
             _logger.LogInformation("запуск метод Create, request: {@Request}", request);
             
-            var validationResult = await createOrderRequestValidator.ValidateAsync(request,ct);
+            var validationResult = await _createOrderRequestValidator.ValidateAsync(request,ct);
             if (!validationResult.IsValid)
             {
                 _logger.LogInformation("в результате работы метода Create, заказ НЕ был создан");
@@ -48,7 +48,7 @@ namespace Order.Web.Controllers
         {
             _logger.LogInformation("запуск метод UpdateStatus, request: {@Request}", request);
 
-            var validationResult = await changeOrderStatusRequestValidator.ValidateAsync(request,ct);
+            var validationResult = await _changeOrderStatusRequestValidator.ValidateAsync(request,ct);
             
             if (!validationResult.IsValid)
             {
