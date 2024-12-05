@@ -8,6 +8,7 @@ using Order.Application.Models;
 using Order.Application.Models.Kafka;
 using Order.Domain.Abstractions;
 using Order.Domain.Entities;
+using Order.Domain.Exceptions;
 
 namespace OrderService.UnitTests;
 
@@ -106,4 +107,47 @@ public class OrderServiceTests
         Assert.Equal(newOrderResponse.OrderStatus, result.OrderStatus);
         Assert.Equal(newOrderResponse.Cost, result.Cost);
     }
+
+    [Fact]
+    public async Task CreateAsync_ThrowsCatalogServiceException_WhenTryChangeQuantityAsyncFails()
+    {
+        var fixture = new Fixture();
+        fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
+            .ForEach(b => fixture.Behaviors.Remove(b));
+        fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+        
+        var request = fixture.Create<CreateOrderRequest>();
+        
+        var errors = new List<(Guid id, string Message, int StatusCode)>
+        {
+            (Guid.NewGuid(), "Error 1", 400),
+            (Guid.NewGuid(), "Error 2", 404)
+        };
+
+        var failureResult = Result<List<ProductItem>, (Guid id, string Message, int StatusCode)>.Failure(errors);
+        
+        _mockQuantityService
+            .Setup(s => s.TryChangeQuantityAsync(It.IsAny<List<ProductItemModel>>(),
+It.IsAny<ICatalogServiceClient>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(failureResult);
+        
+        var exception = await Assert.ThrowsAsync<AggregateException>(() =>
+            _orderService.CreateAsync(request, CancellationToken.None));
+        
+        Assert.Equal(2, exception.InnerExceptions.Count);
+        var catalogException = exception.InnerExceptions.First() as CatalogServiceException;
+        Assert.NotNull(catalogException);
+        Assert.Equal(errors[0].id, catalogException!.Id);
+        Assert.Equal(errors[0].Message, catalogException.Message);
+        Assert.Equal(errors[0].StatusCode, catalogException.StatusCode);
+    }
+    
+    [Fact]
+    public async Task CreateAsync_ThrowsArgumentException_WhenRequestIsInvalid()
+    {
+        var invalidRequest = new CreateOrderRequest();
+        
+        await Assert.ThrowsAsync<ArgumentNullException>(() => _orderService.CreateAsync(invalidRequest, CancellationToken.None));
+    }
+
 }
