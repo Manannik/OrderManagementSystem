@@ -1,5 +1,6 @@
 using Application.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using OrderManagementSystem.Infrastructure;
 using OrderManagementSystem.Infrastructure.Extensions;
 using Serilog;
@@ -9,7 +10,6 @@ using WebApplication.Middlewares;
 var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Host.UseSerilog((context, configuration) =>
 {
     configuration.ReadFrom.Configuration(context.Configuration);
@@ -23,9 +23,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddWeb();
 builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
+builder.Services.Configure<TestingConfiguration>(options => options.SkipMigration = false);
 
 var app = builder.Build();
 MigrateDb(app);
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -34,23 +36,37 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseSerilogRequestLogging();
-
 app.UseHttpsRedirection();
-
 app.UseMiddleware<CatalogServiceExceptionHandlerMiddleware>();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
 
-static void MigrateDb(IApplicationBuilder app)
+public partial class Program
 {
-    var scopeFactory = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
+    public class TestingConfiguration
+    {
+        public bool SkipMigration { get; set; }
+    }
 
-    using var scope = scopeFactory.CreateScope();
-    var dbContext = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
-    dbContext.Database.Migrate();
+    static void MigrateDb(IApplicationBuilder app)
+    {
+        var scopeFactory = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
+    
+        using var scope = scopeFactory.CreateScope();
+        var services = scope.ServiceProvider;
+
+        var testConfig = services.GetService<IOptions<TestingConfiguration>>();
+        if (testConfig?.Value?.SkipMigration == true)
+        {
+            return;
+        }
+
+        var dbContext = services.GetRequiredService<CatalogDbContext>();
+
+        if (dbContext.Database.IsRelational())
+        {
+            dbContext.Database.Migrate();
+        }
+    }
 }
-public partial class Program {}
