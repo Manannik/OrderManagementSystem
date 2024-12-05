@@ -82,6 +82,7 @@ namespace IntegrationsTests
             var categories = categoryModelDtos
                 .Select(dto => fixture.Build<Category>()
                     .With(c => c.Id, dto.Id)
+                    .With(c => c.Name, fixture.Create<string>())
                     .Create())
                 .ToList();
 
@@ -102,7 +103,7 @@ namespace IntegrationsTests
             Assert.That(productInDb.Price, Is.EqualTo(request.Price));
             Assert.That(productInDb.Quantity, Is.EqualTo(request.Quantity));
 
-            var categoriesInDb = productInDb.Categories.Select(c => c.Name).ToList();
+            var categoriesInDb = productInDb.Categories.Select(c => c.Id).ToList();
             CollectionAssert.AreEquivalent(request.CategoryModelDtos.Select(c => c.Id), categoriesInDb);
         }
 
