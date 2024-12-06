@@ -3,6 +3,7 @@ using Application.BusinessLogic.Commands.CreateProduct;
 using AutoFixture;
 using Domain.Abstractions;
 using Domain.Entities;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -18,7 +19,7 @@ using OrderManagementSystem.Infrastructure.Repository;
 
 namespace OrderService.IntegrationTests
 {
-public class OrderServiceIntegrationTests : IDisposable
+public class OrderServiceIntegrationTestsEndToEnd : IDisposable
 {
     private WebApplicationFactory<Program> _catalogServiceFactory;
     private WebApplicationFactory<Program> _orderServiceFactory;
@@ -76,7 +77,7 @@ public class OrderServiceIntegrationTests : IDisposable
 
                 _orderClient = _orderServiceFactory.CreateClient();
             });
-        
+        //тут все ломается
         _orderServiceScope  = _orderServiceFactory.Services.CreateScope();
         var context = _orderServiceScope .ServiceProvider.GetRequiredService<OrderDbContext>();
         _orderRepository = new OrderRepository(context);
