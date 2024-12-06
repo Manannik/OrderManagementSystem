@@ -8,6 +8,5 @@ public interface IQuantityService
 {
     Task<Result<List<ProductItem>, (Guid id, string Message, int StatusCode)>> TryChangeQuantityAsync(
         IEnumerable<ProductItemModel> productItemModels,
-        ICatalogServiceClient catalogServiceClient,
         CancellationToken ct);
 }

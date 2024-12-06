@@ -16,8 +16,8 @@ public class QuantityService : IQuantityService
         _catalogServiceClient = catalogServiceClient;
     }
 
-    public async Task<Result<List<ProductItem>, (Guid id, string Message, int StatusCode)>> TryChangeQuantityAsync(IEnumerable<ProductItemModel> productItemModels, ICatalogServiceClient catalogServiceClient,
-        CancellationToken ct)
+    public async Task<Result<List<ProductItem>, (Guid id, string Message, int StatusCode)>> TryChangeQuantityAsync
+    (IEnumerable<ProductItemModel> productItemModels, CancellationToken ct)
     {
         var errors = new ConcurrentBag<(Guid id, string Message, int StatusCode)>();
         var productItems = new ConcurrentBag<ProductItem>();

@@ -26,7 +26,6 @@ public class OrderServiceTests
     {
         _mockOrderRepository = new Mock<IOrderRepository>();
         _mockQuantityService = new Mock<IQuantityService>();
-        _catalogServiceClient = new Mock<ICatalogServiceClient>();
         _mockCreateOrderProducer = new Mock<IKafkaProducer<CreateOrderKafkaModel>>();
         _mockUpdatedOrderProducer = new Mock<IKafkaProducer<UpdatedOrderKafkaModel>>();
         _mockLogger = new Mock<ILogger<Order.Application.Services.OrderService>>();
@@ -34,7 +33,6 @@ public class OrderServiceTests
         _orderService = new Order.Application.Services.OrderService(
             _mockLogger.Object,
             _mockOrderRepository.Object,
-            _catalogServiceClient.Object,
             _mockCreateOrderProducer.Object,
             _mockUpdatedOrderProducer.Object,
             _mockQuantityService.Object
@@ -60,7 +58,6 @@ public class OrderServiceTests
         var successResult = fixture.Create<Result<List<ProductItem>, (Guid id, string Message, int StatusCode)>>();
 
         _mockQuantityService.Setup(service => service.TryChangeQuantityAsync(It.IsAny<List<ProductItemModel>>(),
-                _catalogServiceClient.Object,
                 CancellationToken.None))
             .ReturnsAsync(successResult)
             .Verifiable();
@@ -95,7 +92,6 @@ public class OrderServiceTests
         var result = await _orderService.CreateAsync(request, CancellationToken.None);
         
         _mockQuantityService.Verify(service=>service.TryChangeQuantityAsync(It.IsAny<List<ProductItemModel>>(),
-            _catalogServiceClient.Object,
             It.IsAny<CancellationToken>()),Times.Once);
         
         _mockOrderRepository.Verify(service=>service.CreateAsync(It.IsAny<List<ProductItem>>(),
@@ -127,8 +123,7 @@ public class OrderServiceTests
         var failureResult = Result<List<ProductItem>, (Guid id, string Message, int StatusCode)>.Failure(errors);
         
         _mockQuantityService
-            .Setup(s => s.TryChangeQuantityAsync(It.IsAny<List<ProductItemModel>>(),
-It.IsAny<ICatalogServiceClient>(), It.IsAny<CancellationToken>()))
+            .Setup(s => s.TryChangeQuantityAsync(It.IsAny<List<ProductItemModel>>(),It.IsAny<CancellationToken>()))
             .ReturnsAsync(failureResult);
         
         var exception = await Assert.ThrowsAsync<AggregateException>(() =>
