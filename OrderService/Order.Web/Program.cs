@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Order.Application.Abstractions;
 using Order.Application.Extensions;
 using Order.Application.Models;
@@ -41,11 +42,31 @@ app.MapControllers();
 
 app.Run();
 
-static void MigrateDb(IApplicationBuilder app)
+public partial class Program
 {
-    var scopeFactory = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
+    public class TestingConfiguration
+    {
+        public bool SkipMigration { get; set; }
+    }
 
-    using var scope = scopeFactory.CreateScope();
-    var dbContext = scope.ServiceProvider.GetRequiredService<OrderDbContext>();
-    dbContext.Database.Migrate();
+    static void MigrateDb(IApplicationBuilder app)
+    {
+        var scopeFactory = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
+
+        using var scope = scopeFactory.CreateScope();
+        var services = scope.ServiceProvider;
+
+        var testConfig = services.GetService<IOptions<TestingConfiguration>>();
+        if (testConfig?.Value?.SkipMigration == true)
+        {
+            return;
+        }
+
+        var dbContext = services.GetRequiredService<OrderDbContext>();
+
+        if (dbContext.Database.IsRelational())
+        {
+            dbContext.Database.Migrate();
+        }
+    }
 }
