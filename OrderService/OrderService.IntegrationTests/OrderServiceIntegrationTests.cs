@@ -1,92 +1,112 @@
-using Application.BusinessLogic.Commands.CreateProduct;
 using AutoFixture;
-using Domain.Abstractions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestPlatform.TestHost;
+using Moq;
+using Order.Application.Abstractions;
+using Order.Application.Models;
+using Order.Domain.Abstractions;
 using Order.Persistence;
-using OrderManagementSystem.Infrastructure.Repository;
+using Order.Persistence.Repositories;
 
 namespace OrderService.IntegrationTests
 {
-    public class OrderServiceIntegrationTests : IDisposable
+public class OrderServiceIntegrationTests : IDisposable
+{
+    private WebApplicationFactory<Program> _orderServiceFactory;
+    private WebApplicationFactory<Program> _catalogServiceFactory;
+    private HttpClient _orderClient;
+    private HttpClient _productClient;
+    private OrderDbContext _context;
+    private IOrderService _orderService;
+    private Mock<IQuantityService> _mockQuantityService;
+
+    [SetUp]
+    public void Setup()
     {
-        private WebApplicationFactory<Program> _webHost;
-        private HttpClient _client;
-        private OrderDbContext _context;
+        SetupOrderService();
+        SetupProductService();
+    }
 
-        [SetUp]
-        public void Setup()
+    private void SetupOrderService()
+    {
+        var testConfig = new Dictionary<string, string>
         {
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
-                .Build();
-            
-            var testConfig = new Dictionary<string, string>
+            { "TestingConfiguration:SkipMigration", "true" }
+        };
+        
+        var testConfiguration = new ConfigurationBuilder()
+            .AddInMemoryCollection(testConfig)
+            .Build();
+
+        _orderServiceFactory = new WebApplicationFactory<Program>()
+            .WithWebHostBuilder(builder =>
             {
-                { "TestingConfiguration:SkipMigration", "false" }
-            };
-
-            var testConfiguration = new ConfigurationBuilder()
-                .AddInMemoryCollection(testConfig)
-                .Build();
-            
-            _webHost = new WebApplicationFactory<Program>()
-                .WithWebHostBuilder(builder =>
+                builder.ConfigureServices(services =>
                 {
-                    builder.ConfigureServices(services =>
+                    services.AddSingleton<IConfiguration>(testConfiguration);
+                    var descriptors = services.Where(d => 
+                            d.ServiceType == typeof(OrderDbContext) ||
+                            d.ServiceType == typeof(IOrderRepository))
+                        .ToList();
+                
+                    foreach (var descriptor in descriptors)
                     {
-                        services.AddSingleton<IConfiguration>(testConfiguration);
-                        //var descriptors = services.Where(d => /* Your condition here */).ToList();
+                        services.Remove(descriptor);
+                    }
 
-                        //foreach (var descriptor in descriptors)
-                        //{
-                        //    services.Remove(descriptor);
-                        //}
-                        //
-                        var options = new DbContextOptionsBuilder<OrderDbContext>()
-                            .UseInMemoryDatabase("InMemoryCatalogDB")
-                            .Options;
-
-                        _context = new OrderDbContext(options);
-                        services.AddSingleton(_ => _context);
-                        services.AddScoped<IProductRepository, ProductRepository>();
-
-                        services.AddMediatR(configuration =>
-                        {
-                            configuration.RegisterServicesFromAssemblyContaining<CreateProductCommand>();
-                        });
+                    services.AddDbContext<OrderDbContext>(options =>
+                    {
+                        options.UseInMemoryDatabase("InMemoryCatalogDB");
                     });
 
-                    _client = _webHost.CreateClient();
-
-                    //_context.Categories.RemoveRange(_context.Categories);
-                    _context.SaveChanges();
+                    services.AddSingleton<IOrderRepository, OrderRepository>();
                 });
-        }
 
-        [Test]
-        public void CreateOrder_WhenCatalogServiceReturnsSuccess_ShouldCreateOrderSuccessfully()
-        {
-            var fixture = new Fixture();
-            fixture.Customize<DateTime>(c => c.FromFactory(() => DateTime.UtcNow));
-            fixture.Behaviors.Remove(new ThrowingRecursionBehavior());
-            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-            Assert.Pass();
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            _webHost.Dispose();
-        }
-
-        public void Dispose()
-        {
-            TearDown();
-        }
+                _orderClient = _orderServiceFactory.CreateClient();
+            });
     }
+    
+    private void SetupProductService()
+    {
+        
+    }
+
+    [Test]
+    public void CreateOrder_WhenCatalogServiceReturnsSuccess_ShouldCreateOrderSuccessfully()
+    {
+        var fixture = new Fixture();
+        fixture.Customize<DateTime>(c => c.FromFactory(() => DateTime.UtcNow));
+        fixture.Behaviors.Remove(new ThrowingRecursionBehavior());
+        fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+        var productItemModels = fixture.CreateMany<ProductItemModel>(2).ToList();
+        foreach (var item in productItemModels)
+        {
+            item.Id = Guid.NewGuid();
+            item.Quantity = fixture.Create<int>() % 10 + 1;
+        }
+
+        var createOrderRequest = new CreateOrderRequest
+        {
+            ProductItemModels = productItemModels
+        };
+        
+        Assert.Pass();
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        _orderServiceFactory.Dispose();
+        _catalogServiceFactory.Dispose();
+    }
+
+    public void Dispose()
+    {
+        TearDown();
+    }
+}
 }
