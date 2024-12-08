@@ -1,5 +1,4 @@
-﻿
-namespace Order.Application.Models.Kafka;
+﻿namespace OrderProcessingService.Application.Models.Kafka;
 
 public class CreateOrderKafkaModel
 {
@@ -7,5 +6,5 @@ public class CreateOrderKafkaModel
     public decimal Cost { get; set; }
     public string OrderStatus { get; set; }
     public DateTime CreatedAt { get; set; }
-    public List<ProductItemModel> ProductItemModels { get; set; }
+    public List<ItemModel> Items { get; set; }
 }
