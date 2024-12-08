@@ -1,4 +1,6 @@
+using Hangfire;
 using Infrastructure.Persistence.Extensions;
+using OrderProcessingService.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +12,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddPersistence(builder.Configuration);
 var app = builder.Build();
+
+app.UseInfrastructure(app.Services.GetRequiredService<IBackgroundJobClient>());
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
