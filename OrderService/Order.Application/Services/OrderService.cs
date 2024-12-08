@@ -46,7 +46,12 @@ namespace Order.Application.Services
                 Id = newOrder.Id,
                 OrderStatus = newOrder.OrderStatus.ToString(),
                 Cost = newOrder.Cost,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                ProductItemModels = newOrder.ProductItems.Select(f=>new ProductItemModel()
+                {
+                    Id = f.Id,
+                    Quantity = f.Quantity
+                }).ToList()
             };
             
             await createOrderProducer.ProduceAsync(orderKafkaModel, ct);
