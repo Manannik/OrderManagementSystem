@@ -27,13 +27,12 @@ namespace OrderService.IntegrationTests
         private HttpClient _productClient;
         private HttpClient _orderClient;
         private OrderDbContext _orderDbContext;
-        private IOrderRepository _orderRepository;
         private IOrderService _orderService;
         private IServiceScope _orderServiceScope;
         private Mock<IQuantityService> _mockQuantityService = new Mock<IQuantityService>();
         private Mock<IProducer<string, string>> mockProducer = new Mock<IProducer<string, string>>();
         private Mock<ICatalogServiceClient> _mockCatalogServiceClient  = new Mock<ICatalogServiceClient>();
-        
+
         [SetUp]
         public void Setup()
         {
@@ -75,10 +74,10 @@ namespace OrderService.IntegrationTests
                             options.UseInMemoryDatabase("InMemoryOrderDB");
                         });
 
+                        services.AddSingleton(_mockQuantityService.Object);
                         services.AddScoped<IOrderService, Order.Application.Services.OrderService>();
                         services.AddScoped<IOrderRepository, OrderRepository>();
                         services.AddScoped<IQuantityService, QuantityService>();
-                        services.AddSingleton(_mockQuantityService.Object);
                         services.AddSingleton<IProducer<string, string>>(mockProducer.Object);
                         services.AddSingleton(_mockCatalogServiceClient.Object);
                     });
@@ -93,8 +92,6 @@ namespace OrderService.IntegrationTests
             _orderDbContext.Database.EnsureCreated();
             _orderDbContext.Orders.RemoveRange(_orderDbContext.Orders);
             _orderDbContext.SaveChanges();
-
-            _orderRepository = _orderServiceScope.ServiceProvider.GetRequiredService<IOrderRepository>();
         }
         [Test]
         public async Task CreateOrder_WhenCatalogServiceReturnsSuccess_ShouldCreateOrderSuccessfully()
@@ -123,12 +120,17 @@ namespace OrderService.IntegrationTests
             }).ToList();
 
             var result = Result<List<ProductItem>, (Guid id, string Message, int StatusCode)>.Success(productItems);
-
+            
+            // не могу определить причину
             _mockQuantityService.Setup(service => service.TryChangeQuantityAsync(
                     createOrderRequest.ProductItemModels,
                     CancellationToken.None))
                 .ReturnsAsync(result);
-
+            
+            _mockQuantityService.Verify(service => service.TryChangeQuantityAsync(
+                createOrderRequest.ProductItemModels,
+                CancellationToken.None), Times.Once);
+            
             mockProducer.Setup(p => p.ProduceAsync(
                     It.IsAny<string>(),
                     It.IsAny<Message<string, string>>(),
@@ -143,7 +145,6 @@ namespace OrderService.IntegrationTests
             var response = await _orderClient.PostAsJsonAsync("/order", createOrderRequest);
 
             // Assert
-            await Task.Delay(100);
             mockProducer.Verify(p => p.ProduceAsync(
                     It.IsAny<string>(),
                     It.IsAny<Message<string, string>>(),
