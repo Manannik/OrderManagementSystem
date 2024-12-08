@@ -1,13 +1,10 @@
-﻿using System.Collections.Concurrent;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Order.Application.Abstractions;
 using Order.Application.Enums;
-using Order.Application.Helpers;
 using Order.Application.Models;
 using Order.Application.Models.Kafka;
 using Order.Application.Requests;
 using Order.Domain.Abstractions;
-using Order.Domain.Entities;
 using Order.Domain.Enums;
 using Order.Domain.Exceptions;
 
@@ -16,9 +13,9 @@ namespace Order.Application.Services
     public class OrderService(
         ILogger<OrderService> logger,
         IOrderRepository orderRepository,
-        ICatalogServiceClient catalogServiceClient,
         IKafkaProducer<CreateOrderKafkaModel> createOrderProducer,
-        IKafkaProducer<UpdatedOrderKafkaModel> updatedOrderProducer) : IOrderService
+        IKafkaProducer<UpdatedOrderKafkaModel> updatedOrderProducer,
+        IQuantityService quantityService) : IOrderService
     {
         public async Task<OrderModelResponse> CreateAsync(CreateOrderRequest request, CancellationToken ct)
         {
@@ -26,15 +23,21 @@ namespace Order.Application.Services
                 request.ProductItemModels);
             
             var productItemModels = request.ProductItemModels.ToList();
-
-            var result = await TryChangeQuantityAsync(productItemModels, catalogServiceClient, ct);
+            
+            
+            
+            var result = await quantityService.TryChangeQuantityAsync(productItemModels, ct);
+            /*
+             вынес проверку в валидатор, но не могу избавиться от повтроного вызора TryChangeQuantityAsync
+             кажется что сделал только хуже эти т.к. 2 раза вызываю
+             
             if (!result.IsSuccess)
             {
                 logger.LogWarning("Обнаружены ошибки: {Errors}", result.Errors);
                 throw new AggregateException(result.Errors.Select(e => 
                     new CatalogServiceException(e.id, e.Message, e.StatusCode)));
             }
-
+            */
             var productItems = result.Value;
             var newOrder = await orderRepository.CreateAsync(productItems, ct);
 
@@ -96,44 +99,6 @@ namespace Order.Application.Services
             logger.LogInformation("Успешное завершение UpdateAsync для заказа: {order}",
                 updatedOrderResponse);
             return updatedOrderResponse;
-        }
-
-        private async Task<Result<List<ProductItem>, (Guid id, string Message, int StatusCode)>> TryChangeQuantityAsync(
-            IEnumerable<ProductItemModel> productItemModels,
-            ICatalogServiceClient catalogServiceClient,
-            CancellationToken ct)
-        {
-            var errors = new ConcurrentBag<(Guid id, string Message, int StatusCode)>();
-            var productItems = new ConcurrentBag<ProductItem>();
-
-            var tasks = productItemModels.Select(async model =>
-            {
-                try
-                {
-                    var result = await catalogServiceClient.ChangeProductQuantityAsync(model.Id, model.Quantity, ct);
-
-                    productItems.Add(new ProductItem
-                    {
-                        Id = Guid.NewGuid(),
-                        ProductId = model.Id,
-                        Quantity = model.Quantity,
-                        Price = result.Price
-                    });
-                }
-                catch (CatalogServiceException ex)
-                {
-                    errors.Add((model.Id, ex.Message, ex.StatusCode));
-                }
-            }).ToList();
-
-            await Task.WhenAll(tasks);
-
-            if (errors.IsEmpty)
-            {
-                return Result<List<ProductItem>, (Guid id, string Message, int StatusCode)>.Success(productItems.ToList());
-            }
-
-            return Result<List<ProductItem>, (Guid id, string Message, int StatusCode)>.Failure(errors.ToList());
         }
     }
 }

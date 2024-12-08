@@ -12,7 +12,6 @@ namespace Order.Web.Extensions
             services.AddControllers();
             services.AddScoped<IValidator<CreateOrderRequest>, CreateOrderRequestValidator>();
             services.AddScoped<IValidator<ChangeOrderStatusRequest>, ChangeOrderStatusRequestValidator>();
-
             return services;
         }
     }

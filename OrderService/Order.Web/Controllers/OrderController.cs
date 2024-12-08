@@ -14,9 +14,10 @@ namespace Order.Web.Controllers
         private readonly IOrderService _orderService;
         private readonly IValidator<CreateOrderRequest> createOrderRequestValidator;
         private readonly IValidator<ChangeOrderStatusRequest> changeOrderStatusRequestValidator;
+
         public OrderController(ILogger<OrderController> logger,
-            IOrderService orderService, 
-            IValidator<CreateOrderRequest> createOrderRequestValidator, 
+            IOrderService orderService,
+            IValidator<CreateOrderRequest> createOrderRequestValidator,
             IValidator<ChangeOrderStatusRequest> changeOrderStatusRequestValidator)
         {
             _logger = logger;
@@ -29,14 +30,14 @@ namespace Order.Web.Controllers
         public async Task<IActionResult> Create([FromBody] CreateOrderRequest request, CancellationToken ct)
         {
             _logger.LogInformation("запуск метод Create, request: {@Request}", request);
-            
-            var validationResult = await createOrderRequestValidator.ValidateAsync(request,ct);
+
+            var validationResult = await createOrderRequestValidator.ValidateAsync(request, ct);
             if (!validationResult.IsValid)
             {
                 _logger.LogInformation("в результате работы метода Create, заказ НЕ был создан");
                 return BadRequest(validationResult.Errors);
             }
-            
+
             var order = await _orderService.CreateAsync(request, ct);
 
             _logger.LogInformation("в результате работы метода Create, заказ успешно создан");
@@ -48,14 +49,14 @@ namespace Order.Web.Controllers
         {
             _logger.LogInformation("запуск метод UpdateStatus, request: {@Request}", request);
 
-            var validationResult = await changeOrderStatusRequestValidator.ValidateAsync(request,ct);
-            
+            var validationResult = await changeOrderStatusRequestValidator.ValidateAsync(request, ct);
+
             if (!validationResult.IsValid)
             {
                 _logger.LogInformation("в результате работы метода UpdateStatus, заказ НЕ был изменен");
                 return BadRequest(validationResult.Errors);
             }
-            
+
             var updatedOrder = await _orderService.UpdateAsync(request, ct);
 
             _logger.LogInformation("в результате работы метода UpdateStatus, статус заказа успешно изменен");
