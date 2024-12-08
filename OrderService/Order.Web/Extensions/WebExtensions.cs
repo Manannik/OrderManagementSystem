@@ -10,8 +10,8 @@ namespace Order.Web.Extensions
         public static IServiceCollection AddWeb(this IServiceCollection services)
         {
             services.AddControllers();
-            services.AddTransient<IValidator<CreateOrderRequest>, CreateOrderRequestValidator>();
-            services.AddTransient<IValidator<ChangeOrderStatusRequest>, ChangeOrderStatusRequestValidator>();
+            services.AddScoped<IValidator<CreateOrderRequest>, CreateOrderRequestValidator>();
+            services.AddScoped<IValidator<ChangeOrderStatusRequest>, ChangeOrderStatusRequestValidator>();
 
             return services;
         }
