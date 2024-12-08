@@ -1,10 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Order.Application.Abstractions;
 using Order.Application.Extensions;
-using Order.Application.Models;
 using Order.Infrastructure.Extensions;
-using Order.Infrastructure.Services;
 using Order.Persistence;
 using Order.Persistence.Extensions;
 using Order.Web.Extensions;
@@ -69,4 +66,8 @@ public partial class Program
             dbContext.Database.Migrate();
         }
     }
+}
+
+public partial class Program
+{
 }

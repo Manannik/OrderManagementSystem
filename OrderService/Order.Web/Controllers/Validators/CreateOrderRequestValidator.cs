@@ -1,12 +1,11 @@
 ﻿using FluentValidation;
-using Order.Application.Abstractions;
 using Order.Application.Models;
 
 namespace Order.Web.Controllers.Validators
 {
     public class CreateOrderRequestValidator : AbstractValidator<CreateOrderRequest>
     {
-        public CreateOrderRequestValidator(ICatalogServiceClient catalogServiceClient)
+        public CreateOrderRequestValidator()
         {
             RuleForEach(f => f.ProductItemModels.Select(f => f.Id))
                 .NotEqual(Guid.Empty).WithMessage("ID продукта не должен быть пустым GUID.");

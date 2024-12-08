@@ -1,191 +1,172 @@
 using System.Net.Http.Json;
-using Application.BusinessLogic.Commands.CreateProduct;
 using AutoFixture;
-using Domain.Abstractions;
-using Domain.Entities;
-using Microsoft.AspNetCore.Builder;
+using Confluent.Kafka;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
+using Moq;
 using Order.Application.Abstractions;
+using Order.Application.Helpers;
 using Order.Application.Models;
+using Order.Application.Models.Kafka;
 using Order.Domain.Abstractions;
+using Order.Domain.Entities;
+using Order.Domain.Enums;
+using Order.Infrastructure.Services;
 using Order.Persistence;
 using Order.Persistence.Repositories;
-using OrderManagementSystem.Infrastructure;
-using OrderManagementSystem.Infrastructure.Repository;
+using Order.Web.Controllers.Validators;
 
 namespace OrderService.IntegrationTests
 {
-public class OrderServiceIntegrationTestsEndToEnd : IDisposable
-{
-    private WebApplicationFactory<Program> _catalogServiceFactory;
-    private WebApplicationFactory<Program> _orderServiceFactory;
-    private HttpClient _productClient;
-    private HttpClient _orderClient;
-    private CatalogDbContext _catalogDbContext;
-    private OrderDbContext _orderDbContext;
-    private IProductRepository _productRepository;
-    private ICategoryRepository _categoryRepository;
-    private IOrderRepository _orderRepository;
-    private IOrderService _orderService;
-    private IServiceScope _orderServiceScope;
-    private IServiceScope _catalogServiceScope;
-    [SetUp]
-    public void Setup()
+    public class OrderServiceIntegrationTestsEndToEnd : IDisposable
     {
-        SetupOrderService();
-        SetupProductService();
-    }
-
-    private void SetupOrderService()
-    {
-        var testConfig = new Dictionary<string, string>
+        private WebApplicationFactory<Program> _orderServiceFactory;
+        private HttpClient _productClient;
+        private HttpClient _orderClient;
+        private OrderDbContext _orderDbContext;
+        private IOrderRepository _orderRepository;
+        private IOrderService _orderService;
+        private IServiceScope _orderServiceScope;
+        private Mock<IQuantityService> _mockQuantityService = new Mock<IQuantityService>();
+        private Mock<IProducer<string, string>> mockProducer = new Mock<IProducer<string, string>>();
+        private Mock<ICatalogServiceClient> _mockCatalogServiceClient  = new Mock<ICatalogServiceClient>();
+        
+        [SetUp]
+        public void Setup()
         {
-            { "TestingConfiguration:SkipMigration", "true" }
-        };
-        
-        var testConfiguration = new ConfigurationBuilder()
-            .AddInMemoryCollection(testConfig)
-            .Build();
-
-        _orderServiceFactory = new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(builder =>
+            var testConfig = new Dictionary<string, string>
             {
-                builder.ConfigureServices(services =>
-                {
-                    services.AddSingleton<IConfiguration>(testConfiguration);
-                    var descriptors = services.Where(d => 
-                            d.ServiceType == typeof(OrderDbContext) ||
-                            d.ServiceType == typeof(IOrderRepository))
-                        .ToList();
-                
-                    foreach (var descriptor in descriptors)
-                    {
-                        services.Remove(descriptor);
-                    }
+                { "TestingConfiguration:SkipMigration", "true" },
+                { "ServiceUrls:CatalogService", "http://localhost" }
+            };
 
-                    services.AddDbContext<OrderDbContext>(options =>
+            var testConfiguration = new ConfigurationBuilder()
+                .AddInMemoryCollection(testConfig)
+                .Build();
+
+            _orderServiceFactory = new WebApplicationFactory<Program>()
+                .WithWebHostBuilder(builder =>
+                {
+                    builder.ConfigureAppConfiguration((context, config) =>
                     {
-                        options.UseInMemoryDatabase("InMemoryCatalogDB");
+                        config.AddInMemoryCollection(testConfig);
                     });
 
-                    services.AddSingleton<IOrderRepository, OrderRepository>();
-                });
+                    builder.ConfigureServices(services =>
+                    {
+                        var descriptorsToRemove = services.Where(d =>
+                                d.ServiceType == typeof(OrderDbContext) ||
+                                d.ServiceType == typeof(IOrderRepository) ||
+                                d.ServiceType == typeof(IOrderService) ||
+                                d.ServiceType == typeof(ICatalogServiceClient) ||
+                                d.ServiceType == typeof(IQuantityService))
+                            .ToList();
 
-                _orderClient = _orderServiceFactory.CreateClient();
-            });
-        //тут все ломается
-        _orderServiceScope  = _orderServiceFactory.Services.CreateScope();
-        var context = _orderServiceScope .ServiceProvider.GetRequiredService<OrderDbContext>();
-        _orderRepository = new OrderRepository(context);
-        
-        context.Orders.RemoveRange(context.Orders);
-        context.SaveChanges();
-    }
-    
-    private void SetupProductService()
-    {
-        _catalogServiceFactory = new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(builder =>
-            {
-                builder.ConfigureServices(services =>
-                {
-                    var descriptors = services.Where(d => 
-                            d.ServiceType == typeof(CatalogDbContext) ||
-                            d.ServiceType == typeof(IProductRepository) ||
-                            d.ServiceType == typeof(ICategoryRepository))
-                        .ToList();
-                    foreach (var descriptor in descriptors)
-                    {
-                        services.Remove(descriptor);
-                    }
-                    var options = new DbContextOptionsBuilder<CatalogDbContext>()
-                        .UseInMemoryDatabase("InMemoryCatalogDB")
-                        .Options;
-                    _catalogDbContext = new CatalogDbContext(options);
-                    services.AddSingleton(_ => _catalogDbContext);
-                    services.AddScoped<IProductRepository, ProductRepository>();
-                    services.AddScoped<ICategoryRepository, CategoryRepository>();
-                    services.AddMediatR(configuration =>
-                    {
-                        configuration.RegisterServicesFromAssemblyContaining<CreateProductCommand>();
+                        foreach (var descriptor in descriptorsToRemove)
+                        {
+                            services.Remove(descriptor);
+                        }
+
+                        services.AddDbContext<OrderDbContext>(options =>
+                        {
+                            options.UseInMemoryDatabase("InMemoryOrderDB");
+                        });
+
+                        services.AddScoped<IOrderService, Order.Application.Services.OrderService>();
+                        services.AddScoped<IOrderRepository, OrderRepository>();
+                        services.AddScoped<IQuantityService, QuantityService>();
+                        services.AddSingleton(_mockQuantityService.Object);
+                        services.AddSingleton<IProducer<string, string>>(mockProducer.Object);
+                        services.AddSingleton(_mockCatalogServiceClient.Object);
                     });
                 });
-                _orderClient = _catalogServiceFactory.CreateClient();
-            });
-        
-        _catalogServiceScope = _catalogServiceFactory.Services.CreateScope();
-        var context = _catalogServiceScope.ServiceProvider.GetRequiredService<CatalogDbContext>();
-        _productRepository = new ProductRepository(context);
-        
-        context.Products.RemoveRange(context.Products);
-        context.Categories.RemoveRange(context.Categories);
-        context.SaveChanges();
-        context.SaveChanges();
-    }
 
-    [Test]
-    public async Task CreateOrder_WhenCatalogServiceReturnsSuccess_ShouldCreateOrderSuccessfully()
-    {
-        var fixture = new Fixture();
-        fixture.Customize<DateTime>(c => c.FromFactory(() => DateTime.UtcNow));
-        fixture.Behaviors.Remove(new ThrowingRecursionBehavior());
-        fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+            _orderClient = _orderServiceFactory.CreateClient();
 
-        var categories = fixture.CreateMany<Category>(2).ToList();
-        var products = fixture.Build<Product>()
-            .With(f => f.Categories, categories)
-            .With(req => req.Price, fixture.Create<decimal>() % 100 + 1)
-            .With(req => req.Name, fixture.Create<string>().Substring(0, 10))
-            .With(req => req.Description, fixture.Create<string>().Substring(0, 10))
-            .With(req => req.Quantity, fixture.Create<int>() % 100)
-            .With(f=>f.Id,Guid.NewGuid)
-            .CreateMany(2)
-            .ToList();
+            _orderServiceScope = _orderServiceFactory.Services.CreateScope();
 
-        await _catalogDbContext.Categories.AddRangeAsync(categories);
-        await _catalogDbContext.Products.AddRangeAsync(products);
-        await _catalogDbContext.SaveChangesAsync();
-        
-        var productIds = products.Select(p => p.Id).ToList();
-        var productInDb = await _catalogDbContext.Products.Include(product => product.Categories)
-            .Where(p => productIds.Contains(p.Id))
-            .ToListAsync();
-        
-        Assert.NotNull(productInDb);
-        CollectionAssert.AreEquivalent(productInDb, products);
-        
-        var categoriesInDb = productInDb.Select(f=>f.Categories.Select(c => c.Id).ToList()).ToList();
-        CollectionAssert.AreEquivalent(categories, categoriesInDb);
-        
-        var createOrderRequest = fixture.Build<CreateOrderRequest>()
-            .With(r => r.ProductItemModels, fixture.CreateMany<ProductItemModel>(2)
-                .Select(item => 
+            _orderDbContext = _orderServiceScope.ServiceProvider.GetRequiredService<OrderDbContext>();
+
+            _orderDbContext.Database.EnsureCreated();
+            _orderDbContext.Orders.RemoveRange(_orderDbContext.Orders);
+            _orderDbContext.SaveChanges();
+
+            _orderRepository = _orderServiceScope.ServiceProvider.GetRequiredService<IOrderRepository>();
+        }
+        [Test]
+        public async Task CreateOrder_WhenCatalogServiceReturnsSuccess_ShouldCreateOrderSuccessfully()
+        {
+            // Arrange
+            var fixture = new Fixture();
+            fixture.Customize<DateTime>(c => c.FromFactory(() => DateTime.UtcNow));
+            fixture.Behaviors.Remove(new ThrowingRecursionBehavior());
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+            var createOrderRequest = fixture.Build<CreateOrderRequest>()
+                .With(r => r.ProductItemModels, fixture.CreateMany<ProductItemModel>(2)
+                    .Select(item =>
+                    {
+                        item.Id = Guid.NewGuid();
+                        item.Quantity = fixture.Create<int>() % 10 + 1;
+                        return item;
+                    }).ToList())
+                .Create();
+
+            var productItems = createOrderRequest.ProductItemModels.Select(f => new ProductItem
+            {
+                Id = f.Id,
+                Quantity = f.Quantity,
+                Price = fixture.Create<int>() % 10 + 1.0m
+            }).ToList();
+
+            var result = Result<List<ProductItem>, (Guid id, string Message, int StatusCode)>.Success(productItems);
+
+            _mockQuantityService.Setup(service => service.TryChangeQuantityAsync(
+                    createOrderRequest.ProductItemModels,
+                    CancellationToken.None))
+                .ReturnsAsync(result);
+
+            mockProducer.Setup(p => p.ProduceAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Message<string, string>>(),
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new DeliveryResult<string, string>
                 {
-                    item.Id = Guid.NewGuid();
-                    item.Quantity = fixture.Create<int>() % 10 + 1;
-                    return item;
-                }).ToList())
-            .Create();
-        
-        var response = await _orderClient.PostAsJsonAsync("/catalog", createOrderRequest);
-        
-        Assert.Pass();
-    }
+                    Status = PersistenceStatus.Persisted,
+                    Offset = 0
+                });
 
-    [TearDown]
-    public void TearDown()
-    {
-        _orderServiceFactory.Dispose();
-        _catalogServiceFactory.Dispose();
-    }
+            // Act
+            var response = await _orderClient.PostAsJsonAsync("/order", createOrderRequest);
 
-    public void Dispose()
-    {
-        TearDown();
+            // Assert
+            await Task.Delay(100);
+            mockProducer.Verify(p => p.ProduceAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<Message<string, string>>(),
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
+            var orderInDb = await _orderDbContext.Orders.Include(o => o.ProductItems).SingleOrDefaultAsync();
+
+            Assert.NotNull(orderInDb, "ЗАКАЗ НЕ БЫЛ СОЗДАН В БАЗЕ ДАННЫХ");
+            Assert.AreEqual(productItems.Count, orderInDb.ProductItems.Count,
+                "НЕ БЬЕТСЯ КОЛИЧЕСТВО PRODUCTITEMS В БД И В REQUEST");
+            Assert.That(orderInDb.Cost, Is.EqualTo(productItems.Sum(p => p.Quantity * p.Price)), "ЦЕНА НЕКОРРЕКТНА");
+            Assert.IsTrue(response.IsSuccessStatusCode, "HTTP СТАТУС КОД НЕКОРРЕКТЕН");
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            _orderServiceFactory.Dispose();
+        }
+
+        public void Dispose()
+        {
+            TearDown();
+        }
     }
-}
 }

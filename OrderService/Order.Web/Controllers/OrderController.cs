@@ -29,7 +29,6 @@ namespace Order.Web.Controllers
         public async Task<IActionResult> Create([FromBody] CreateOrderRequest request, CancellationToken ct)
         {
             _logger.LogInformation("запуск метод Create, request: {@Request}", request);
-            
             var validationResult = await _createOrderRequestValidator.ValidateAsync(request,ct);
             if (!validationResult.IsValid)
             {

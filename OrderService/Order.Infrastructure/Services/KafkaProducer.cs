@@ -16,20 +16,21 @@ namespace Order.Infrastructure.Services
             {
                 BootstrapServers = kafkaSettings.Value.BootstrapServers
             };
-            
+
             producer = new ProducerBuilder<string, TMessage>(config)
                 .SetValueSerializer(new KafkaJsonSerializer<TMessage>())
                 .Build();
 
             topic = kafkaSettings.Value.Topic;
         }
+
         public async Task ProduceAsync(TMessage message, CancellationToken cancellationToken)
         {
             await producer.ProduceAsync(topic, new Message<string, TMessage>()
             {
-                Key=Guid.NewGuid().ToString(),
+                Key = Guid.NewGuid().ToString(),
                 Value = message
-            },cancellationToken);
+            }, cancellationToken);
         }
 
         public void Dispose()
