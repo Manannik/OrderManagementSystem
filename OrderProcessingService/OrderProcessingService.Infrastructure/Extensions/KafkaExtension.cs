@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using OrderProcessingService.Application.Abstarctions;
 using OrderProcessingService.Infrastructure.Kafka;
+using OrderProcessingService.Infrastructure.Services;
 
 namespace OrderProcessingService.Infrastructure.Extensions;
 
@@ -12,6 +13,7 @@ public static class KafkaExtension
         IConfiguration configurationSection)
     {
         //services.Configure<KafkaSettings>(configurationSection);
-        services.AddSingleton<IKafkaConsumer<TMessage>, IKafkaConsumer<TMessage>>();
+        services.AddScoped<IKafkaConsumer<TMessage>, KafkaConsumer<TMessage>>();
+
     }
 }

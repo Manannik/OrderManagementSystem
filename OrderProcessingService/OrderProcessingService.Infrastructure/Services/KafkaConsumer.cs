@@ -33,7 +33,7 @@ public class KafkaConsumer<TMessage> : IKafkaConsumer<TMessage>
         _topic = kafkaSettings.Value.Topic;
     }
 
-    public void Consume(CancellationToken cancellationToken)
+    public async Task ConsumeAsync(CancellationToken cancellationToken)
     {
         _consumer.Subscribe(_topic);
 
@@ -44,7 +44,7 @@ public class KafkaConsumer<TMessage> : IKafkaConsumer<TMessage>
                 var consumeResult = _consumer.Consume(cancellationToken);
                 Console.WriteLine($"Получено сообщение: {consumeResult.Message.Value}");
 
-                ProcessMessage(consumeResult.Message.Value, cancellationToken);
+                await ProcessMessageAsync(consumeResult.Message.Value, cancellationToken);
             }
         }
         catch (OperationCanceledException)
@@ -57,7 +57,7 @@ public class KafkaConsumer<TMessage> : IKafkaConsumer<TMessage>
         }
     }
 
-    private void ProcessMessage(TMessage message, CancellationToken ct)
+    private async Task ProcessMessageAsync(TMessage message, CancellationToken ct)
     {
         if (message is CreateOrderKafkaModel orderMessage)
         {
@@ -73,7 +73,7 @@ public class KafkaConsumer<TMessage> : IKafkaConsumer<TMessage>
                 }).ToList()
             };
 
-            _processingRepository.CreateAsync(processingOrder, ct);
+            await _processingRepository.CreateAsync(processingOrder, ct);
         }
     }
 

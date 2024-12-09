@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using OrderProcessingService.Application.Models.Kafka;
 
 namespace OrderProcessingService.Infrastructure.Extensions;
@@ -14,19 +15,15 @@ public static class InfrastructureExtension
     {
         services.AddConsumer<CreateOrderKafkaModel>(configuration.GetSection("Kafka:Order"));
         
-        services.AddHangfire(configuration => 
-            configuration.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
-                .UseSimpleAssemblyNameTypeSerializer()
-                .UseDefaultTypeSerializer()
-                .UseSqlServerStorage("SQLConnectionString"));
-        
+        services.AddHangfire((sp,config) =>
+        {
+            var connectionString = sp.GetRequiredService<IConfiguration>()
+                .GetConnectionString("HangfireConnectionString");
+            
+            config.UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSqlServerStorage(connectionString);
+        });
         services.AddHangfireServer();
-    }
-    
-    public static void UseInfrastructure(this IApplicationBuilder app, IBackgroundJobClient backgroundJobs)
-    {
-        app.UseHangfireDashboard();
-
-        backgroundJobs.Enqueue(() => Console.WriteLine("Hello, Hangfire!"));
     }
 }

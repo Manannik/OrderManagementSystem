@@ -12,10 +12,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Extensions\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\OrderProcessingService.Infrastructure\OrderProcessingService.Infrastructure.csproj" />
       <ProjectReference Include="..\OrderProcessingService.Persistence\OrderProcessingService.Persistence.csproj" />
     </ItemGroup>

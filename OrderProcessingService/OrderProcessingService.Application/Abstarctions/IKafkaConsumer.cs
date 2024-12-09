@@ -2,5 +2,5 @@
 
 public interface IKafkaConsumer<T>:IDisposable
 {
-    public void Consume(CancellationToken cancellationToken);
+    public Task ConsumeAsync(CancellationToken cancellationToken);
 }

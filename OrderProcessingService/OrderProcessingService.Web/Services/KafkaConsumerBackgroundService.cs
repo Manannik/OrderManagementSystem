@@ -21,7 +21,7 @@ public class KafkaConsumerBackgroundService<TMessage> : BackgroundService
 
         try
         {
-            _kafkaConsumer.Consume(stoppingToken);
+            await _kafkaConsumer.ConsumeAsync(stoppingToken);
         }
         catch (Exception ex)
         {
