@@ -1,7 +1,7 @@
 using Hangfire;
+using HangfireBasicAuthenticationFilter;
 using Infrastructure.Persistence.Extensions;
 using OrderProcessingService.Infrastructure.Extensions;
-using OrderProcessingService.Web.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +29,18 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.UseHangfireDashboard();
+app.MapHangfireDashboard("/hangfire", new DashboardOptions()
+{
+    DashboardTitle = "OrderProcessingService",
+    Authorization = new[]
+    {
+        new HangfireCustomBasicAuthenticationFilter()
+        {
+            User ="user",
+            Pass = "user"
+        }
+    }
+});
 
 app.MapControllers();
 

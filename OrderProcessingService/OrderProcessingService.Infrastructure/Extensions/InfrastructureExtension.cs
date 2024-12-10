@@ -20,10 +20,13 @@ public static class InfrastructureExtension
             var connectionString = sp.GetRequiredService<IConfiguration>()
                 .GetConnectionString("HangfireConnectionString");
             
-            config.UseSimpleAssemblyNameTypeSerializer()
+            config.SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
                 .UseSqlServerStorage(connectionString);
         });
         services.AddHangfireServer();
+        
+        services.AddConsumer<CreateOrderKafkaModel>(configuration.GetSection("Kafka:Order"));
     }
 }

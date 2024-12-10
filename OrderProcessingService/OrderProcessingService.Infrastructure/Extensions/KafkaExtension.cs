@@ -12,7 +12,7 @@ public static class KafkaExtension
         this IServiceCollection services,
         IConfiguration configurationSection)
     {
-        //services.Configure<KafkaSettings>(configurationSection);
+        services.Configure<KafkaSettings>(configurationSection);
         services.AddScoped<IKafkaConsumer<TMessage>, KafkaConsumer<TMessage>>();
 
     }
