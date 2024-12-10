@@ -1,7 +1,9 @@
 using Hangfire;
 using HangfireBasicAuthenticationFilter;
 using Infrastructure.Persistence.Extensions;
+using OrderProcessingService.Application.Models.Kafka;
 using OrderProcessingService.Infrastructure.Extensions;
+using OrderProcessingService.Web.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddWeb<CreateOrderKafkaModel>();
+
 // builder.Services.AddWeb<string>();
 
 var app = builder.Build();

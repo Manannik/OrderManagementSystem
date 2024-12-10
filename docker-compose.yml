@@ -1,4 +1,5 @@
-version: '3'
+version: '3.8'
+
 services:
   db:
     image: postgres:16
@@ -8,22 +9,10 @@ services:
       - "5432:5432"
     restart: unless-stopped
     environment:
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=test
-      - POSTGRES_USER=test
-      - POSTGRES_DB=catalog_service
-
-  app:
-    build:
-      context: .
-    ports:
-      - "5000:5000"  
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__HangfireConnectionString=Server=sqlserver;Database=HangfireDB;User Id=sa;Password=YourStrongPassword;
-    depends_on:
-      - sqlserver
-
-  sqlserver:
+      
+  db_hangfire:
     image: mcr.microsoft.com/mssql/server:2022-latest
     volumes:
       - ./data/sqlserver:/var/opt/mssql
@@ -49,10 +38,10 @@ services:
     ports:
       - "8081:8081"
     restart: unless-stopped
-
+  
   order-processing-service:
     build:
-      context: ./OrderProcessingService 
+      context: ./OrderProcessingService
       dockerfile: OrderProcessingService.Web/Dockerfile
     ports:
       - "8082:8082"

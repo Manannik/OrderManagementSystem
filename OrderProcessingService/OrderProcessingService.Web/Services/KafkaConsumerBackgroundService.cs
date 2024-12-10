@@ -5,14 +5,16 @@ namespace OrderProcessingService.Web.Services;
 public class KafkaConsumerBackgroundService<TMessage> : BackgroundService
 {
     private readonly IKafkaConsumer<TMessage> _kafkaConsumer;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly ILogger<KafkaConsumerBackgroundService<TMessage>> _logger;
 
     public KafkaConsumerBackgroundService(
         IKafkaConsumer<TMessage> kafkaConsumer,
-        ILogger<KafkaConsumerBackgroundService<TMessage>> logger)
+        ILogger<KafkaConsumerBackgroundService<TMessage>> logger, IServiceScopeFactory serviceScopeFactory)
     {
         _kafkaConsumer = kafkaConsumer;
         _logger = logger;
+        _serviceScopeFactory = serviceScopeFactory;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -21,7 +23,14 @@ public class KafkaConsumerBackgroundService<TMessage> : BackgroundService
 
         try
         {
-            await _kafkaConsumer.ConsumeAsync(stoppingToken);
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    var kafkaConsumer = scope.ServiceProvider.GetRequiredService<IKafkaConsumer<TMessage>>();
+                    await kafkaConsumer.ConsumeAsync(stoppingToken);
+                }
+            }
         }
         catch (Exception ex)
         {
