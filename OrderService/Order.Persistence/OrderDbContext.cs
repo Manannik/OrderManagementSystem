@@ -8,11 +8,11 @@ namespace Order.Persistence
     {
         public DbSet<Domain.Entities.Order> Orders { get; set; }
         public DbSet<ProductItem> ProductItems { get; set; }
-    
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.ApplyConfiguration(new OrderConfiguration());
-        modelBuilder.ApplyConfiguration(new ProductItemConfiguration());
-    }
+        {
+            modelBuilder.ApplyConfiguration(new OrderConfiguration());
+            modelBuilder.ApplyConfiguration(new ProductItemConfiguration());
+        }
     }
 }
