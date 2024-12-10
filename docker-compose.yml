@@ -1,4 +1,5 @@
-version: '3'
+version: '3.8'
+
 services:
   db:
     image: postgres:16
@@ -8,9 +9,19 @@ services:
       - "5432:5432"
     restart: unless-stopped
     environment:
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=test
-      - POSTGRES_USER=test
-      - POSTGRES_DB=catalog_service
+      
+  db_hangfire:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    volumes:
+      - ./data/sqlserver:/var/opt/mssql
+    ports:
+      - "1433:1433"
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "YourStrongPassword"
 
   catalog-service:
     build:
@@ -26,6 +37,14 @@ services:
       dockerfile: Order.Web/Dockerfile
     ports:
       - "8081:8081"
+    restart: unless-stopped
+  
+  order-processing-service:
+    build:
+      context: ./OrderProcessingService
+      dockerfile: OrderProcessingService.Web/Dockerfile
+    ports:
+      - "8082:8082"
     restart: unless-stopped
 
   zookeeper:
