@@ -15,7 +15,7 @@ namespace Order.Persistence.Extensions
 
             services.AddDbContext<OrderDbContext>(options =>
             {
-                options.UseNpgsql(configuration.GetConnectionString("OrderProcessingServiceConnectionString"));
+                options.UseNpgsql(configuration.GetConnectionString("OrderServiceConnectionString"));
             });
             return services;
         }

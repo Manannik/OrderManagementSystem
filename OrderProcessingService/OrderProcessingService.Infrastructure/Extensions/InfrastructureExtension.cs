@@ -26,7 +26,5 @@ public static class InfrastructureExtension
                 .UseSqlServerStorage(connectionString);
         });
         services.AddHangfireServer();
-        
-        services.AddConsumer<CreateOrderKafkaModel>(configuration.GetSection("Kafka:Order"));
     }
 }

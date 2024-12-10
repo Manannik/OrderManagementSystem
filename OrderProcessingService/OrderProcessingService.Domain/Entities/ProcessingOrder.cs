@@ -11,7 +11,7 @@ public class ProcessingOrder
     public DateTime CreatedAt { get; set; }
     public Stage Stage { get; set; }
     public ProcessingOrderStatus Status { get; set; }
-    public DateTime UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
     public Guid TrackingNumber { get; set; }
     
 }
