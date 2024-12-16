@@ -7,11 +7,11 @@ using Order.Domain.Exceptions;
 
 namespace Order.Infrastructure.Services;
 
-public class QuantityService : IQuantityService
+public class CatalogService : ICatalogService
 {
     private readonly ICatalogServiceClient _catalogServiceClient;
 
-    public QuantityService(ICatalogServiceClient catalogServiceClient)
+    public CatalogService(ICatalogServiceClient catalogServiceClient)
     {
         _catalogServiceClient = catalogServiceClient;
     }

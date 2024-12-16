@@ -15,7 +15,7 @@ namespace Order.Application.Services
         IOrderRepository orderRepository,
         IKafkaProducer<CreateOrderKafkaModel> createOrderProducer,
         IKafkaProducer<UpdatedOrderKafkaModel> updatedOrderProducer,
-        IQuantityService quantityService) : IOrderService
+        ICatalogService catalogService) : IOrderService
     {
         public async Task<OrderModelResponse> CreateAsync(CreateOrderRequest request, CancellationToken ct)
         {
@@ -24,12 +24,7 @@ namespace Order.Application.Services
             
             var productItemModels = request.ProductItemModels.ToList();
             
-            
-            
-            var result = await quantityService.TryChangeQuantityAsync(productItemModels, ct);
-            /*
-             вынес проверку в валидатор, но не могу избавиться от повтроного вызора TryChangeQuantityAsync
-             кажется что сделал только хуже эти т.к. 2 раза вызываю
+            var result = await catalogService.TryChangeQuantityAsync(productItemModels, ct);
              
             if (!result.IsSuccess)
             {
@@ -37,7 +32,7 @@ namespace Order.Application.Services
                 throw new AggregateException(result.Errors.Select(e => 
                     new CatalogServiceException(e.id, e.Message, e.StatusCode)));
             }
-            */
+
             var productItems = result.Value;
             var newOrder = await orderRepository.CreateAsync(productItems, ct);
 
