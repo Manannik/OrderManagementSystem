@@ -13,6 +13,7 @@ namespace OrderManagementSystem.Infrastructure.Repository
 
         public async Task<List<Category>> GetByIdAsync(List<Guid> ids, CancellationToken ct)
     {
+        Console.WriteLine($"Context in test: {dbContext.GetHashCode()}");
         return await dbContext.Categories.Where(f=>ids.Contains(f.Id)).ToListAsync(ct);
     }
 

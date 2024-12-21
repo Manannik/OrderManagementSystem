@@ -1,7 +1,6 @@
 ﻿using Application.BusinessLogic.Models;
 using Application.Models;
 using Domain.Abstractions;
-using Domain.Entities;
 using Domain.Exceptions;
 using MediatR;
 
