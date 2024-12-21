@@ -14,7 +14,7 @@ namespace Order.Infrastructure.Extensions
             IConfiguration configuration)
         {
             services.AddScoped<ICatalogServiceClient, CatalogServiceClient>();
-            services.AddScoped<IQuantityService, QuantityService>();
+            services.AddScoped<ICatalogService, CatalogService>();
             services.AddProducer<CreateOrderKafkaModel>(configuration.GetSection("Kafka:Order"));
             services.AddProducer<UpdatedOrderKafkaModel>(configuration.GetSection("Kafka:UpdatedOrder"));
             services.AddHttpClient<ICatalogServiceClient, CatalogServiceClient>(options =>

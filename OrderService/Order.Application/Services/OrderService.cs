@@ -15,7 +15,7 @@ namespace Order.Application.Services
         IOrderRepository orderRepository,
         IKafkaProducer<CreateOrderKafkaModel> createOrderProducer,
         IKafkaProducer<UpdatedOrderKafkaModel> updatedOrderProducer,
-        IQuantityService quantityService) : IOrderService
+        ICatalogService catalogService) : IOrderService
     {
         public async Task<OrderModelResponse> CreateAsync(CreateOrderRequest request, CancellationToken ct)
         {
@@ -23,8 +23,9 @@ namespace Order.Application.Services
                 request.ProductItemModels);
             
             var productItemModels = request.ProductItemModels.ToList();
-
-            var result = await quantityService.TryChangeQuantityAsync(productItemModels, ct);
+            
+            var result = await catalogService.TryChangeQuantityAsync(productItemModels, ct);
+             
             if (!result.IsSuccess)
             {
                 logger.LogWarning("Обнаружены ошибки: {Errors}", result.Errors);
