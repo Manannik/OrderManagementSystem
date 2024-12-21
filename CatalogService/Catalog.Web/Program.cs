@@ -45,12 +45,19 @@ app.MapControllers();
 
 app.Run();
 
-static void MigrateDb(IApplicationBuilder app)
+public partial class Program
 {
-    var scopeFactory = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
+    static void MigrateDb(IApplicationBuilder app)
+    {
+        var scopeFactory = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
 
-    using var scope = scopeFactory.CreateScope();
-    var dbContext = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
-    dbContext.Database.Migrate();
+        using var scope = scopeFactory.CreateScope();
+        var services = scope.ServiceProvider;
+
+        var dbContext = services.GetRequiredService<CatalogDbContext>();
+        if (dbContext.Database.IsRelational())
+        {
+            dbContext.Database.Migrate();
+        }
+    }
 }
-public partial class Program {}

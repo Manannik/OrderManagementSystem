@@ -10,6 +10,7 @@ namespace Order.Application.Extensions
             this IServiceCollection services)
         {
             services.AddScoped<IOrderService, OrderService>();
+
             return services;
         }
     }
