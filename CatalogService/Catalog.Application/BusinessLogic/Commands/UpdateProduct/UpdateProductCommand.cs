@@ -4,19 +4,19 @@ using Domain.Abstractions;
 using Domain.Exceptions;
 using MediatR;
 
-namespace Application.BusinessLogic.Commands.UpdateProduct;
-
-public class UpdateProductCommand : IRequest<ProductModelDto>
+namespace Application.BusinessLogic.Commands.UpdateProduct
 {
-    public Guid Id { get; set; }
-    public UpdateProductRequest Request { get; set; }
-}
+    public class UpdateProductCommand : IRequest<ProductModelDto>
+    {
+        public Guid Id { get; set; }
+        public UpdateProductRequest Request { get; set; }
+    }
 
-public class UpdateProductCommandHandle(IProductRepository productRepository, 
-    ICategoryRepository categoryRepository)
-    : IRequestHandler<UpdateProductCommand, ProductModelDto>
-{
-    public async Task<ProductModelDto> Handle(UpdateProductCommand request, CancellationToken ct)
+    public class UpdateProductCommandHandle(IProductRepository productRepository, 
+        ICategoryRepository categoryRepository)
+        : IRequestHandler<UpdateProductCommand, ProductModelDto>
+    {
+        public async Task<ProductModelDto> Handle(UpdateProductCommand request, CancellationToken ct)
     {
         var existingProduct = await productRepository.GetByIdAsync(request.Id, ct);
         
@@ -65,6 +65,7 @@ public class UpdateProductCommandHandle(IProductRepository productRepository,
         };
 
         return result;
+    }
     }
 }
 

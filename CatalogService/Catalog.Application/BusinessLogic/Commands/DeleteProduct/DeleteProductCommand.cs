@@ -2,16 +2,16 @@
 using Domain.Exceptions;
 using MediatR;
 
-namespace Application.BusinessLogic.Commands.DeleteProduct;
-
-public class DeleteProductCommand : IRequest
+namespace Application.BusinessLogic.Commands.DeleteProduct
 {
-    public Guid Id { get; set; }
-}
+    public class DeleteProductCommand : IRequest
+    {
+        public Guid Id { get; set; }
+    }
 
-public class DeleteProductCommandHandle(IProductRepository productRepository) : IRequestHandler<DeleteProductCommand>
-{
-    public async Task Handle(DeleteProductCommand request, CancellationToken ct)
+    public class DeleteProductCommandHandle(IProductRepository productRepository) : IRequestHandler<DeleteProductCommand>
+    {
+        public async Task Handle(DeleteProductCommand request, CancellationToken ct)
     {
         var existingProduct = await productRepository.GetByIdAsync(request.Id, ct);
         
@@ -21,5 +21,6 @@ public class DeleteProductCommandHandle(IProductRepository productRepository) : 
         }
         
         await productRepository.DeleteAsync(existingProduct,ct);
+    }
     }
 }

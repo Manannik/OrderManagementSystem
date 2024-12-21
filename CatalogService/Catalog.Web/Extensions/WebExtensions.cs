@@ -4,12 +4,12 @@ using MediatR;
 using MediatR.Pipeline;
 using WebApplication.Controllers.Validators;
 
-namespace WebApplication.Extensions;
-
-public static class WebExtensions
+namespace WebApplication.Extensions
 {
-    public static IServiceCollection AddWeb(
-        this IServiceCollection services)
+    public static class WebExtensions
+    {
+        public static IServiceCollection AddWeb(
+            this IServiceCollection services)
     {
         services.AddControllers();
         services.AddTransient<IValidator<CreateProductRequest>, CreateProductRequestValidator>();
@@ -18,5 +18,6 @@ public static class WebExtensions
         
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));
         return services;
+    }
     }
 }

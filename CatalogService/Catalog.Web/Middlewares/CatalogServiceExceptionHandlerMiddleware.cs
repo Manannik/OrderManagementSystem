@@ -1,11 +1,11 @@
 ﻿using Domain.Exceptions;
 
-namespace WebApplication.Middlewares;
-
-public class CatalogServiceExceptionHandlerMiddleware(ILogger<CatalogServiceExceptionHandlerMiddleware> _logger)
-    : IMiddleware
+namespace WebApplication.Middlewares
 {
-    public async Task InvokeAsync(HttpContext context, RequestDelegate next)
+    public class CatalogServiceExceptionHandlerMiddleware(ILogger<CatalogServiceExceptionHandlerMiddleware> _logger)
+        : IMiddleware
+    {
+        public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
         try
         {
@@ -40,5 +40,6 @@ public class CatalogServiceExceptionHandlerMiddleware(ILogger<CatalogServiceExce
                     break;
             }
         }
+    }
     }
 }

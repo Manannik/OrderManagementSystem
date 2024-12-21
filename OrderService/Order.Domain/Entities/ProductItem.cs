@@ -1,13 +1,15 @@
-﻿namespace Order.Domain.Entities;
+﻿using System.Text.Json.Serialization;
 
-public class ProductItem
+namespace Order.Domain.Entities
 {
-    public Guid ProductId { get; set; }
-    public decimal Price { get; set; }
-    public int Quantity { get; set; }
-    public List<Order> Orders { get; set; }
-    public ProductItem()
+    public class ProductItem
     {
-        Orders = new List<Order>();
+        public Guid Id { get; set; }
+        public Guid ProductId { get; set; }
+        public decimal Price { get; set; }
+        public int Quantity { get; set; }
+        public Guid OrderId { get; set; }
+        public Order Order { get; set; }
+
     }
 }

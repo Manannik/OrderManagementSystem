@@ -1,6 +1,7 @@
-﻿namespace Application.BusinessLogic.Models;
-
-public class CategoryModelDto
+﻿namespace Application.BusinessLogic.Models
 {
-    public Guid Id { get; set; }
+    public class CategoryModelDto
+    {
+        public Guid Id { get; set; }
+    }
 }

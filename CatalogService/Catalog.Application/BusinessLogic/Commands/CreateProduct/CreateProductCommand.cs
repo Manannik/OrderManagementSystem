@@ -4,50 +4,51 @@ using Domain.Entities;
 using Domain.Exceptions;
 using MediatR;
 
-namespace Application.BusinessLogic.Commands.CreateProduct;
-
-public class CreateProductCommand : IRequest
+namespace Application.BusinessLogic.Commands.CreateProduct
 {
-    public string Name { get; set; }
-    public string Description { get; set; }
-    public List<CategoryModelDto> CategoryModelDtos { get; set; }
-    public decimal Price { get; set; }
-    public int Quantity { get; set; }
-}
-
-public class CreateProductCommandHandler(
-    IProductRepository productRepository,
-    ICategoryRepository categoryRepository) : IRequestHandler<CreateProductCommand>
-{
-    public async Task Handle(CreateProductCommand request, CancellationToken ct)
+    public class CreateProductCommand : IRequest
     {
-        var isProductExist = await productRepository.ExistAsync(request.Name, ct);
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public List<CategoryModelDto> CategoryModelDtos { get; set; }
+        public decimal Price { get; set; }
+        public int Quantity { get; set; }
+    }
 
-        if (isProductExist)
+    public class CreateProductCommandHandler(
+        IProductRepository productRepository,
+        ICategoryRepository categoryRepository) : IRequestHandler<CreateProductCommand>
+    {
+        public async Task Handle(CreateProductCommand request, CancellationToken ct)
         {
-            throw new ProductAlreadyExistException(request.Name);
-        }
+            var isProductExist = await productRepository.ExistAsync(request.Name, ct);
 
-        var categoriesId = request.CategoryModelDtos.Select(f => f.Id).ToList();
-        var existingCategories = await categoryRepository.GetByIdAsync(categoriesId, ct);
+            if (isProductExist)
+            {
+                throw new ProductAlreadyExistException(request.Name);
+            }
 
-        var exceptedCategoriesIds = categoriesId.Except(existingCategories.Select(f => f.Id)).ToList();
+            var categoriesId = request.CategoryModelDtos.Select(f => f.Id).ToList();
+            var existingCategories = await categoryRepository.GetByIdAsync(categoriesId, ct);
+
+            var exceptedCategoriesIds = categoriesId.Except(existingCategories.Select(f => f.Id)).ToList();
         
-        if (exceptedCategoriesIds.Count != 0)
-        {
-            throw new WrongCategoryException(exceptedCategoriesIds);
+            if (exceptedCategoriesIds.Count != 0)
+            {
+                throw new WrongCategoryException(exceptedCategoriesIds);
+            }
+
+            var product = new Product()
+            {
+                Name = request.Name,
+                Description = request.Description,
+                Categories = existingCategories,
+                Price = request.Price,
+                Quantity = request.Quantity,
+                CreatedDateUtc = DateTime.UtcNow,
+            };
+
+            await productRepository.CreateAsync(product, ct);
         }
-
-        var product = new Product()
-        {
-            Name = request.Name,
-            Description = request.Description,
-            Categories = existingCategories,
-            Price = request.Price,
-            Quantity = request.Quantity,
-            CreatedDateUtc = DateTime.UtcNow,
-        };
-
-        await productRepository.CreateAsync(product, ct);
     }
 }

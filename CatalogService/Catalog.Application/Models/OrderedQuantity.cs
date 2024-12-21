@@ -1,7 +1,8 @@
-﻿namespace Application.Models;
-
-public class OrderedQuantity
+﻿namespace Application.Models
 {
-    public Guid Id { get; set; }
-    public int OrderQuantity { get; set; }
+    public class OrderedQuantity
+    {
+        public Guid Id { get; set; }
+        public int OrderQuantity { get; set; }
+    }
 }
