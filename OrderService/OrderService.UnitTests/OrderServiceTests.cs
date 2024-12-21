@@ -16,7 +16,7 @@ public class OrderServiceTests
 {
     private Mock<IOrderRepository> _mockOrderRepository;
     private IOrderService _orderService;
-    private Mock<IQuantityService> _mockQuantityService;
+    private Mock<ICatalogService> _mockQuantityService;
     private Mock<ICatalogServiceClient> _catalogServiceClient;
     private Mock<IKafkaProducer<CreateOrderKafkaModel>> _mockCreateOrderProducer;
     private Mock<IKafkaProducer<UpdatedOrderKafkaModel>> _mockUpdatedOrderProducer;
@@ -25,7 +25,7 @@ public class OrderServiceTests
     public OrderServiceTests()
     {
         _mockOrderRepository = new Mock<IOrderRepository>();
-        _mockQuantityService = new Mock<IQuantityService>();
+        _mockQuantityService = new Mock<ICatalogService>();
         _mockCreateOrderProducer = new Mock<IKafkaProducer<CreateOrderKafkaModel>>();
         _mockUpdatedOrderProducer = new Mock<IKafkaProducer<UpdatedOrderKafkaModel>>();
         _mockLogger = new Mock<ILogger<Order.Application.Services.OrderService>>();
