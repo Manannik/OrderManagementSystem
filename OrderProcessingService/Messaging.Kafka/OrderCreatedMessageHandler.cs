@@ -1,4 +1,5 @@
 ﻿using Messaging.Kafka.Models;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OrderProcessingService.Domain.Abstractions;
 using OrderProcessingService.Domain.Entities;
@@ -7,13 +8,15 @@ using OrderProcessingService.Domain.Enums;
 namespace Messaging.Kafka;
 
 public class OrderCreatedMessageHandler(ILogger<OrderCreatedMessageHandler> logger, 
-    IOrderProcessingRepository processingRepository) : IMessageHandler<OrderCreated>
+    IServiceScopeFactory serviceScopeFactory) : IMessageHandler<OrderCreated>
 {
     public async Task HandleAsync(OrderCreated message, CancellationToken cancellationToken)
     {
         logger.LogInformation($"Заказ создан. Начинаем обработку {message.Id}");
         if (message is OrderCreated orderMessage)
         {
+            using var scope = serviceScopeFactory.CreateScope();
+            var processingRepository = scope.ServiceProvider.GetRequiredService<IOrderProcessingRepository>();
             var processingOrder = new ProcessingOrder()
             {
                 Id = Guid.NewGuid(),
