@@ -1,4 +1,4 @@
-﻿namespace OrderProcessingService.Application.Models.Kafka;
+﻿namespace Messaging.Kafka.Models;
 
 public class ItemModel
 {

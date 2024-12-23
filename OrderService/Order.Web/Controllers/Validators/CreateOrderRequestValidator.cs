@@ -25,17 +25,6 @@ namespace Order.Web.Controllers.Validators
             RuleFor(request => request.ProductItemModels)
                 .Must(productItemModels => productItemModels != null && productItemModels.Any())
                 .WithMessage("Товары не должны быть Null или пустыми");
-            
-            RuleFor(request => request)
-                .MustAsync(ValidateQuantitiesAsync)
-                .WithMessage("Некоторые товары имеют недоступное количество.");
-        }
-        
-        private async Task<bool> ValidateQuantitiesAsync(CreateOrderRequest request, CancellationToken ct)
-        {
-            var productItemModels = request.ProductItemModels.ToList();
-            var result = await _quantityService.TryChangeQuantityAsync(productItemModels, ct);
-            return result.IsSuccess;
         }
     }
 }

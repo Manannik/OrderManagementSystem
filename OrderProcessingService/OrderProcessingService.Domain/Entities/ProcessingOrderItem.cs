@@ -2,11 +2,11 @@
 
 namespace OrderProcessingService.Domain.Entities;
 
-public class Item
+public class ProcessingOrderItem
 {
     public Guid ProductId { get; set; }
     public int Quantity { get; set; }
-    public OrderStatus Status { get; set; }
+    public ProcessingOrderItemStatus ProcessingOrderItemStatus { get; set; }
     
     public Guid ProcessingOrderId { get; set; }
     public ProcessingOrder ProcessingOrder { get; set; }

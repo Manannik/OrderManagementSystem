@@ -24,20 +24,8 @@ namespace Order.Application.Services
             
             var productItemModels = request.ProductItemModels.ToList();
             
-            
-            
             var result = await quantityService.TryChangeQuantityAsync(productItemModels, ct);
-            /*
-             вынес проверку в валидатор, но не могу избавиться от повтроного вызора TryChangeQuantityAsync
-             кажется что сделал только хуже эти т.к. 2 раза вызываю
-             
-            if (!result.IsSuccess)
-            {
-                logger.LogWarning("Обнаружены ошибки: {Errors}", result.Errors);
-                throw new AggregateException(result.Errors.Select(e => 
-                    new CatalogServiceException(e.id, e.Message, e.StatusCode)));
-            }
-            */
+
             var productItems = result.Value;
             var newOrder = await orderRepository.CreateAsync(productItems, ct);
 

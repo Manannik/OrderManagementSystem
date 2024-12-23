@@ -6,7 +6,7 @@ public class ProcessingOrder
 {
     public Guid Id { get; set; }
     public Guid OrderId { get; set; }
-    public List<Item> Items { get; set; }
+    public List<ProcessingOrderItem> Items { get; set; }
     
     public DateTime CreatedAt { get; set; }
     public Stage Stage { get; set; }

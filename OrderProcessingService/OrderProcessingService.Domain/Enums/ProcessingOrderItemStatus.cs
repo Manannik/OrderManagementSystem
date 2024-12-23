@@ -1,6 +1,6 @@
 ﻿namespace OrderProcessingService.Domain.Enums;
 
-public enum OrderStatus
+public enum ProcessingOrderItemStatus
 {
     Pending,
     Ready

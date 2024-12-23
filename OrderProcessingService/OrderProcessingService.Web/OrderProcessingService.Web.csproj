@@ -17,6 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Messaging.Kafka\Messaging.Kafka.csproj" />
       <ProjectReference Include="..\OrderProcessingService.Infrastructure\OrderProcessingService.Infrastructure.csproj" />
       <ProjectReference Include="..\OrderProcessingService.Persistence\OrderProcessingService.Persistence.csproj" />
     </ItemGroup>
@@ -25,6 +26,10 @@
       <Content Include="..\..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Services\" />
     </ItemGroup>
 
 </Project>

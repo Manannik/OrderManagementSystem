@@ -7,7 +7,9 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Folder Include="Abstarctions\" />
       <Folder Include="Extensions\" />
+      <Folder Include="Models\" />
     </ItemGroup>
 
 </Project>

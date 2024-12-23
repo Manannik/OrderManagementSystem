@@ -1,9 +1,9 @@
 using Hangfire;
 using HangfireBasicAuthenticationFilter;
 using Infrastructure.Persistence.Extensions;
-using OrderProcessingService.Application.Models.Kafka;
+using Messaging.Kafka;
+using Messaging.Kafka.Models;
 using OrderProcessingService.Infrastructure.Extensions;
-using OrderProcessingService.Web.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,8 +15,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddWeb<CreateOrderKafkaModel>();
-
+builder.Services.AddConsumer<OrderCreated, OrderCreatedMessageHandler>(
+    builder.Configuration.GetSection("Kafka:OrderCreated"));
 // builder.Services.AddWeb<string>();
 
 var app = builder.Build();
@@ -35,7 +35,7 @@ app.UseAuthorization();
 app.UseHangfireDashboard();
 app.MapHangfireDashboard("/hangfire", new DashboardOptions()
 {
-    DashboardTitle = "OrderProcessingService",
+    DashboardTitle = "Order-processing-service",
     Authorization = new[]
     {
         new HangfireCustomBasicAuthenticationFilter()
