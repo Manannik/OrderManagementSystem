@@ -9,7 +9,6 @@ namespace Messaging.Kafka;
 
 public class OrderCreatedMessageHandler(
     ILogger<OrderCreatedMessageHandler> logger,
-    IServiceScopeFactory serviceScopeFactory,
     IOrderProcessingRepository orderProcessingRepository) : IMessageHandler<OrderCreated>
 {
     public async Task HandleAsync(OrderCreated message, CancellationToken cancellationToken)
