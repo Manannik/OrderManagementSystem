@@ -7,9 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Abstarctions\" />
-      <Folder Include="Extensions\" />
-      <Folder Include="Models\" />
+        <PackageReference Include="Serilog.AspNetCore" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.0" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\OrderProcessingService.Domain\OrderProcessingService.Domain.csproj" />
     </ItemGroup>
 
 </Project>

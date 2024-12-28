@@ -1,19 +1,39 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using OrderProcessingService.Application.Abstarctions;
 
-namespace OrderProcessingService.Web.Controllers;
-
-[ApiController]
-[Route("[controller]")]
-public class OrderProcessingController : ControllerBase
+namespace OrderProcessingService.Web.Controllers
 {
-    private static readonly string[] Summaries = new[]
+    [ApiController]
+    [Route("[controller]")]
+    public class OrderProcessingController : ControllerBase
     {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
-    private readonly ILogger<OrderProcessingController> _logger;
+        private readonly ILogger<OrderProcessingController> _logger;
 
-    public OrderProcessingController(ILogger<OrderProcessingController> logger)
-    {
-        _logger = logger;
+        private readonly IOrderProcessingService _orderProcessingService;
+        public OrderProcessingController(ILogger<OrderProcessingController> logger,
+            IOrderProcessingService orderProcessingService)
+        {
+            _logger = logger;
+            _orderProcessingService = orderProcessingService;
+        }
+
+        [HttpPost("{id}/process")]
+        public async Task<IActionResult> ProcessOrder(Guid processingOrderId, CancellationToken ct)
+        {
+            _logger.LogInformation("запуск метод ProcessOrder для товара с Id: {@Request}", processingOrderId);
+            
+            var existingOrderProcessingModel =
+                await _orderProcessingService.ProcessOrderByIdAsync(processingOrderId, ct);
+            
+            _logger.LogInformation("Заказ с id = {@Request} готов к отправке:", processingOrderId);
+            return Ok(existingOrderProcessingModel);
+        }
+
+        [HttpPost("{id}/deliver")]
+        public async Task<IActionResult> DeliverOrder(Guid processingOrderId, CancellationToken ct)
+        {
+            return Ok();
+        }
     }
 }

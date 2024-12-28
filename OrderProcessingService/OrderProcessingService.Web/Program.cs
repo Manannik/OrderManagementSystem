@@ -3,7 +3,9 @@ using HangfireBasicAuthenticationFilter;
 using Infrastructure.Persistence.Extensions;
 using Messaging.Kafka;
 using Messaging.Kafka.Models;
+using OrderProcessingService.Application.Extensions;
 using OrderProcessingService.Infrastructure.Extensions;
+using OrderProcessingService.Web.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,8 +13,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddTransient<OrderProcessingServiceExceptionHandlerMiddleware>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddConsumer<OrderCreated, OrderCreatedMessageHandler>(
@@ -29,6 +33,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<OrderProcessingServiceExceptionHandlerMiddleware>();
 
 app.UseAuthorization();
 

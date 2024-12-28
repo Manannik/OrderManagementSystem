@@ -18,6 +18,5 @@ public static class OrderStatusTransitions
         return AllowedTransitions.ContainsKey(currentStatus) && 
                AllowedTransitions[currentStatus].Contains(newStatus);
     }
-    
 
 }

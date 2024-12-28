@@ -6,12 +6,4 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
-    <ItemGroup>
-      <Folder Include="Extensions\" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\OrderProcessingService.Application\OrderProcessingService.Application.csproj" />
-    </ItemGroup>
-
 </Project>

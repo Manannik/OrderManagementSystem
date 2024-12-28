@@ -7,16 +7,16 @@ using OrderProcessingService.Domain.Enums;
 
 namespace Messaging.Kafka;
 
-public class OrderCreatedMessageHandler(ILogger<OrderCreatedMessageHandler> logger, 
-    IServiceScopeFactory serviceScopeFactory) : IMessageHandler<OrderCreated>
+public class OrderCreatedMessageHandler(
+    ILogger<OrderCreatedMessageHandler> logger,
+    IServiceScopeFactory serviceScopeFactory,
+    IOrderProcessingRepository orderProcessingRepository) : IMessageHandler<OrderCreated>
 {
     public async Task HandleAsync(OrderCreated message, CancellationToken cancellationToken)
     {
         logger.LogInformation($"Заказ создан. Начинаем обработку {message.Id}");
         if (message is OrderCreated orderMessage)
         {
-            using var scope = serviceScopeFactory.CreateScope();
-            var processingRepository = scope.ServiceProvider.GetRequiredService<IOrderProcessingRepository>();
             var processingOrder = new ProcessingOrder()
             {
                 Id = Guid.NewGuid(),
@@ -27,11 +27,8 @@ public class OrderCreatedMessageHandler(ILogger<OrderCreatedMessageHandler> logg
                     ProcessingOrderItemStatus = ProcessingOrderItemStatus.Pending,
                     Quantity = f.Quantity,
                 }).ToList(),
-                Stage = Stage.Assembly,
-                Status = ProcessingOrderStatus.New,
-                CreatedAt = DateTime.UtcNow
             };
-            await processingRepository.CreateAsync(processingOrder, cancellationToken);
+            await orderProcessingRepository.CreateAsync(processingOrder, cancellationToken);
         }
     }
 }

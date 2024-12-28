@@ -1,4 +1,5 @@
 ﻿using Confluent.Kafka;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
@@ -6,13 +7,13 @@ namespace Messaging.Kafka;
 
 public class KafkaConsumer<TMessage> : BackgroundService
 {
-    private readonly IMessageHandler<TMessage> _messageHandler;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly string _topic;
     private readonly IConsumer<string, TMessage> _consumer;
 
-    public KafkaConsumer(IOptions<KafkaSetting> kafkaSettings, IMessageHandler<TMessage> messageHandler)
+    public KafkaConsumer(IOptions<KafkaSetting> kafkaSettings, IMessageHandler<TMessage> messageHandler, IServiceScopeFactory serviceScopeFactory)
     {
-        _messageHandler = messageHandler;
+        _serviceScopeFactory = serviceScopeFactory;
         var config = new ConsumerConfig()
         {
             AutoOffsetReset = AutoOffsetReset.Earliest,
@@ -37,7 +38,9 @@ public class KafkaConsumer<TMessage> : BackgroundService
             while (!stoppingToken.IsCancellationRequested)
             {
                 var result = _consumer.Consume(stoppingToken);
-                await _messageHandler.HandleAsync(result.Message.Value, stoppingToken);
+                using var scope = _serviceScopeFactory.CreateScope();
+                var messageHandler = scope.ServiceProvider.GetRequiredService<IMessageHandler<TMessage>>();
+                await messageHandler.HandleAsync(result.Message.Value, stoppingToken);
             }
         }
         catch (Exception e)
