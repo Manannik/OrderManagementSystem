@@ -9,12 +9,12 @@ namespace WebApplication1
         : IRequestPreProcessor<CreateProductCommand>
     {
         public async Task Process(CreateProductCommand request, CancellationToken ct)
-    {
-        var validationResult = await validator.ValidateAsync(request, ct);
-        if (!validationResult.IsValid)
         {
-            throw new ValidationException(validationResult.Errors);
+            var validationResult = await validator.ValidateAsync(request, ct);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
         }
-    }
     }
 }

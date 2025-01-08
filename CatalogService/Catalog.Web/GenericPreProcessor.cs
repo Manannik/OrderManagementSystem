@@ -17,6 +17,7 @@ namespace WebApplication1
 
         public async Task Process(TRequest request, CancellationToken cancellationToken)
     {
+        _logger.LogWarning("Старт работы валидатора");
         var validationResult = await _validator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
         {
