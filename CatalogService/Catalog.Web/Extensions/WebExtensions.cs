@@ -19,9 +19,9 @@ namespace WebApplication.Extensions
             //services.AddScoped<IValidator<OrderedQuantity>, UpdateProductQuantityRequestValidator>();
             
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+            //services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             
-            //services.AddScoped(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));
+            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));
             return services;
         }
     }
