@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Application.BusinessLogic.Commands.CreateProduct;
 using Application.Models;
 using FluentValidation;
 using MediatR;
@@ -14,14 +15,15 @@ namespace WebApplication.Extensions
             this IServiceCollection services)
         {
             services.AddControllers();
-            //services.AddScoped<IValidator<CreateProductRequest>, CreateProductRequestValidator>();
+            //services.AddScoped<IValidator<CreateProductRequest>, CreateProductCommandValidator>();
             //services.AddScoped<IValidator<UpdateProductRequest>, UpdateProductRequestValidator>();
             //services.AddScoped<IValidator<OrderedQuantity>, UpdateProductQuantityRequestValidator>();
             
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             //services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             
-            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));
+            //services.AddScoped(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));
+
             return services;
         }
     }

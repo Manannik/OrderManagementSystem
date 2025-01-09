@@ -1,11 +1,10 @@
-﻿using Application.Models;
-using FluentValidation;
+﻿using FluentValidation;
 
-namespace WebApplication.Controllers.Validators
+namespace Application.BusinessLogic.Commands.CreateProduct
 {
-    public class CreateProductRequestValidator : AbstractValidator<CreateProductRequest>
+    public class CreateProductCommandValidator : AbstractValidator<CreateProductCommand>
     {
-        public CreateProductRequestValidator()
+        public CreateProductCommandValidator()
     {
         RuleFor(f => f.Price)
             .NotEmpty()

@@ -1,11 +1,9 @@
-﻿using Application.BusinessLogic.Commands.CreateProduct;
-using Application.Models;
-using FluentValidation;
+﻿using FluentValidation;
 using MediatR.Pipeline;
 
-namespace WebApplication1
+namespace Application.BusinessLogic.Commands.CreateProduct
 {
-    public class CreateProductRequestPreProcessor(IValidator<CreateProductCommand> validator)
+    public class CreateProductCommandPreProcessor(IValidator<CreateProductCommand> validator)
         : IRequestPreProcessor<CreateProductCommand>
     {
         public async Task Process(CreateProductCommand request, CancellationToken ct)
