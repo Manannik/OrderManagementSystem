@@ -35,12 +35,32 @@ public class OrderProcessingService : IOrderProcessingService
 
         var existingProcessingOrderModel = MapToModel(existingProcessingOrder);
 
-        _hangfireBackgroundTaskService.ScheduleProductAssemblyTask(existingProcessingOrderModel.Id, 
-            existingProcessingOrderModel.Items,ct);
-
+        await SimulateEmployeeWork(ct, existingProcessingOrderModel, existingProcessingOrder);
+        
+        //кажется лишним ходить второй раз в БД после работы метода SimulateEmployeeWork
         var result = await _processingRepository.GetByIdAsync(id, ct);
+        
         _logger.LogInformation("Успешное завершение метода GetById для заказа с id: {Id}", id);
         return MapToModel(result);
+    }
+
+    private async Task SimulateEmployeeWork(CancellationToken ct, ProcessingOrderModel existingProcessingOrderModel,
+        ProcessingOrder existingProcessingOrder)
+    {
+        _logger.LogInformation("Начинаем сборку товара для задачи с ID: {TaskId}", existingProcessingOrderModel.Id);
+        await Task.Delay(1000, ct);
+        foreach (var item in existingProcessingOrderModel.Items)
+        {
+            _logger.LogInformation("Пришел за товаром {ProductId}", item.ProductId);
+            item.ProcessingOrderItemStatus = ProcessingOrderItemStatusModel.Ready;
+            _logger.LogInformation("Статус позиции {ProductId} изменен на Ready", item.ProductId);
+        }
+        await Task.Delay(1000, ct);
+        _logger.LogInformation("Все позиции готовы. Меняем состояние сборки на Completed.");
+        await UpdateProcessingOrderStatusToCompletedAsync(existingProcessingOrder.Id, existingProcessingOrderModel.Items, ct);
+        
+        await Task.Delay(1000, ct);
+        _logger.LogInformation("Процесс сборки завершен для заказа с ID: {OrderId}", existingProcessingOrder.Id);
     }
 
     public async Task UpdateProcessingOrderStatusToCompletedAsync(Guid id, List<ProcessingOrderItemModel> items, CancellationToken ct)
