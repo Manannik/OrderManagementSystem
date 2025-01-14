@@ -1,5 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
-using OrderProcessingService.Application.Abstarctions;
+﻿using Hangfire;
+using Microsoft.Extensions.Logging;
+using OrderProcessingService.Application.Abstractions;
 using OrderProcessingService.Application.Enums;
 using OrderProcessingService.Application.Models;
 using OrderProcessingService.Domain.Abstractions;
@@ -13,16 +14,13 @@ public class OrderProcessingService : IOrderProcessingService
 {
     private ILogger<OrderProcessingService> _logger;
     private IOrderProcessingRepository _processingRepository;
-    private IHangfireBackgroundTaskService _hangfireBackgroundTaskService;
 
     public OrderProcessingService(ILogger<OrderProcessingService> logger,
-        IOrderProcessingRepository processingRepository,
-        IHangfireBackgroundTaskService hangfireBackgroundTaskService)
-    {
-        _logger = logger;
-        _processingRepository = processingRepository;
-        _hangfireBackgroundTaskService = hangfireBackgroundTaskService;
-    }
+        IOrderProcessingRepository processingRepository)
+        {
+            _logger = logger;
+            _processingRepository = processingRepository;
+        }
 
     public async Task<ProcessingOrderModel> ProcessOrderByIdAsync(Guid id, CancellationToken ct)
     {
@@ -35,38 +33,11 @@ public class OrderProcessingService : IOrderProcessingService
 
         var existingProcessingOrderModel = MapToModel(existingProcessingOrder);
 
-        await SimulateEmployeeWork(ct, existingProcessingOrderModel, existingProcessingOrder);
-        
-        //кажется лишним ходить второй раз в БД после работы метода SimulateEmployeeWork
+        BackgroundJob.Enqueue<IWorkerSimulator>(worker => worker.SimulateAsync(ct,existingProcessingOrderModel,existingProcessingOrder));
         var result = await _processingRepository.GetByIdAsync(id, ct);
         
         _logger.LogInformation("Успешное завершение метода GetById для заказа с id: {Id}", id);
         return MapToModel(result);
-    }
-
-    private async Task SimulateEmployeeWork(CancellationToken ct, ProcessingOrderModel existingProcessingOrderModel,
-        ProcessingOrder existingProcessingOrder)
-    {
-        _logger.LogInformation("Начинаем сборку товара для задачи с ID: {TaskId}", existingProcessingOrderModel.Id);
-        await Task.Delay(1000, ct);
-        foreach (var item in existingProcessingOrderModel.Items)
-        {
-            _logger.LogInformation("Пришел за товаром {ProductId}", item.ProductId);
-            item.ProcessingOrderItemStatus = ProcessingOrderItemStatusModel.Ready;
-            _logger.LogInformation("Статус позиции {ProductId} изменен на Ready", item.ProductId);
-        }
-        await Task.Delay(1000, ct);
-        _logger.LogInformation("Все позиции готовы. Меняем состояние сборки на Completed.");
-        await UpdateProcessingOrderStatusToCompletedAsync(existingProcessingOrder.Id, existingProcessingOrderModel.Items, ct);
-        
-        await Task.Delay(1000, ct);
-        _logger.LogInformation("Процесс сборки завершен для заказа с ID: {OrderId}", existingProcessingOrder.Id);
-    }
-
-    public async Task UpdateProcessingOrderStatusToCompletedAsync(Guid id, List<ProcessingOrderItemModel> items, CancellationToken ct)
-    {
-        var existingProcessingOrder = await _processingRepository.GetByIdAsync(id, ct);
-        await _processingRepository.ChangeProcessingOrderStatusToCompleted(existingProcessingOrder, ct);
     }
 
     private void ValidateProcessingOrder(ProcessingOrder existingProcessingOrder, Guid id)

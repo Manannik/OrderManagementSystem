@@ -1,10 +1,13 @@
 using Hangfire;
 using HangfireBasicAuthenticationFilter;
+using Infrastructure.Persistence;
 using Infrastructure.Persistence.Extensions;
 using Messaging.Kafka;
 using Messaging.Kafka.Models;
+using Microsoft.EntityFrameworkCore;
 using OrderProcessingService.Application.Extensions;
 using OrderProcessingService.Infrastructure.Extensions;
+using OrderProcessingService.Web.Extensions;
 using OrderProcessingService.Web.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,15 +19,14 @@ builder.Services.AddControllers();
 builder.Services.AddTransient<OrderProcessingServiceExceptionHandlerMiddleware>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddConsumer<OrderCreated, OrderCreatedMessageHandler>(
-    builder.Configuration.GetSection("Kafka:OrderCreated"));
-// builder.Services.AddWeb<string>();
+builder.Services.AddWeb<string>(builder.Configuration);
 
 var app = builder.Build();
-
+MigrateDb(app);
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -55,3 +57,12 @@ app.MapHangfireDashboard("/hangfire", new DashboardOptions()
 app.MapControllers();
 
 app.Run();
+
+static void MigrateDb(IApplicationBuilder app)
+{
+    var scopeFactory = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>();
+
+    using var scope = scopeFactory.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<OrderProcessingDbContext>();
+    dbContext.Database.Migrate();
+}

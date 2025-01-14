@@ -17,6 +17,7 @@ public static class PersistenceExtensions
         {
             options.UseNpgsql(configuration.GetConnectionString("OrderProcessingConnectionString"));
         });
+        
         return services;
     }
 }

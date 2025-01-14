@@ -10,7 +10,7 @@ public static class Extensions
     {
         serviceCollection.Configure<KafkaSetting>(configurationSection);
         serviceCollection.AddHostedService<KafkaConsumer<TMessage>>();
-        serviceCollection.AddSingleton<IMessageHandler<TMessage>, THandler>();
+        serviceCollection.AddScoped<IMessageHandler<TMessage>, THandler>();
 
         return serviceCollection;
     }

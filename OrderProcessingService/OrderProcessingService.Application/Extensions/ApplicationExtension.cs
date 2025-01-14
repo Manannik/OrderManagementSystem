@@ -1,7 +1,7 @@
 ﻿using Hangfire;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using OrderProcessingService.Application.Abstarctions;
+using OrderProcessingService.Application.Abstractions;
 using OrderProcessingService.Application.Services;
 
 namespace OrderProcessingService.Application.Extensions;
@@ -22,7 +22,8 @@ public static class ApplicationExtension
                 .UseSqlServerStorage(connectionString);
         });
         services.AddScoped<IOrderProcessingService,Services.OrderProcessingService>();
-        services.AddScoped<IHangfireBackgroundTaskService,HangfireBackgroundTaskService>();
+        
+        services.AddTransient<IWorkerSimulator, WorkerSimulator>();
         
         services.AddHangfireServer();
     }

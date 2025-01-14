@@ -1,6 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using OrderProcessingService.Application.Abstarctions;
+using OrderProcessingService.Application.Abstractions;
 
 namespace OrderProcessingService.Web.Controllers
 {
