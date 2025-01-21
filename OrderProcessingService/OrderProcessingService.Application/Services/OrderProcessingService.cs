@@ -33,7 +33,7 @@ public class OrderProcessingService : IOrderProcessingService
 
         var existingProcessingOrderModel = MapToModel(existingProcessingOrder);
 
-        BackgroundJob.Enqueue<IWorkerSimulator>(worker => worker.SimulateAsync(ct,existingProcessingOrderModel,existingProcessingOrder));
+        BackgroundJob.Enqueue<IWorkerSimulator>(worker => worker.SimulateAsync(existingProcessingOrderModel,existingProcessingOrder));
         var result = await _processingRepository.GetByIdAsync(id, ct);
         
         _logger.LogInformation("Успешное завершение метода GetById для заказа с id: {Id}", id);

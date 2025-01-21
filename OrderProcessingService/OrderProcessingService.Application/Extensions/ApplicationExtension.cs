@@ -1,4 +1,5 @@
 ﻿using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OrderProcessingService.Application.Abstractions;
@@ -15,11 +16,12 @@ public static class ApplicationExtension
         {
             var connectionString = sp.GetRequiredService<IConfiguration>()
                 .GetConnectionString("HangfireConnectionString");
-            
+
             config.SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
-                .UseSqlServerStorage(connectionString);
+                .UsePostgreSqlStorage(connectionString);
+            //.UseSqlServerStorage(connectionString);
         });
         services.AddScoped<IOrderProcessingService,Services.OrderProcessingService>();
         

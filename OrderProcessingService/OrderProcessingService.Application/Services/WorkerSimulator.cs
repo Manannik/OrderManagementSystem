@@ -18,23 +18,23 @@ public class WorkerSimulator : IWorkerSimulator
         _processingRepository = processingRepository;
     }
 
-    public async Task SimulateAsync(CancellationToken ct, ProcessingOrderModel processingOrderModel, ProcessingOrder processingOrder)
+    public async Task SimulateAsync(ProcessingOrderModel processingOrderModel, ProcessingOrder processingOrder)
     {
         _logger.LogInformation("Начинаем сборку товара для задачи с ID: {TaskId}", processingOrderModel.Id);
-        await Task.Delay(1000, ct);
+        await Task.Delay(1000);
         foreach (var item in processingOrderModel.Items)
         {
             _logger.LogInformation("Пришел за товаром {ProductId}", item.ProductId);
             item.ProcessingOrderItemStatus = ProcessingOrderItemStatusModel.Ready;
             _logger.LogInformation("Статус позиции {ProductId} изменен на Ready", item.ProductId);
         }
-        await Task.Delay(1000, ct);
+        await Task.Delay(1000);
         _logger.LogInformation("Все позиции готовы. Меняем состояние сборки на Completed.");
         
-        var existingProcessingOrder = await _processingRepository.GetByIdAsync(processingOrder.Id, ct);
-        await _processingRepository.ChangeProcessingOrderStatusToCompleted(existingProcessingOrder, ct);
+        var existingProcessingOrder = await _processingRepository.GetByIdAsync(processingOrder.Id, CancellationToken.None);
+        await _processingRepository.ChangeProcessingOrderStatusToCompleted(existingProcessingOrder, CancellationToken.None);
         
-        await Task.Delay(1000, ct);
+        await Task.Delay(1000);
         _logger.LogInformation("Процесс сборки завершен для заказа с ID: {OrderId}", processingOrder.Id);
     }
 }
