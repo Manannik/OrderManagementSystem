@@ -12,7 +12,7 @@ public static class ApplicationExtension
     public static void AddApplication(
         this IServiceCollection services)
     {
-        services.AddHangfire((sp,config) =>
+        services.AddHangfire((sp, config) =>
         {
             var connectionString = sp.GetRequiredService<IConfiguration>()
                 .GetConnectionString("HangfireConnectionString");
@@ -20,13 +20,13 @@ public static class ApplicationExtension
             config.SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
-                .UsePostgreSqlStorage(connectionString);
+                .UsePostgreSqlStorage(options => options.UseNpgsqlConnection(connectionString));
             //.UseSqlServerStorage(connectionString);
         });
-        services.AddScoped<IOrderProcessingService,Services.OrderProcessingService>();
-        
+        services.AddScoped<IOrderProcessingService, Services.OrderProcessingService>();
+
         services.AddTransient<IWorkerSimulator, WorkerSimulator>();
-        
+
         services.AddHangfireServer();
     }
 }

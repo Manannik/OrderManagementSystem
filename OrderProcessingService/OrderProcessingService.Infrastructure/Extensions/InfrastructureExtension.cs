@@ -12,19 +12,6 @@ public static class InfrastructureExtension
         IConfiguration configuration)
     {
         
-        services.AddHangfire((sp,config) =>
-        {
-            var connectionString = sp.GetRequiredService<IConfiguration>()
-                .GetConnectionString("HangfireConnectionString");
-            
-            config.SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
-                .UseSimpleAssemblyNameTypeSerializer()
-                .UseRecommendedSerializerSettings()
-                .UsePostgreSqlStorage(options =>
-                {
-                    options.UseNpgsqlConnection(connectionString);
-                });
-        });
-        services.AddHangfireServer();
+
     }
 }
