@@ -15,7 +15,7 @@ public static class PersistenceExtensions
 
         services.AddDbContext<OrderProcessingDbContext>(options =>
         {
-            options.UseNpgsql(configuration.GetConnectionString("OrderProcessingConnectionString"));
+            options.UseNpgsql(configuration.GetConnectionString("OrderProcessingServiceConnectionString"));
         });
         
         return services;

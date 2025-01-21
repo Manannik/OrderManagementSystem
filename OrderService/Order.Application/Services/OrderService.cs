@@ -37,7 +37,7 @@ namespace Order.Application.Services
                 CreatedAt = DateTime.UtcNow,
                 ProductItemModels = newOrder.ProductItems.Select(f=>new ProductItemModel()
                 {
-                    Id = f.Id,
+                    ProductId = f.Id,
                     Quantity = f.Quantity
                 }).ToList()
             };

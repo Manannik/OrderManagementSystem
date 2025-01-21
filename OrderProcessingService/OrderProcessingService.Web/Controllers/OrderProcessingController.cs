@@ -5,7 +5,7 @@ using OrderProcessingService.Application.Abstractions;
 namespace OrderProcessingService.Web.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class OrderProcessingController : ControllerBase
     {
         private readonly ILogger<OrderProcessingController> _logger;
@@ -18,8 +18,8 @@ namespace OrderProcessingService.Web.Controllers
             _orderProcessingService = orderProcessingService;
         }
 
-        [HttpPost("{id}/process")]
-        public async Task<IActionResult> ProcessOrder(Guid processingOrderId, CancellationToken ct)
+        [HttpPost("ProcessOrder")]
+        public async Task<IActionResult> ProcessOrder([FromBody]Guid processingOrderId, CancellationToken ct)
         {
             _logger.LogInformation("запуск метод ProcessOrder для товара с Id: {@Request}", processingOrderId);
             
@@ -30,8 +30,8 @@ namespace OrderProcessingService.Web.Controllers
             return Ok(existingOrderProcessingModel);
         }
 
-        [HttpPost("{id}/deliver")]
-        public async Task<IActionResult> DeliverOrder(Guid processingOrderId, CancellationToken ct)
+        [HttpPost("DeliverOrder")]
+        public async Task<IActionResult> DeliverOrder([FromRoute]Guid processingOrderId, CancellationToken ct)
         {
             return Ok();
         }

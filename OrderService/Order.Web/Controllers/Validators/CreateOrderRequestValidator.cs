@@ -15,7 +15,7 @@ namespace Order.Web.Controllers.Validators
             RuleForEach(f => f.ProductItemModels)
                 .ChildRules(productItem =>
                 {
-                    productItem.RuleFor(item => item.Id)
+                    productItem.RuleFor(item => item.ProductId)
                         .NotEqual(Guid.Empty).WithMessage("ID продукта не должен быть пустым GUID.");
 
                     productItem.RuleFor(item => item.Quantity)

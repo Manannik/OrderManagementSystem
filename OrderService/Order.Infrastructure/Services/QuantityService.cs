@@ -26,19 +26,19 @@ public class QuantityService : IQuantityService
         {
             try
             {
-                var result = await _catalogServiceClient.ChangeProductQuantityAsync(model.Id, model.Quantity, ct);
+                var result = await _catalogServiceClient.ChangeProductQuantityAsync(model.ProductId, model.Quantity, ct);
 
                 productItems.Add(new ProductItem
                 {
                     Id = Guid.NewGuid(),
-                    ProductId = model.Id,
+                    ProductId = model.ProductId,
                     Quantity = model.Quantity,
                     Price = result.Price
                 });
             }
             catch (CatalogServiceException ex)
             {
-                errors.Add((model.Id, ex.Message, ex.StatusCode));
+                errors.Add((model.ProductId, ex.Message, ex.StatusCode));
             }
         }).ToList();
 

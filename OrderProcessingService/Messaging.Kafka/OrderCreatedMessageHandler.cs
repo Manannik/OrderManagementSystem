@@ -20,7 +20,7 @@ public class OrderCreatedMessageHandler(
             {
                 Id = Guid.NewGuid(),
                 OrderId = orderMessage.Id,
-                Items = orderMessage.Items.Select(f => new ProcessingOrderItem()
+                Items = orderMessage.ProductItemModels.Select(f => new ProcessingOrderItem()
                 {
                     ProductId = f.ProductId,
                     ProcessingOrderItemStatus = ProcessingOrderItemStatus.Pending,

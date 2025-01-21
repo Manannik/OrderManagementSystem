@@ -11,14 +11,15 @@ public class KafkaConsumer<TMessage> : BackgroundService
     private readonly string _topic;
     private readonly IConsumer<string, TMessage> _consumer;
 
-    public KafkaConsumer(IOptions<KafkaSetting> kafkaSettings, IMessageHandler<TMessage> messageHandler, IServiceScopeFactory serviceScopeFactory)
+    public KafkaConsumer(IOptions<KafkaSetting> kafkaSettings, IServiceScopeFactory serviceScopeFactory)
     {
         _serviceScopeFactory = serviceScopeFactory;
         var config = new ConsumerConfig()
         {
             AutoOffsetReset = AutoOffsetReset.Earliest,
             BootstrapServers = kafkaSettings.Value.BootstrapServers,
-            GroupId = kafkaSettings.Value.GroupId
+            GroupId = kafkaSettings.Value.GroupId,
+            //EnableAutoCommit = false,
         };
 
         _topic = kafkaSettings.Value.Topic;

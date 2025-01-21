@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebApplication.Controllers
 {
-    [Route("[controller]")]
     [ApiController]
+    [Route("[controller]")]
     public class CatalogController(
         IMediator mediator,
         ILogger<CatalogController> logger) : ControllerBase
