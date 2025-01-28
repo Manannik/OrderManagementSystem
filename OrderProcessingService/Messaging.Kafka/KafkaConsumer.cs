@@ -19,7 +19,7 @@ public class KafkaConsumer<TMessage> : BackgroundService
             AutoOffsetReset = AutoOffsetReset.Earliest,
             BootstrapServers = kafkaSettings.Value.BootstrapServers,
             GroupId = kafkaSettings.Value.GroupId,
-            //EnableAutoCommit = false,
+            EnableAutoCommit = false,
         };
 
         _topic = kafkaSettings.Value.Topic;
