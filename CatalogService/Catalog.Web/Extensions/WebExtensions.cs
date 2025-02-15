@@ -1,11 +1,5 @@
 ﻿using System.Reflection;
-using Application.BusinessLogic.Commands.CreateProduct;
-using Application.Models;
 using FluentValidation;
-using MediatR;
-using MediatR.Pipeline;
-using WebApplication.Controllers.Validators;
-using WebApplication1;
 
 namespace WebApplication.Extensions
 {

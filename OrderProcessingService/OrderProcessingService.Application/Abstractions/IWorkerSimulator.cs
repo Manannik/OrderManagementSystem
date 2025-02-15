@@ -5,5 +5,5 @@ namespace OrderProcessingService.Application.Abstractions;
 
 public interface IWorkerSimulator
 {
-    Task SimulateAsync(ProcessingOrderModel processingOrderModel, ProcessingOrder processingOrder);
+    Task SimulateAsync(ProcessingOrderModel processingOrderModel);
 }

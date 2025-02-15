@@ -2,6 +2,7 @@
 using Messaging.Kafka;
 using Messaging.Kafka.Models;
 using Microsoft.Extensions.Options;
+using Serilog;
 
 namespace OrderProcessingService.Web.Extensions;
 

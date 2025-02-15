@@ -1,56 +1,75 @@
-version: '3.8'
+x-common: &common
+  restart: unless-stopped
 
 services:
   db:
-    image: postgres:16
-    volumes:
-      - ./data/postgres:/var/lib/postgresql/data
+    <<: *common
+    image: postgres:latest
     ports:
       - "5432:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: test
-
-  hangfiredb:
-    image: postgres:16
     volumes:
-      - ./data/hangfiredb:/var/lib/postgresql/data
-    ports:
-      - "5433:5432"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: test
-      POSTGRES_DB: HangfireDb
+      - db_data:/var/lib/postgresql/data
+    container_name: db_postgresql_container
+    networks:
+      - app-network
 
   catalog-service:
+    <<: *common
     build:
       context: ./CatalogService
       dockerfile: Catalog.Web/Dockerfile
     ports:
       - "8080:8080"
+    depends_on:
+      - db
+    container_name: catalog-service
+    # command: ["./wait-for-it.sh", "db:5432", "--", "dotnet", "Catalog.Web.dll"]
+    networks:
+      - app-network
 
   order-service:
+    <<: *common
     build:
-      context: ./OrderService 
+      context: ./OrderService
       dockerfile: Order.Web/Dockerfile
     ports:
       - "8081:8081"
+    depends_on:
+      - db
+    container_name: order-service
+    command: ["./wait-for-it.sh", "db:5432", "--", "dotnet", "Order.Web.dll"]
+    networks:
+      - app-network
 
   order-processing-service:
+    <<: *common
     build:
       context: ./OrderProcessingService
       dockerfile: OrderProcessingService.Web/Dockerfile
     ports:
       - "8082:8082"
+    depends_on:
+      - db
+    container_name: order-processing-service
+    command: ["./wait-for-it.sh", "db:5432", "--", "dotnet", "OrderProcessing.Web.dll"]
+    networks:
+      - app-network
 
   zookeeper:
+    <<: *common
     image: confluentinc/cp-zookeeper:latest
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
     ports:
       - "2181:2181"
+    networks:
+      - app-network
 
   kafka:
+    <<: *common
     image: confluentinc/cp-kafka:latest
     depends_on:
       - zookeeper
@@ -61,22 +80,24 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     ports:
       - "9092:9092"
+    networks:
+      - app-network
 
-x-common: &common
-  restart: unless-stopped
+  serilog_seq:
+    <<: *common
+    image: datalust/seq:latest
+    environment:
+      - ACCEPT_EULA=Y
+    ports:
+      - "5341:5341"
+      - "8083:80"
+    container_name: serilog_seq
+    networks:
+      - app-network
 
-services:
-  db:
-    <<: *common
-  hangfiredb:
-    <<: *common
-  catalog-service:
-    <<: *common
-  order-service:
-    <<: *common
-  order-processing-service:
-    <<: *common
-  zookeeper:
-    <<: *common
-  kafka:
-    <<: *common
+volumes:
+  db_data:
+
+networks:
+  app-network:
+    driver: bridge

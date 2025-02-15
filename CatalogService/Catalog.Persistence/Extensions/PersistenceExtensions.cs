@@ -9,15 +9,16 @@ namespace OrderManagementSystem.Infrastructure.Extensions
     public static class PersistenceExtensions
     {
         public static IServiceCollection AddPersistence(
-            this IServiceCollection services,IConfiguration configuration)
-    {
-        services.AddScoped<IProductRepository, ProductRepository>();
-        services.AddScoped<ICategoryRepository, CategoryRepository>();
-        services.AddDbContext<CatalogDbContext>(options =>
+            this IServiceCollection services, 
+            IConfiguration configuration)
         {
-            options.UseNpgsql(configuration.GetConnectionString("CatalogServiceConnectionString"));
-        });
-        return services;
-    }
+            services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddDbContext<CatalogDbContext>(options =>
+            {
+                options.UseNpgsql(configuration.GetConnectionString("CatalogServiceConnectionString"));
+            });
+            return services;
+        }
     }
 }

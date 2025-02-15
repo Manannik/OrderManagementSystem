@@ -18,7 +18,7 @@ public class WorkerSimulator : IWorkerSimulator
         _processingRepository = processingRepository;
     }
 
-    public async Task SimulateAsync(ProcessingOrderModel processingOrderModel, ProcessingOrder processingOrder)
+    public async Task SimulateAsync(ProcessingOrderModel processingOrderModel)
     {
         _logger.LogInformation("Начинаем сборку товара для задачи с ID: {TaskId}", processingOrderModel.Id);
         await Task.Delay(1000);
@@ -31,10 +31,10 @@ public class WorkerSimulator : IWorkerSimulator
         await Task.Delay(1000);
         _logger.LogInformation("Все позиции готовы. Меняем состояние сборки на Completed.");
         
-        var existingProcessingOrder = await _processingRepository.GetByIdAsync(processingOrder.Id, CancellationToken.None);
+        var existingProcessingOrder = await _processingRepository.GetByIdAsync(processingOrderModel.Id, CancellationToken.None);
         await _processingRepository.ChangeProcessingOrderStatusToCompleted(existingProcessingOrder, CancellationToken.None);
         
         await Task.Delay(1000);
-        _logger.LogInformation("Процесс сборки завершен для заказа с ID: {OrderId}", processingOrder.Id);
+        _logger.LogInformation("Процесс сборки завершен для заказа с ID: {OrderId}", processingOrderModel.Id);
     }
 }

@@ -4,5 +4,5 @@ namespace OrderProcessingService.Application.Abstractions;
 
 public interface IOrderProcessingService
 {
-    public Task<ProcessingOrderModel> ProcessOrderByIdAsync(Guid id,CancellationToken ct);
+    public Task<ProcessingOrderModel> AssembleOrderAsync(Guid id,CancellationToken ct);
 }

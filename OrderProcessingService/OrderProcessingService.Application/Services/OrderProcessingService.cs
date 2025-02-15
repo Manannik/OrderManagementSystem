@@ -22,7 +22,7 @@ public class OrderProcessingService : IOrderProcessingService
             _processingRepository = processingRepository;
         }
 
-    public async Task<ProcessingOrderModel> ProcessOrderByIdAsync(Guid id, CancellationToken ct)
+    public async Task<ProcessingOrderModel> AssembleOrderAsync(Guid id, CancellationToken ct)
     {
         _logger.LogInformation("Запуск метода GetById для заказа с id: {Id}", id);
 
@@ -33,7 +33,9 @@ public class OrderProcessingService : IOrderProcessingService
 
         var existingProcessingOrderModel = MapToModel(existingProcessingOrder);
 
-        BackgroundJob.Enqueue<IWorkerSimulator>(worker => worker.SimulateAsync(existingProcessingOrderModel,existingProcessingOrder));
+        var jobId = BackgroundJob.Enqueue<IWorkerSimulator>(worker => worker.SimulateAsync(existingProcessingOrderModel));
+        _logger.LogInformation("Задача добавлена в очередь фоновых работ. Job ID: {JobId}", jobId);
+        
         var result = await _processingRepository.GetByIdAsync(id, ct);
         
         _logger.LogInformation("Успешное завершение метода GetById для заказа с id: {Id}", id);
