@@ -2,8 +2,6 @@ using Hangfire;
 using HangfireBasicAuthenticationFilter;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Extensions;
-using Messaging.Kafka;
-using Messaging.Kafka.Models;
 using Microsoft.EntityFrameworkCore;
 using OrderProcessingService.Application.Extensions;
 using OrderProcessingService.Infrastructure.Extensions;
@@ -14,9 +12,6 @@ using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Host.UseSerilog((context, loggerConfiguration) =>
-    loggerConfiguration.ReadFrom.Configuration(context.Configuration));
-
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.Debug()
@@ -25,7 +20,6 @@ Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft.AspNetCore.Hosting", LogEventLevel.Warning)
     .MinimumLevel.Override("Microsoft.AspNetCore.Mvc", LogEventLevel.Warning)
     .MinimumLevel.Override("Microsoft.AspNetCore.Routing", LogEventLevel.Warning)
-    .MinimumLevel.Information()
     .CreateLogger();
 
 // Add services to the container.
@@ -44,6 +38,19 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddWeb<string>(builder.Configuration);
 
 var app = builder.Build();
+
+app.Use(async (context, next) =>
+{
+    var startTime = DateTime.UtcNow;
+    Log.Information("HTTP request started: {Method} {Path}", context.Request.Method, context.Request.Path);
+
+    await next();
+
+    var elapsedTime = DateTime.UtcNow - startTime;
+    Log.Information("HTTP request completed: {Method} {Path} in {ElapsedMilliseconds}ms",
+        context.Request.Method, context.Request.Path, elapsedTime.TotalMilliseconds);
+});
+
 MigrateDb(app);
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
