@@ -12,7 +12,7 @@ using OrderManagementSystem.Infrastructure;
 namespace OrderManagementSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(CatalogDbContext))]
-    [Migration("20240913101710_Initial")]
+    [Migration("20250215183702_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -25,7 +25,7 @@ namespace OrderManagementSystem.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Catalog.Domain.Entities.Category", b =>
+            modelBuilder.Entity("Domain.Entities.Category", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -44,10 +44,20 @@ namespace OrderManagementSystem.Infrastructure.Migrations
                         {
                             Id = new Guid("6af8acea-bfa5-438d-ac76-2767b6f2d651"),
                             Name = "Одежда"
+                        },
+                        new
+                        {
+                            Id = new Guid("6af8acea-bfa5-438d-ac76-2767b6f2d652"),
+                            Name = "Джинсы"
+                        },
+                        new
+                        {
+                            Id = new Guid("6af8acea-bfa5-438d-ac76-2767b6f2d653"),
+                            Name = "Куртка"
                         });
                 });
 
-            modelBuilder.Entity("Catalog.Domain.Entities.Product", b =>
+            modelBuilder.Entity("Domain.Entities.Product", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -78,7 +88,7 @@ namespace OrderManagementSystem.Infrastructure.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("Catalog.Domain.Entities.ProductCategory", b =>
+            modelBuilder.Entity("Domain.Entities.ProductCategory", b =>
                 {
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");
@@ -93,15 +103,15 @@ namespace OrderManagementSystem.Infrastructure.Migrations
                     b.ToTable("ProductCategory");
                 });
 
-            modelBuilder.Entity("Catalog.Domain.Entities.ProductCategory", b =>
+            modelBuilder.Entity("Domain.Entities.ProductCategory", b =>
                 {
-                    b.HasOne("Catalog.Domain.Entities.Category", "Category")
+                    b.HasOne("Domain.Entities.Category", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Catalog.Domain.Entities.Product", "Product")
+                    b.HasOne("Domain.Entities.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)

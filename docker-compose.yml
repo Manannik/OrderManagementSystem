@@ -9,9 +9,10 @@ services:
       - "5432:5432"
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: test
+      POSTGRES_PASSWORD: postgres
     volumes:
       - db_data:/var/lib/postgresql/data
+    #  - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     container_name: db_postgresql_container
     networks:
       - app-network
@@ -26,7 +27,7 @@ services:
     depends_on:
       - db
     container_name: catalog-service
-    # command: ["./wait-for-it.sh", "db:5432", "--", "dotnet", "Catalog.Web.dll"]
+    command: ["./wait-for-it.sh", "db:5432", "--", "dotnet", "Catalog.Web.dll"]
     networks:
       - app-network
 
@@ -54,7 +55,7 @@ services:
     depends_on:
       - db
     container_name: order-processing-service
-    command: ["./wait-for-it.sh", "db:5432", "--", "dotnet", "OrderProcessing.Web.dll"]
+    command: ["./wait-for-it.sh", "db:5432", "--", "dotnet", "OrderProcessingService.Web.dll"]
     networks:
       - app-network
 

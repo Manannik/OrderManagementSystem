@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace OrderManagementSystem.Infrastructure.Migrations
 {
     /// <inheritdoc />
@@ -67,7 +69,12 @@ namespace OrderManagementSystem.Infrastructure.Migrations
             migrationBuilder.InsertData(
                 table: "Categories",
                 columns: new[] { "Id", "Name" },
-                values: new object[] { new Guid("6af8acea-bfa5-438d-ac76-2767b6f2d651"), "Одежда" });
+                values: new object[,]
+                {
+                    { new Guid("6af8acea-bfa5-438d-ac76-2767b6f2d651"), "Одежда" },
+                    { new Guid("6af8acea-bfa5-438d-ac76-2767b6f2d652"), "Джинсы" },
+                    { new Guid("6af8acea-bfa5-438d-ac76-2767b6f2d653"), "Куртка" }
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProductCategory_CategoryId",

@@ -22,7 +22,7 @@ namespace OrderManagementSystem.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Catalog.Domain.Entities.Category", b =>
+            modelBuilder.Entity("Domain.Entities.Category", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -54,7 +54,7 @@ namespace OrderManagementSystem.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Catalog.Domain.Entities.Product", b =>
+            modelBuilder.Entity("Domain.Entities.Product", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -85,7 +85,7 @@ namespace OrderManagementSystem.Infrastructure.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("Catalog.Domain.Entities.ProductCategory", b =>
+            modelBuilder.Entity("Domain.Entities.ProductCategory", b =>
                 {
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");
@@ -100,15 +100,15 @@ namespace OrderManagementSystem.Infrastructure.Migrations
                     b.ToTable("ProductCategory");
                 });
 
-            modelBuilder.Entity("Catalog.Domain.Entities.ProductCategory", b =>
+            modelBuilder.Entity("Domain.Entities.ProductCategory", b =>
                 {
-                    b.HasOne("Catalog.Domain.Entities.Category", "Category")
+                    b.HasOne("Domain.Entities.Category", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Catalog.Domain.Entities.Product", "Product")
+                    b.HasOne("Domain.Entities.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
