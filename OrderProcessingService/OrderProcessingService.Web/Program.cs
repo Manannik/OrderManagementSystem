@@ -14,6 +14,9 @@ using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Host.UseSerilog((context, loggerConfiguration) =>
+    loggerConfiguration.ReadFrom.Configuration(context.Configuration));
+
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.Debug()
@@ -47,6 +50,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseSerilogRequestLogging();
 
 app.UseMiddleware<OrderProcessingServiceExceptionHandlerMiddleware>();
 

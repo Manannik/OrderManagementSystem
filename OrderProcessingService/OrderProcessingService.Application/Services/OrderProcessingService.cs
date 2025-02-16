@@ -1,4 +1,5 @@
 ﻿using Hangfire;
+using Microsoft.AspNetCore.Mvc;
 using OrderProcessingService.Application.Abstractions;
 using OrderProcessingService.Application.Enums;
 using OrderProcessingService.Application.Models;
@@ -30,21 +31,22 @@ public class OrderProcessingService : IOrderProcessingService
 
         var existingProcessingOrderModel = MapToProcessingOrderModel(existingProcessingOrder);
 
-        var jobId = BackgroundJob.Enqueue<IWorkerSimulator>(worker =>
+        var jobId = BackgroundJob.Enqueue<IWorkerSimulator>( worker =>
             worker.ProcessOrderInWarehouseAsync(existingProcessingOrderModel));
-        
+
         Log.Information("Задача добавлена в очередь фоновых работ. Job ID: {JobId}", jobId);
-        
+
         //var result = await _processingRepository.GetByIdAsync(id, ct);
         
         Log.Information("Успешное завершение метода AssembleOrderAsync для заказа с id: {Id}", id);
         return existingProcessingOrderModel;
     }
 
-    public async Task<List<DeliveryOrderModel>> TakeOrdersForDeliveryAsync(List<Guid> guids, CancellationToken ct)
+    public async Task<List<DeliveryOrderModel>> TakeOrdersForDeliveryAsync([FromBody] List<Guid> guids, CancellationToken ct)
     {
         Log.Information("Запуск метода GetById для заказа с id: {Id}", guids);
         var deliveryOrderModels = new List<DeliveryOrderModel>();
+        var validOrderIds = new List<Guid>();
         foreach (var guid in guids)
         {
             var order = await _processingRepository.GetByIdAsync(guid, ct);
@@ -59,10 +61,18 @@ public class OrderProcessingService : IOrderProcessingService
             deliveryOrderModels.Add(deliveryOrderModel);
         }
         
-        var jobId = BackgroundJob.Enqueue<IWorkerSimulator>(worker =>
-            worker.TransferOrderToDelivery(deliveryOrderModels.Select(f=>f.OrderId).ToList()));
+        if (validOrderIds.Any())
+        {
+            var jobId = BackgroundJob.Enqueue<IWorkerSimulator>(worker =>
+                worker.TransferOrderToDelivery(validOrderIds));
+
+            Log.Information("Задача добавлена в очередь фоновых работ. Job ID: {JobId}", jobId);
+        }
         
-        Log.Information("Задача добавлена в очередь фоновых работ. Job ID: {JobId}", jobId);
+        else
+        {
+            Log.Warning("Нет заказов для передачи в службу доставки.");
+        }
         
         Log.Information("Успешное завершение метода TakeOrdersForDeliveryAsync");
         return deliveryOrderModels;
