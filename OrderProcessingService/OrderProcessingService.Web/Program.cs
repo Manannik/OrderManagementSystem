@@ -36,6 +36,8 @@ builder.Services.AddTransient<OrderProcessingServiceExceptionHandlerMiddleware>(
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddSerilog();
+
 builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
