@@ -105,18 +105,18 @@ public class OrderProcessingService : IOrderProcessingService
             return false;
         }
 
-        if (existingProcessingOrder.Status != ProcessingOrderStatus.Completed
-            || existingProcessingOrder.Stage != Stage.Assembly)
+        if (existingProcessingOrder.Status == ProcessingOrderStatus.Completed
+            && existingProcessingOrder.Stage == Stage.Assembly)
         {
             Log.Warning(
                 "Заказ с id {OrderId} не может быть передан в доставку. Текущий статус: {Status}, этап: {Stage}",
                 existingProcessingOrder.OrderId,
                 existingProcessingOrder.Status,
                 existingProcessingOrder.Stage);
-            return false;
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     private ProcessingOrderModel MapToProcessingOrderModel(ProcessingOrder existingProcessingOrder)
