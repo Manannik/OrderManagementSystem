@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using OrderProcessingService.Application.Abstractions;
+using OrderProcessingService.Application.Models;
 using Serilog;
 
 namespace OrderProcessingService.Web.Controllers
@@ -28,14 +29,14 @@ namespace OrderProcessingService.Web.Controllers
         }
 
         [HttpPost("DeliverOrder")]
-        public async Task<IActionResult> DeliverOrder([FromRoute]List<Guid> guids, CancellationToken ct)
+        public async Task<IActionResult> DeliverOrder([FromBody]DeliverOrderRequest request, CancellationToken ct)
         {
-            Log.Information("Запуск метода DeliverOrder для товара с Id: {@Request}", guids);
+            Log.Information("Запуск метода DeliverOrder для товара с Id: {@Request}", request.Guids);
             
             var existingOrderProcessingModel =
-                await _orderProcessingService.TakeOrdersForDeliveryAsync(guids, ct);
+                await _orderProcessingService.TakeOrdersForDeliveryAsync(request.Guids, ct);
             
-            Log.Information("Успешное завершение метода DeliverOrder для товара с Id: {@Request}", guids);
+            Log.Information("Успешное завершение метода DeliverOrder для товара с Id: {@Request}", request.Guids);
             return Ok(existingOrderProcessingModel);
         }
     }

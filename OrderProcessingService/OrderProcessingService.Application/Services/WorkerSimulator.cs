@@ -45,12 +45,12 @@ public class WorkerSimulator : IWorkerSimulator
         
         foreach (var order in orders)
         {
-            await Task.Delay(TimeSpan.FromSeconds(30));
+            await Task.Delay(TimeSpan.FromSeconds(3));
             var deliveryAddress = GenerateRandomAddress();
             Log.Information("Везу заказ {OrderId} по адресу: {Address}", order, 
                 deliveryAddress);
 
-            await Task.Delay(TimeSpan.FromSeconds(30));
+            await Task.Delay(TimeSpan.FromSeconds(3));
             Log.Information("Заказ {OrderId} доставлен по адресу: {Address}", order, 
                 deliveryAddress);
 

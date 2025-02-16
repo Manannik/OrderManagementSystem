@@ -16,9 +16,9 @@ public class OrderProcessingService : IOrderProcessingService
     private IOrderProcessingRepository _processingRepository;
 
     public OrderProcessingService(IOrderProcessingRepository processingRepository)
-        {
-            _processingRepository = processingRepository;
-        }
+    {
+        _processingRepository = processingRepository;
+    }
 
     public async Task<ProcessingOrderModel> AssembleOrderAsync(Guid id, CancellationToken ct)
     {
@@ -31,49 +31,50 @@ public class OrderProcessingService : IOrderProcessingService
 
         var existingProcessingOrderModel = MapToProcessingOrderModel(existingProcessingOrder);
 
-        var jobId = BackgroundJob.Enqueue<IWorkerSimulator>( worker =>
+        var jobId = BackgroundJob.Enqueue<IWorkerSimulator>(worker =>
             worker.ProcessOrderInWarehouseAsync(existingProcessingOrderModel));
 
         Log.Information("Задача добавлена в очередь фоновых работ. Job ID: {JobId}", jobId);
 
         //var result = await _processingRepository.GetByIdAsync(id, ct);
-        
+
         Log.Information("Успешное завершение метода AssembleOrderAsync для заказа с id: {Id}", id);
         return existingProcessingOrderModel;
     }
 
-    public async Task<List<DeliveryOrderModel>> TakeOrdersForDeliveryAsync([FromBody] List<Guid> guids, CancellationToken ct)
+    public async Task<List<DeliveryOrderModel>> TakeOrdersForDeliveryAsync([FromBody] List<Guid> guids,
+        CancellationToken ct)
     {
-        Log.Information("Запуск метода GetById для заказа с id: {Id}", guids);
+        Log.Information("Запуск метода TakeOrdersForDeliveryAsync для заказов с id: {Ids}", guids);
         var deliveryOrderModels = new List<DeliveryOrderModel>();
         var validOrderIds = new List<Guid>();
+
         foreach (var guid in guids)
         {
             var order = await _processingRepository.GetByIdAsync(guid, ct);
-            // не нравится, что если какой то заказ не прошел проверку, то надо заново запускать
-            // хотел бы пройтись по всем заказам и те которые находятся в неправильно статусе отбросить
-            ValidateOrderForDeliver(order, guid);
-            Log.Information("Заказ передается в службу доставки");
-            await _processingRepository.PrepareOrderForDelivery(order,ct);
-            Log.Information("Заказ успешно передан в службу доставки");
 
-            var deliveryOrderModel = MapToDeliveryOrderModel(order);
-            deliveryOrderModels.Add(deliveryOrderModel);
-        }
-        
-        if (validOrderIds.Any())
-        {
-            var jobId = BackgroundJob.Enqueue<IWorkerSimulator>(worker =>
-                worker.TransferOrderToDelivery(validOrderIds));
+            if (ValidateOrderForDeliver(order, guid))
+            {
+                Log.Information("Заказ {OrderId} проходит проверку и готовится к доставке", guid);
+                await _processingRepository.PrepareOrderForDelivery(order, ct);
+                Log.Information("Заказ {OrderId} успешно подготовлен для доставки", guid);
 
-            Log.Information("Задача добавлена в очередь фоновых работ. Job ID: {JobId}", jobId);
+                var deliveryOrderModel = MapToDeliveryOrderModel(order);
+                deliveryOrderModels.Add(deliveryOrderModel);
+                validOrderIds.Add(guid);
+
+                var jobId = BackgroundJob.Enqueue<IWorkerSimulator>(worker =>
+                    worker.TransferOrderToDelivery(validOrderIds));
+
+                Log.Information("Фоновая задача добавлена в очередь. Job ID: {JobId}", jobId);
+            }
         }
-        
-        else
+
+        if (!validOrderIds.Any())
         {
-            Log.Warning("Нет заказов для передачи в службу доставки.");
+            throw new InvalidOperationException("Отсутствуют заказы для доставки");
         }
-        
+
         Log.Information("Успешное завершение метода TakeOrdersForDeliveryAsync");
         return deliveryOrderModels;
     }
@@ -96,23 +97,28 @@ public class OrderProcessingService : IOrderProcessingService
         }
     }
 
-    private void ValidateOrderForDeliver(ProcessingOrder existingProcessingOrder, Guid id)
+    private bool ValidateOrderForDeliver(ProcessingOrder existingProcessingOrder, Guid id)
     {
         if (existingProcessingOrder == null)
         {
-            throw new OrderProcessingDoesNotExistsException(id.ToString());
+            Log.Warning("Заказ с id {OrderId} не найден.", id);
+            return false;
         }
-        
-        if (existingProcessingOrder.Status != ProcessingOrderStatus.Completed 
-            && existingProcessingOrder.Stage != Stage.Assembly)
+
+        if (existingProcessingOrder.Status != ProcessingOrderStatus.Completed
+            || existingProcessingOrder.Stage != Stage.Assembly)
         {
-            throw new DeliverOrderException(
+            Log.Warning(
+                "Заказ с id {OrderId} не может быть передан в доставку. Текущий статус: {Status}, этап: {Stage}",
                 existingProcessingOrder.OrderId,
                 existingProcessingOrder.Status,
                 existingProcessingOrder.Stage);
+            return false;
         }
+
+        return true;
     }
-    
+
     private ProcessingOrderModel MapToProcessingOrderModel(ProcessingOrder existingProcessingOrder)
     {
         return new ProcessingOrderModel()
@@ -131,7 +137,7 @@ public class OrderProcessingService : IOrderProcessingService
             }).ToList()
         };
     }
-    
+
     private DeliveryOrderModel MapToDeliveryOrderModel(ProcessingOrder existingProcessingOrder)
     {
         return new DeliveryOrderModel()
@@ -151,7 +157,7 @@ public class OrderProcessingService : IOrderProcessingService
             TrackingNumber = existingProcessingOrder.TrackingNumber
         };
     }
-    
+
     private ProcessingOrder MapToEntity(ProcessingOrderModel processingOrderModel)
     {
         return new ProcessingOrder()
