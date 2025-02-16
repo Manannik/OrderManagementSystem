@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using OrderProcessingService.Application.Abstractions;
+using Serilog;
 
 namespace OrderProcessingService.Web.Controllers
 {
@@ -7,32 +8,35 @@ namespace OrderProcessingService.Web.Controllers
     [Route("api/[controller]")]
     public class OrderProcessingController : ControllerBase
     {
-        private readonly ILogger<OrderProcessingController> _logger;
-
         private readonly IOrderProcessingService _orderProcessingService;
-        public OrderProcessingController(ILogger<OrderProcessingController> logger,
-            IOrderProcessingService orderProcessingService)
+        public OrderProcessingController(IOrderProcessingService orderProcessingService)
         {
-            _logger = logger;
             _orderProcessingService = orderProcessingService;
         }
 
         [HttpPost("AssembleOnWarehouse")]
         public async Task<IActionResult> AssembleOnWarehouse([FromBody]Guid processingOrderId, CancellationToken ct)
         {
-            _logger.LogInformation("запуск метод ProcessOrder для товара с Id: {@Request}", processingOrderId);
+            Log.Information("запуск метода AssembleOnWarehouse для товара с Id: {@Request}", processingOrderId);
             
             var existingOrderProcessingModel =
                 await _orderProcessingService.AssembleOrderAsync(processingOrderId, ct);
             
-            _logger.LogInformation("Заказ с id = {@Request} готов к отправке:", processingOrderId);
+            Log.Information("Успешное завершение метода AssembleOnWarehouse. " +
+                            "Заказ с id = {@Request} готов к отправке:", processingOrderId);
             return Ok(existingOrderProcessingModel);
         }
 
         [HttpPost("DeliverOrder")]
-        public async Task<IActionResult> DeliverOrder([FromRoute]Guid processingOrderId, CancellationToken ct)
+        public async Task<IActionResult> DeliverOrder([FromRoute]List<Guid> guids, CancellationToken ct)
         {
-            return Ok();
+            Log.Information("Запуск метода DeliverOrder для товара с Id: {@Request}", guids);
+            
+            var existingOrderProcessingModel =
+                await _orderProcessingService.TakeOrdersForDeliveryAsync(guids, ct);
+            
+            Log.Information("Успешное завершение метода DeliverOrder для товара с Id: {@Request}", guids);
+            return Ok(existingOrderProcessingModel);
         }
     }
 }

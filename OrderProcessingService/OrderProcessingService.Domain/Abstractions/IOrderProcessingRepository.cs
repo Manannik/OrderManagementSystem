@@ -8,4 +8,6 @@ public interface IOrderProcessingRepository
     Task<ProcessingOrder> GetByIdAsync(Guid id, CancellationToken ct);
     Task<ProcessingOrder> ChangeProcessingOrderStatusToProcessing(ProcessingOrder processingOrder, CancellationToken ct);
     Task ChangeProcessingOrderStatusToCompleted(ProcessingOrder processingOrder, CancellationToken ct);
+    Task PrepareOrderForDelivery(ProcessingOrder processingOrder, CancellationToken ct);
+    Task ChangeOrderStatusToDeliveredAsync(Guid id, CancellationToken ct);
 }

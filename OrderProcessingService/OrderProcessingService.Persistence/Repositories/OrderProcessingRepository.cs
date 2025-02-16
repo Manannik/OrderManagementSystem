@@ -36,4 +36,19 @@ public class OrderProcessingRepository(OrderProcessingDbContext dbContext) : IOr
         dbContext.ProcessingOrders.Update(processingOrder);
         await dbContext.SaveChangesAsync(ct);
     }
+
+    public async Task PrepareOrderForDelivery(ProcessingOrder processingOrder, CancellationToken ct)
+    {
+        processingOrder.Status = ProcessingOrderStatus.Processing;
+        processingOrder.Stage = Stage.Delivery;
+        processingOrder.TrackingNumber = Guid.NewGuid();
+        await dbContext.SaveChangesAsync(ct);
+    }
+
+    public async Task ChangeOrderStatusToDeliveredAsync(Guid id, CancellationToken ct)
+    {
+        var order = await GetByIdAsync(id, ct);
+        order.Status = ProcessingOrderStatus.Completed;
+        await dbContext.SaveChangesAsync(ct);
+    }
 }
