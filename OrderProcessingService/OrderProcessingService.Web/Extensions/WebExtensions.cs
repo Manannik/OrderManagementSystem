@@ -9,8 +9,10 @@ public static class WebExtensions
     {
         var kafkaConsumerConfig = configuration.GetSection("Kafka:OrderCreated");
         services.AddConsumer<OrderCreated, OrderCreatedMessageHandler>(kafkaConsumerConfig);
-        services.AddProducer<NotificationKafkaModel>(configuration.GetSection("Kafka:Notification"));
 
+        var kafkaProducerConfig = configuration.GetSection("Kafka:Notification");
+        services.AddProducer<NotificationKafkaModel>(kafkaProducerConfig);
+        
         return services;
     }
 }

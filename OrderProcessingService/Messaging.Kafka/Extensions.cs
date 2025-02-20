@@ -10,7 +10,7 @@ public static class Extensions
     public static IServiceCollection AddConsumer<TMessage, THandler>(this IServiceCollection serviceCollection,
         IConfigurationSection configurationSection) where THandler : class, IMessageHandler<TMessage>
     {
-        serviceCollection.Configure<KafkaSettings>(configurationSection);
+        serviceCollection.Configure<OrderCreatedKafkaSettings>(configurationSection);
         serviceCollection.AddHostedService<KafkaConsumer<TMessage>>();
         serviceCollection.AddScoped<IMessageHandler<TMessage>, THandler>();
 
@@ -21,7 +21,7 @@ public static class Extensions
         this IServiceCollection services,
         IConfiguration configurationSection)
     {
-        services.Configure<KafkaSettings>(configurationSection);
+        services.Configure<NotificationKafkaSettings>(configurationSection);
         services.AddSingleton<IKafkaProducer<TMessage>, KafkaProducer<TMessage>>();
     }
 }

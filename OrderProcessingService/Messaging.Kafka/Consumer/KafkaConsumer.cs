@@ -11,13 +11,13 @@ public class KafkaConsumer<TMessage> : BackgroundService
     private readonly string _topic;
     private readonly IConsumer<string, TMessage> _consumer;
 
-    public KafkaConsumer(IOptions<KafkaSettings> kafkaSettings, IServiceScopeFactory serviceScopeFactory)
+    public KafkaConsumer(IOptions<OrderCreatedKafkaSettings> kafkaSettings, IServiceScopeFactory serviceScopeFactory)
     {
         _serviceScopeFactory = serviceScopeFactory;
         var config = new ConsumerConfig()
         {
-            //AutoOffsetReset = AutoOffsetReset.Latest,
-            AutoOffsetReset = AutoOffsetReset.Earliest,
+            AutoOffsetReset = AutoOffsetReset.Latest,
+            //AutoOffsetReset = AutoOffsetReset.Earliest,
             BootstrapServers = kafkaSettings.Value.BootstrapServers,
             GroupId = kafkaSettings.Value.GroupId,
             EnableAutoCommit = false,
@@ -25,8 +25,7 @@ public class KafkaConsumer<TMessage> : BackgroundService
 
         _topic = kafkaSettings.Value.Topic;
 
-        _consumer = new ConsumerBuilder<string, TMessage>(config)
-            .SetValueDeserializer(new KafkaDeserializer<TMessage>()).Build();
+        _consumer = new ConsumerBuilder<string, TMessage>(config).SetValueDeserializer(new KafkaDeserializer<TMessage>()).Build();
     }
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {

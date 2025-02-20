@@ -7,7 +7,7 @@ namespace Messaging.Kafka.Producer
     {
         private readonly IProducer<string, TMessage> producer;
         private readonly string topic;
-        public KafkaProducer(IOptions<KafkaSettings> kafkaSettings)
+        public KafkaProducer(IOptions<NotificationKafkaSettings> kafkaSettings)
         {
             var config = new ProducerConfig()
             {
