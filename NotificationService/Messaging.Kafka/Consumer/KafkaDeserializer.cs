@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Confluent.Kafka;
 
-namespace Messaging.Kafka;
+namespace Messaging.Kafka.Consumer;
 
 public class KafkaDeserializer<TMessage> : IDeserializer<TMessage>
 {

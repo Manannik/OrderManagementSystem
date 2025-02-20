@@ -1,4 +1,6 @@
 ﻿using Hangfire;
+using Messaging.Kafka.Models;
+using Messaging.Kafka.Producer;
 using Microsoft.AspNetCore.Mvc;
 using OrderProcessingService.Application.Abstractions;
 using OrderProcessingService.Application.Enums;
@@ -14,10 +16,13 @@ namespace OrderProcessingService.Application.Services;
 public class OrderProcessingService : IOrderProcessingService
 {
     private IOrderProcessingRepository _processingRepository;
-
-    public OrderProcessingService(IOrderProcessingRepository processingRepository)
+    private IKafkaProducer<NotificationKafkaModel> _notificationProducer;
+    public OrderProcessingService(
+        IOrderProcessingRepository processingRepository, 
+        IKafkaProducer<NotificationKafkaModel> notificationProducer)
     {
         _processingRepository = processingRepository;
+        _notificationProducer = notificationProducer;
     }
 
     public async Task<ProcessingOrderModel> AssembleOrderAsync(Guid id, CancellationToken ct)
@@ -57,8 +62,18 @@ public class OrderProcessingService : IOrderProcessingService
             {
                 Log.Information("Заказ {OrderId} проходит проверку и готовится к доставке", guid);
                 await _processingRepository.PrepareOrderForDelivery(order, ct);
-                Log.Information("Заказ {OrderId} успешно подготовлен для доставки", guid);
-
+                Log.Information("Заказ {OrderId} успешно подготовлен для доставки, " +
+                                "ваш трек-номер {TrackingNumber}", guid, order.TrackingNumber);
+                
+                var notificationKafkaModel = new NotificationKafkaModel()
+                {
+                    //попробовать добавить код вручения
+                    OrderId = guid,
+                    Value = $"заказ {guid} успешно подготовлен для доставки"
+                };
+                
+                await _notificationProducer.ProduceAsync(notificationKafkaModel, cancellationToken: default);
+                
                 var deliveryOrderModel = MapToDeliveryOrderModel(order);
                 deliveryOrderModels.Add(deliveryOrderModel);
                 validOrderIds.Add(guid);

@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace Messaging.Kafka.Models;
+﻿namespace Messaging.Kafka.Models;
 
 public class OrderCreated
 {

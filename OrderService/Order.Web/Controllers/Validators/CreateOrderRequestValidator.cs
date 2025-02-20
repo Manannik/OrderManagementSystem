@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Order.Application.Abstractions;
 using Order.Application.Models;
+using Order.Application.Requests;
 
 namespace Order.Web.Controllers.Validators
 {

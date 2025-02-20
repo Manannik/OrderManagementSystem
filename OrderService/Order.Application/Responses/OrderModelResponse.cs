@@ -1,6 +1,6 @@
 ﻿using Order.Application.Enums;
 
-namespace Order.Application.Models;
+namespace Order.Application.Responses;
 
 public class OrderModelResponse
 {

@@ -1,7 +1,10 @@
-﻿using OrderProcessingService.Application.Abstractions;
+﻿using Messaging.Kafka.Models;
+using Messaging.Kafka.Producer;
+using OrderProcessingService.Application.Abstractions;
 using OrderProcessingService.Application.Enums;
 using OrderProcessingService.Application.Models;
 using OrderProcessingService.Domain.Abstractions;
+using OrderProcessingService.Domain.Enums;
 using Serilog;
 
 namespace OrderProcessingService.Application.Services;
@@ -9,10 +12,14 @@ namespace OrderProcessingService.Application.Services;
 public class WorkerSimulator : IWorkerSimulator
 {
     private IOrderProcessingRepository _processingRepository;
+    private IKafkaProducer<NotificationKafkaModel> _notificationProducer;
 
-    public WorkerSimulator(IOrderProcessingRepository processingRepository)
+    public WorkerSimulator(
+        IOrderProcessingRepository processingRepository,
+        IKafkaProducer<NotificationKafkaModel> notificationProducer)
     {
         _processingRepository = processingRepository;
+        _notificationProducer = notificationProducer;
     }
 
     public async Task ProcessOrderInWarehouseAsync(ProcessingOrderModel processingOrderModel)
@@ -37,26 +44,51 @@ public class WorkerSimulator : IWorkerSimulator
 
         await Task.Delay(1000);
         Log.Information("Процесс сборки завершен для заказа с ID: {OrderId}", processingOrderModel.Id);
+
+        var notificationKafkaModel = new NotificationKafkaModel()
+        {
+            OrderId = existingProcessingOrder.OrderId,
+            Value = $"Процесс сборки прошел успешно и заказ {existingProcessingOrder.OrderId} " +
+                    $"сменил статус на ${Stage.Delivery}"
+        };
+
+        await _notificationProducer.ProduceAsync(notificationKafkaModel, cancellationToken: default);
     }
 
     public async Task TransferOrderToDelivery(List<Guid> orders)
     {
         Log.Information("Начинаю доставлять заказы");
-        
+
         foreach (var order in orders)
         {
             await Task.Delay(TimeSpan.FromSeconds(3));
             var deliveryAddress = GenerateRandomAddress();
-            Log.Information("Везу заказ {OrderId} по адресу: {Address}", order, 
+            Log.Information("Везу заказ {OrderId} по адресу: {Address}", order,
                 deliveryAddress);
 
+            var notificationKafkaModel = new NotificationKafkaModel()
+            {
+                OrderId = order,
+                Value = $"заказ {order} отправлен в доставку"
+            };
+            await _notificationProducer.ProduceAsync(notificationKafkaModel, cancellationToken: default);
+            
             await Task.Delay(TimeSpan.FromSeconds(3));
-            Log.Information("Заказ {OrderId} доставлен по адресу: {Address}", order, 
+            Log.Information("Заказ {OrderId} доставлен по адресу: {Address}", order,
                 deliveryAddress);
 
             await _processingRepository.ChangeOrderStatusToDeliveredAsync(order, CancellationToken.None);
+            Log.Information("изменен статус заказа на {status}", ProcessingOrderStatus.Completed);
+            
+            notificationKafkaModel = new NotificationKafkaModel()
+            {
+                //попробовать добавить код вручения
+                OrderId = order,
+                Value = $"заказ {order} успешно вручен"
+            };
+            await _notificationProducer.ProduceAsync(notificationKafkaModel, cancellationToken: default);
         }
-
+        
         Log.Information("Все заказы успешно доставлены.");
     }
 

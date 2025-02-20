@@ -11,6 +11,7 @@ COPY ["OrderProcessingService.Infrastructure/OrderProcessingService.Infrastructu
 COPY ["OrderProcessingService.Application/OrderProcessingService.Application.csproj", "OrderProcessingService.Application/"]
 COPY ["OrderProcessingService.Persistence/OrderProcessingService.Persistence.csproj", "OrderProcessingService.Persistence/"]
 COPY ["OrderProcessingService.Domain/OrderProcessingService.Domain.csproj", "OrderProcessingService.Domain/"]
+COPY ["Messaging.Kafka/Messaging.Kafka.csproj", "Messaging.Kafka/"]
 RUN dotnet restore "OrderProcessingService.Web/OrderProcessingService.Web.csproj"
 COPY . .
 WORKDIR "/src/OrderProcessingService.Web"
