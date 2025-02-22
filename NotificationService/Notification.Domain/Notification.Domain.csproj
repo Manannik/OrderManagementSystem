@@ -6,4 +6,8 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Telegram.Common\Telegram.Common.csproj" />
+    </ItemGroup>
+
 </Project>
