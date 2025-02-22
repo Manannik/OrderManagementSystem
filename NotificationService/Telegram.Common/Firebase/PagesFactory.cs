@@ -7,7 +7,7 @@ namespace Telegram.Common.Firebase
     {
         public IPage GetPage(string typeName)
         {
-            var type = Type.GetType("TelegramBot.Common.Pages." + typeName) ?? throw new Exception("Такого нет в проекте");
+            var type = Type.GetType("Telegram.Common.Pages." + typeName) ?? throw new Exception("Такого нет в проекте");
             return (IPage)services.GetRequiredService(type);
         }
     }

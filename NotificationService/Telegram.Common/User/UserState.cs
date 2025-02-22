@@ -13,5 +13,4 @@ namespace Telegram.Common.User
             }
         }
     }
-
 }

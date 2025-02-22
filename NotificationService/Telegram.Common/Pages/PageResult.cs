@@ -13,5 +13,10 @@ namespace Telegram.Common.Pages
             Text = text;
             ReplyMarkup = replyMarkup;
         }
+        
+        public PageResult(string text)
+        {
+            Text = text;
+        }
     }
 }

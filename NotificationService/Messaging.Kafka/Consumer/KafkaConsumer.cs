@@ -16,7 +16,7 @@ public class KafkaConsumer<TMessage> : BackgroundService
         _serviceScopeFactory = serviceScopeFactory;
         var config = new ConsumerConfig()
         {
-            AutoOffsetReset = AutoOffsetReset.Latest,
+            AutoOffsetReset = AutoOffsetReset.Earliest,
             BootstrapServers = kafkaSettings.Value.BootstrapServers,
             GroupId = kafkaSettings.Value.GroupId,
             EnableAutoCommit = false,

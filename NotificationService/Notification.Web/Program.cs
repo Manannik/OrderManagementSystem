@@ -1,3 +1,4 @@
+using Notification.Application.Services;
 using Notification.Web.Extensions;
 using Telegram.Common;
 
@@ -7,13 +8,14 @@ var builder = WebApplication.CreateBuilder(args);
 ContainerConfigurator.Configure(builder.Configuration, builder.Services);
 builder.Services.AddHostedService<WebHookConfigurator>();
 builder.Services.ConfigureTelegramBotMvc();
+builder.Services.AddTransient<TelegramMessageService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddWeb<string>(builder.Configuration);
+//builder.Services.AddWeb<string>(builder.Configuration);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

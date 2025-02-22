@@ -13,6 +13,12 @@
       <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
       <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.0" />
       <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+      <PackageReference Include="Telegram.Bot" Version="22.4.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Notification.Application\Notification.Application.csproj" />
+      <ProjectReference Include="..\Telegram.Common\Telegram.Common.csproj" />
     </ItemGroup>
 
 </Project>

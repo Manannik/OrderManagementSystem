@@ -6,6 +6,7 @@ using OrderProcessingService.Application.Models;
 using OrderProcessingService.Domain.Abstractions;
 using OrderProcessingService.Domain.Enums;
 using Serilog;
+using StageModel = OrderProcessingService.Application.Enums.StageModel;
 
 namespace OrderProcessingService.Application.Services;
 
@@ -25,7 +26,7 @@ public class WorkerSimulator : IWorkerSimulator
     public async Task ProcessOrderInWarehouseAsync(ProcessingOrderModel processingOrderModel)
     {
         Log.Information("Начинаем сборку товара для задачи с ID: {TaskId}", processingOrderModel.Id);
-
+        
         await Task.Delay(1000);
         foreach (var item in processingOrderModel.Items)
         {
@@ -45,14 +46,6 @@ public class WorkerSimulator : IWorkerSimulator
         await Task.Delay(1000);
         Log.Information("Процесс сборки завершен для заказа с ID: {OrderId}", processingOrderModel.Id);
 
-        var notificationKafkaModel = new NotificationKafkaModel()
-        {
-            OrderId = existingProcessingOrder.OrderId,
-            Value = $"Процесс сборки прошел успешно и заказ {existingProcessingOrder.OrderId} " +
-                    $"сменил статус на ${Stage.Delivery}"
-        };
-
-        await _notificationProducer.ProduceAsync(notificationKafkaModel, cancellationToken: default);
     }
 
     public async Task TransferOrderToDelivery(List<Guid> orders)
@@ -66,13 +59,6 @@ public class WorkerSimulator : IWorkerSimulator
             Log.Information("Везу заказ {OrderId} по адресу: {Address}", order,
                 deliveryAddress);
 
-            var notificationKafkaModel = new NotificationKafkaModel()
-            {
-                OrderId = order,
-                Value = $"заказ {order} отправлен в доставку"
-            };
-            await _notificationProducer.ProduceAsync(notificationKafkaModel, cancellationToken: default);
-            
             await Task.Delay(TimeSpan.FromSeconds(3));
             Log.Information("Заказ {OrderId} доставлен по адресу: {Address}", order,
                 deliveryAddress);
@@ -80,16 +66,25 @@ public class WorkerSimulator : IWorkerSimulator
             await _processingRepository.ChangeOrderStatusToDeliveredAsync(order, CancellationToken.None);
             Log.Information("изменен статус заказа на {status}", ProcessingOrderStatus.Completed);
             
-            notificationKafkaModel = new NotificationKafkaModel()
+            var notificationKafkaModel = new NotificationKafkaModel()
             {
                 //попробовать добавить код вручения
                 OrderId = order,
-                Value = $"заказ {order} успешно вручен"
+                Stage = Messaging.Kafka.Models.StageModel.Completed,
+                Code = GenerateCodeToDelivery()
             };
             await _notificationProducer.ProduceAsync(notificationKafkaModel, cancellationToken: default);
         }
         
         Log.Information("Все заказы успешно доставлены.");
+    }
+
+    private string GenerateCodeToDelivery()
+    {
+        Random random = new Random();
+        int code = random.Next(0, 10000);
+        string formattedCode = code.ToString("D4");
+        return formattedCode;
     }
 
     private string GenerateRandomAddress()

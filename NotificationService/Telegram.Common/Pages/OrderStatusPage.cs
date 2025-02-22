@@ -23,10 +23,13 @@ namespace Telegram.Common.Pages
         public PageResult View(Update update, UserState userState)
         {
             var text = @"пупупу";
+            return new PageResult(text);
+            /*
             return new PageResult(text, GetReplyKeyboard())
             {
                 UpdatedUserState = userState
             };
+            */
         }
 
         private ReplyMarkup GetReplyKeyboard()

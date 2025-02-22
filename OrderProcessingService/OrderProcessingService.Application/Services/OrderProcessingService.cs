@@ -10,6 +10,7 @@ using OrderProcessingService.Domain.Entities;
 using OrderProcessingService.Domain.Enums;
 using OrderProcessingService.Domain.Exceptions;
 using Serilog;
+using StageModel = OrderProcessingService.Application.Enums.StageModel;
 
 namespace OrderProcessingService.Application.Services;
 
@@ -32,6 +33,14 @@ public class OrderProcessingService : IOrderProcessingService
         var existingProcessingOrder = await _processingRepository.GetByIdAsync(id, ct);
         ValidateProcessingOrder(existingProcessingOrder, id);
 
+        var notificationKafkaModel = new NotificationKafkaModel()
+        {
+            OrderId = existingProcessingOrder.OrderId,
+            Stage = (Messaging.Kafka.Models.StageModel)existingProcessingOrder.Stage
+        };
+        
+        await _notificationProducer.ProduceAsync(notificationKafkaModel, cancellationToken: default);
+        
         await _processingRepository.ChangeProcessingOrderStatusToProcessing(existingProcessingOrder, ct);
 
         var existingProcessingOrderModel = MapToProcessingOrderModel(existingProcessingOrder);
@@ -67,9 +76,9 @@ public class OrderProcessingService : IOrderProcessingService
                 
                 var notificationKafkaModel = new NotificationKafkaModel()
                 {
-                    //попробовать добавить код вручения
                     OrderId = guid,
-                    Value = $"заказ {guid} успешно подготовлен для доставки"
+                    Stage = (Messaging.Kafka.Models.StageModel)order.Stage,
+                    TrackingNumber = order.TrackingNumber
                 };
                 
                 await _notificationProducer.ProduceAsync(notificationKafkaModel, cancellationToken: default);

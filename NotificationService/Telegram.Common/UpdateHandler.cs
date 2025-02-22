@@ -53,7 +53,7 @@ public class UpdateHandler(UserStateStorage storage,IServiceProvider services) :
         Console.WriteLine(exception.Message);
     }
 
-    private static async Task<Telegram.Bot.Types.Message> SendMessage(
+    private static async Task<Bot.Types.Message> SendMessage(
         ITelegramBotClient client,
         Update update,
         long telegramUserId,
@@ -65,7 +65,7 @@ public class UpdateHandler(UserStateStorage storage,IServiceProvider services) :
                 chatId: telegramUserId,
                 messageId: result.UpdatedUserState.UserData.LastMessage.Id,
                 text: result.Text,
-                parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
+                parseMode: Bot.Types.Enums.ParseMode.Html,
                 replyMarkup: (InlineKeyboardMarkup)result.ReplyMarkup);
         }
 

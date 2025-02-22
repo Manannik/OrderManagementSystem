@@ -9,11 +9,13 @@ namespace Telegram.Common.Pages
     {
         public PageResult Handle(Update update, UserState userState)
         {
-            if (update?.CallbackQuery?.Data == "Проверить заказ по трек-номеру")
+            var orderId = update?.Message?.Text;
+            /*
+            if (update?.CallbackQuery?.Data == "Проверить статус заказа")
             {
                 return services.GetRequiredService<OrderStatusPage>().View(update, userState);
             }
-
+            */
             return new PageResult(@"Нажми на кнопку - получишь в результат
 И твоя мечта осуществится
 Нажми на кнопку, но что же ты не рад
@@ -24,12 +26,16 @@ namespace Telegram.Common.Pages
         {
             var text = @"Привет я отправляю уведомления пользователям
 учебного проекта Order Management System.
-Если хочешь проверить статус заказа жми кнопку Проверить заказ по трек-номеру";
+Если хочешь проверить статус заказа введи номер своего заказа";
             userState.AddPage(this);
-            return new PageResult(text, GetReplyKeyboard())
+            return new PageResult(text)
             {
                 UpdatedUserState = userState
             };
+            // return new PageResult(text, GetReplyKeyboard())
+            // {
+            //     UpdatedUserState = userState
+            // };
         }
 
         private ReplyMarkup GetReplyKeyboard()
