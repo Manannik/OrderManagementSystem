@@ -6,13 +6,12 @@ namespace Notification.Persistence;
 
 public class NotificationDbContext(DbContextOptions<NotificationDbContext> options) : DbContext(options)
 {
-    public DbSet<Domain.Entities.Notification> Notifications { get; set; }
-    public DbSet<UserData> UserData { get; set; }
-    
+    public DbSet<UserState> UserStates { get; set; }
+    public DbSet<UserData> UserDatas { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ConfigureNotification).Assembly);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ConfigureUserData).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ConfigureUserState).Assembly);
     }
 }

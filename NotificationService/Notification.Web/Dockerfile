@@ -7,7 +7,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Notification.Web/Notification.Web.csproj", "Notification.Web/"]
-COPY ["Notification.Persistance/Notification.Persistance.csproj", "Notification.Persistance/"]
+COPY ["Notification.Persistence/Notification.Persistence.csproj", "Notification.Persistence/"]
 COPY ["Notification.Domain/Notification.Domain.csproj", "Notification.Domain/"]
 COPY ["Messaging.Kafka/Messaging.Kafka.csproj", "Messaging.Kafka/"]
 RUN dotnet restore "Notification.Web/Notification.Web.csproj"

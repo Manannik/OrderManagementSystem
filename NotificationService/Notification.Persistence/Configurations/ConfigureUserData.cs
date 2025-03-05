@@ -10,11 +10,11 @@ public class ConfigureUserData : IEntityTypeConfiguration<UserData>
     {
         builder.ToTable("user_data");
 
-        builder.HasKey(u => u.Id);
+        builder.HasKey(u => u.OrderId);
 
-        builder.Property(u => u.OrderId).IsRequired(false);
-        builder.Property(u => u.LastMessageId).IsRequired(false);
-
-        builder.OwnsMany(p => p.Pages, builder => { builder.ToJson(); });
+        builder.HasOne(ud => ud.UserState)
+            .WithOne(ud => ud.UserData)
+            .HasForeignKey<UserState>(f=>f.UserDataId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

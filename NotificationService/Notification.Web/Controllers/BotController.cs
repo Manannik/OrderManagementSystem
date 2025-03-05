@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
-using Telegram.Common.Configuration;
 
 namespace Notification.Web.Controllers;
 
@@ -11,7 +10,7 @@ public class BotController(
     IUpdateHandler updateHandler,
     ITelegramBotClient botClient) : Controller
 {
-    [HttpPost(BotConfiguration.UpdateRoute)]
+    [HttpPost("/webhook/update")]
     public async Task<IActionResult> Index([FromBody] Update update)
     {
         try

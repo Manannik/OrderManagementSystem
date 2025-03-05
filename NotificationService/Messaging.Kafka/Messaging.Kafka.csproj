@@ -18,6 +18,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Notification.Application\Notification.Application.csproj" />
+      <ProjectReference Include="..\Notification.Domain\Notification.Domain.csproj" />
       <ProjectReference Include="..\Telegram.Common\Telegram.Common.csproj" />
     </ItemGroup>
 

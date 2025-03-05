@@ -8,6 +8,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.4">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
         <PackageReference Include="Telegram.Bot" Version="22.4.3" />
     </ItemGroup>
@@ -21,6 +25,8 @@
     <ItemGroup>
       <ProjectReference Include="..\Messaging.Kafka\Messaging.Kafka.csproj" />
       <ProjectReference Include="..\Notification.Application\Notification.Application.csproj" />
+      <ProjectReference Include="..\Notification.Infrastructure\Notification.Infrastructure.csproj" />
+      <ProjectReference Include="..\Notification.Persistence\Notification.Persistence.csproj" />
       <ProjectReference Include="..\Telegram.Common\Telegram.Common.csproj" />
     </ItemGroup>
 
