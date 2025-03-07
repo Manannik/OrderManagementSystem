@@ -34,23 +34,31 @@ namespace Notification.Infrastructure.Telegram.Pages
             }
             
             var userData = await userDataRepository.TryGetByOrderIdAsync(orderId, cancellationToken: default);
-            
             if (userData != null)
             {
                 var pages = userStateModel.Pages.Select(page => page.GetType().Name).ToList();
-                
-                var updatedUserState = new UserState
+
+                var existingUserState = userData.UserState;
+
+                if (existingUserState == null)
                 {
-                    TelegramUserId = userStateModel.TelegramUserId,
-                    Pages = pages,
-                    UserDataId = orderId
-                };
-                userData.UserState = updatedUserState;
+                    userData.UserState = new UserState
+                    {
+                        TelegramUserId = userStateModel.TelegramUserId,
+                        Pages = pages,
+                        UserDataId = orderId,
+                    };
+                }
+                else
+                {
+                    existingUserState.Pages = pages;
+                    existingUserState.UserDataId = orderId;
+                }
 
                 await userDataRepository.UpdateAsync(userData, cancellationToken: default);
 
                 userStateModel.OrderStatus = (OrderStatusModel)userData.Stage;
-                
+
                 return await services.GetRequiredService<OrderStatusPage>().View(update, userStateModel);
             }
             

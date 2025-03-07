@@ -44,9 +44,6 @@ namespace Notification.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("TelegramUserId"));
 
-                    b.Property<long>("ChatId")
-                        .HasColumnType("bigint");
-
                     b.Property<int?>("LastUserMessage")
                         .HasColumnType("integer");
 

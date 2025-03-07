@@ -13,11 +13,11 @@ using Message = Telegram.Bot.Types.Message;
 namespace Notification.Infrastructure.Telegram;
 
 public class UpdateHandler(
-    IServiceScopeFactory scopeFactory, 
+    IServiceScopeFactory scopeFactory,
     PagesFactory pagesFactory) : IUpdateHandler
 {
     public async Task HandleUpdateAsync(
-        ITelegramBotClient botClient, 
+        ITelegramBotClient botClient,
         Update update,
         CancellationToken cancellationToken)
     {
@@ -42,14 +42,13 @@ public class UpdateHandler(
             {
                 TelegramUserId = telegramUserId,
                 Pages = [nameof(NotStartedPage)],
-                ChatId = update.Message.Chat.Id
             };
 
             await userStateRepository.CreateAsync(userState, cancellationToken);
         }
-        
+
         var userStateModel = ToUserStateModel(userState);
-            
+
         Console.WriteLine($"Update ID: {update.Id}, Current User State: {userState}");
 
         var result = await userStateModel.CurrentPage.Handle(update, userStateModel);
@@ -81,7 +80,11 @@ public class UpdateHandler(
     private UserStateModel ToUserStateModel(UserState userState)
     {
         var pages = userState.Pages.Select(f => pagesFactory.GetPage(f)).Reverse();
-        var userStateModel = new UserStateModel { TelegramUserId = userState.TelegramUserId, Pages = new Stack<IPage>(pages) };
+        var userStateModel = new UserStateModel
+        {
+            TelegramUserId = userState.TelegramUserId,
+            Pages = new Stack<IPage>(pages),
+        };
         return userStateModel;
     }
 

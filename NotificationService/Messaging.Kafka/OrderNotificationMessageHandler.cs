@@ -70,7 +70,7 @@ public class OrderNotificationMessageHandler(
         var statusDisplayName = userStateModel.OrderStatus.GetDisplayName();
         var message = $"Заказ {orderId} находится в статусе {statusDisplayName}";
         await botClient.SendMessage(
-            chatId: userState.ChatId,
+            chatId: userState.TelegramUserId,
             text: message,
             cancellationToken: cancellationToken);
     }
@@ -80,7 +80,7 @@ public class OrderNotificationMessageHandler(
         var userStateModel = new UserStateModel
         {
             TelegramUserId = userState.TelegramUserId,
-            OrderStatus = (OrderStatusModel)userState.UserData.Stage
+            OrderStatus = (OrderStatusModel)userState.UserData.Stage,
         };
         return userStateModel;
     }

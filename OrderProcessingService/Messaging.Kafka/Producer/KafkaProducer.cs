@@ -1,4 +1,5 @@
 ﻿using Confluent.Kafka;
+using Messaging.Kafka.Models;
 using Microsoft.Extensions.Options;
 
 namespace Messaging.Kafka.Producer
@@ -23,9 +24,11 @@ namespace Messaging.Kafka.Producer
 
         public async Task ProduceAsync(TMessage message, CancellationToken cancellationToken)
         {
+            var orderId = (message as NotificationKafkaModel)!.OrderId.ToString();
+            
             await producer.ProduceAsync(topic, new Message<string, TMessage>()
             {
-                Key = Guid.NewGuid().ToString(),
+                Key = orderId,
                 Value = message
             }, cancellationToken);
         }
