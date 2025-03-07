@@ -12,10 +12,12 @@ public static class PersistenceExtensions
         this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<INotificationRepository, NotificationRepository>();
+        services.AddScoped<IUserDataRepository, UserDataRepository>();
+        services.AddScoped<IUserStateRepository, UserStateRepository>();
 
         services.AddDbContext<NotificationDbContext>(options =>
         {
-            options.UseNpgsql(configuration.GetConnectionString("NotificationServiceLocalConnectionString"));
+            options.UseNpgsql(configuration.GetConnectionString("NotificationServiceConnectionString"));
         });
         
         return services;

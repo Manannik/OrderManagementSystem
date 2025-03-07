@@ -21,7 +21,6 @@ public static class ApplicationExtension
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
                 .UsePostgreSqlStorage(options => options.UseNpgsqlConnection(connectionString));
-            //.UseSqlServerStorage(connectionString);
         });
         services.AddScoped<IOrderProcessingService, Services.OrderProcessingService>();
 

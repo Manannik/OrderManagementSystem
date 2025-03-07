@@ -24,7 +24,7 @@ public class TelegramLongPollingService : BackgroundService
 
             try
             {
-                var user = await client.GetMeAsync(stoppingToken);
+                var user = await client.GetMe(stoppingToken);
                 Console.WriteLine($"Начали слушать апдейты для бота {user.Username}");
 
                 await client.ReceiveAsync(

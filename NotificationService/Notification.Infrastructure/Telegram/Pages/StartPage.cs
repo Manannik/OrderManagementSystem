@@ -9,7 +9,9 @@ using Telegram.Bot.Types.ReplyMarkups;
 namespace Notification.Infrastructure.Telegram.Pages
 {
     [Page("StartPage")]
-    public class StartPage(IServiceProvider services, INotificationRepository notificationRepository) : IPage
+    public class StartPage(
+        IServiceProvider services, 
+        IUserDataRepository userDataRepository) : IPage
     {
         public async Task<PageResult> Handle(Update update, UserStateModel userStateModel)
         {
@@ -31,7 +33,7 @@ namespace Notification.Infrastructure.Telegram.Pages
                 };
             }
             
-            var userData = await notificationRepository.TryGetUserDataByOrderIdAsync(orderId, cancellationToken: default);
+            var userData = await userDataRepository.TryGetByOrderIdAsync(orderId, cancellationToken: default);
             
             if (userData != null)
             {
@@ -45,7 +47,7 @@ namespace Notification.Infrastructure.Telegram.Pages
                 };
                 userData.UserState = updatedUserState;
 
-                await notificationRepository.UpdateUserDataAsync(userData, cancellationToken: default);
+                await userDataRepository.UpdateAsync(userData, cancellationToken: default);
 
                 userStateModel.OrderStatus = (OrderStatusModel)userData.Stage;
                 

@@ -1,6 +1,11 @@
-﻿namespace Notification.Domain.Abstractions;
+﻿using Notification.Domain.Entities.User;
 
-public class IUserStateRepository
+namespace Notification.Domain.Abstractions;
+
+public interface IUserStateRepository
 {
-    
+    Task CreateAsync(UserState userState, CancellationToken cancellationToken);
+    Task<UserState?> TryGetByTelegramIdAsync(long id, CancellationToken cancellationToken);
+    Task<UserState?> TryGetByOrderIdAsync(Guid orderId, CancellationToken cancellationToken);
+    Task UpdateAsync(UserState userState, CancellationToken cancellationToken);
 }

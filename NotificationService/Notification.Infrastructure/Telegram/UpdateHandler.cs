@@ -12,9 +12,13 @@ using Message = Telegram.Bot.Types.Message;
 
 namespace Notification.Infrastructure.Telegram;
 
-public class UpdateHandler(IServiceScopeFactory scopeFactory, PagesFactory pagesFactory) : IUpdateHandler
+public class UpdateHandler(
+    IServiceScopeFactory scopeFactory, 
+    PagesFactory pagesFactory) : IUpdateHandler
 {
-    public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update,
+    public async Task HandleUpdateAsync(
+        ITelegramBotClient botClient, 
+        Update update,
         CancellationToken cancellationToken)
     {
         if (update.Type != UpdateType.Message && update.Type != UpdateType.CallbackQuery)
@@ -28,19 +32,20 @@ public class UpdateHandler(IServiceScopeFactory scopeFactory, PagesFactory pages
 
         Console.WriteLine($"Update ID: {update.Id}, Telegram User ID: {telegramUserId}");
         using var scope = scopeFactory.CreateScope();
-        var notificationRepository = scope.ServiceProvider.GetRequiredService<INotificationRepository>();
+        var userStateRepository = scope.ServiceProvider.GetRequiredService<IUserStateRepository>();
 
-        var userState = await notificationRepository.TryGetUserStateByTelegramIdAsync(telegramUserId, cancellationToken);
+        var userState = await userStateRepository.TryGetByTelegramIdAsync(telegramUserId, cancellationToken);
 
         if (userState == null)
         {
             userState = new UserState()
             {
                 TelegramUserId = telegramUserId,
-                Pages = [nameof(NotStartedPage)]
+                Pages = [nameof(NotStartedPage)],
+                ChatId = update.Message.Chat.Id
             };
 
-            await notificationRepository.CreateUserStateAsync(userState, cancellationToken);
+            await userStateRepository.CreateAsync(userState, cancellationToken);
         }
         
         var userStateModel = ToUserStateModel(userState);
@@ -56,7 +61,7 @@ public class UpdateHandler(IServiceScopeFactory scopeFactory, PagesFactory pages
 
         var updatedUserState = ToUserState(result, telegramUserId, lastMessage);
 
-        await notificationRepository.UpdateUserStateAsync(updatedUserState, cancellationToken);
+        await userStateRepository.UpdateAsync(updatedUserState, cancellationToken);
     }
 
     private static UserState ToUserState(PageResult result, long telegramUserId, Message lastMessage)
