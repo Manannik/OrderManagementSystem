@@ -51,4 +51,7 @@ static void MigrateDb(IApplicationBuilder app)
     var dbContext = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
     dbContext.Database.Migrate();
 }
-public partial class Program {}
+namespace WebApplication
+{
+    public partial class Program {}
+}

@@ -4,6 +4,7 @@ using Order.Application.Enums;
 using Order.Application.Models;
 using Order.Application.Models.Kafka;
 using Order.Application.Requests;
+using Order.Application.Responses;
 using Order.Domain.Abstractions;
 using Order.Domain.Enums;
 using Order.Domain.Exceptions;

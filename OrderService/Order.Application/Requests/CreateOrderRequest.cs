@@ -1,4 +1,6 @@
-﻿namespace Order.Application.Models
+﻿using Order.Application.Models;
+
+namespace Order.Application.Requests
 {
     public class CreateOrderRequest
     {

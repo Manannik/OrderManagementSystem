@@ -12,7 +12,6 @@ public class OrderProcessingRepository(OrderProcessingDbContext dbContext) : IOr
         processingOrder.Stage = Stage.Assembly;
         processingOrder.Status = ProcessingOrderStatus.New;
         processingOrder.CreatedAt = DateTime.UtcNow;
-        
         await dbContext.ProcessingOrders.AddAsync(processingOrder, ct);
         await dbContext.SaveChangesAsync(ct);
     }

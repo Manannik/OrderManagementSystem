@@ -56,6 +56,19 @@ services:
     container_name: order-processing-service
     networks:
       - app-network
+        
+  notification-service:
+    <<: *common
+    build:
+      context: ./NotificationService
+      dockerfile: Notification.Web/Dockerfile
+    ports:
+      - "8084:8084"
+    depends_on:
+      - db
+    container_name: notification-service
+    networks:
+      - app-network
 
   zookeeper:
     <<: *common

@@ -1,4 +1,6 @@
 ﻿using Hangfire;
+using Messaging.Kafka.Models;
+using Messaging.Kafka.Producer;
 using Microsoft.AspNetCore.Mvc;
 using OrderProcessingService.Application.Abstractions;
 using OrderProcessingService.Application.Enums;
@@ -8,16 +10,20 @@ using OrderProcessingService.Domain.Entities;
 using OrderProcessingService.Domain.Enums;
 using OrderProcessingService.Domain.Exceptions;
 using Serilog;
+using StageModel = OrderProcessingService.Application.Enums.StageModel;
 
 namespace OrderProcessingService.Application.Services;
 
 public class OrderProcessingService : IOrderProcessingService
 {
     private IOrderProcessingRepository _processingRepository;
-
-    public OrderProcessingService(IOrderProcessingRepository processingRepository)
+    private IKafkaProducer<NotificationKafkaModel> _notificationProducer;
+    public OrderProcessingService(
+        IOrderProcessingRepository processingRepository, 
+        IKafkaProducer<NotificationKafkaModel> notificationProducer)
     {
         _processingRepository = processingRepository;
+        _notificationProducer = notificationProducer;
     }
 
     public async Task<ProcessingOrderModel> AssembleOrderAsync(Guid id, CancellationToken ct)
@@ -27,6 +33,14 @@ public class OrderProcessingService : IOrderProcessingService
         var existingProcessingOrder = await _processingRepository.GetByIdAsync(id, ct);
         ValidateProcessingOrder(existingProcessingOrder, id);
 
+        var notificationKafkaModel = new NotificationKafkaModel()
+        {
+            OrderId = existingProcessingOrder.OrderId,
+            Stage = (Messaging.Kafka.Models.StageModel)existingProcessingOrder.Stage
+        };
+        
+        await _notificationProducer.ProduceAsync(notificationKafkaModel, cancellationToken: default);
+        
         await _processingRepository.ChangeProcessingOrderStatusToProcessing(existingProcessingOrder, ct);
 
         var existingProcessingOrderModel = MapToProcessingOrderModel(existingProcessingOrder);
@@ -57,8 +71,18 @@ public class OrderProcessingService : IOrderProcessingService
             {
                 Log.Information("Заказ {OrderId} проходит проверку и готовится к доставке", guid);
                 await _processingRepository.PrepareOrderForDelivery(order, ct);
-                Log.Information("Заказ {OrderId} успешно подготовлен для доставки", guid);
-
+                Log.Information("Заказ {OrderId} успешно подготовлен для доставки, " +
+                                "ваш трек-номер {TrackingNumber}", guid, order.TrackingNumber);
+                
+                var notificationKafkaModel = new NotificationKafkaModel()
+                {
+                    OrderId = guid,
+                    Stage = (Messaging.Kafka.Models.StageModel)order.Stage,
+                    TrackingNumber = order.TrackingNumber
+                };
+                
+                await _notificationProducer.ProduceAsync(notificationKafkaModel, cancellationToken: default);
+                
                 var deliveryOrderModel = MapToDeliveryOrderModel(order);
                 deliveryOrderModels.Add(deliveryOrderModel);
                 validOrderIds.Add(guid);

@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using MediatR.Pipeline;
 
-namespace WebApplication1
+namespace WebApplication
 {
     public class GenericValidatorPreProcessor<TRequest> : IRequestPreProcessor<TRequest>
     {
