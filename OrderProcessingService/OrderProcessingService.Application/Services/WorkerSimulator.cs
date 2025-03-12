@@ -12,21 +12,30 @@ namespace OrderProcessingService.Application.Services;
 
 public class WorkerSimulator : IWorkerSimulator
 {
-    private IOrderProcessingRepository _processingRepository;
-    private IKafkaProducer<NotificationKafkaModel> _notificationProducer;
+    private readonly IOrderProcessingRepository _processingRepository;
+    private readonly IKafkaProducer<NotificationKafkaModel> _notificationProducer;
+    private readonly IBackgroundJobService _backgroundJobService;
 
     public WorkerSimulator(
         IOrderProcessingRepository processingRepository,
-        IKafkaProducer<NotificationKafkaModel> notificationProducer)
+        IKafkaProducer<NotificationKafkaModel> notificationProducer,
+        IBackgroundJobService backgroundJobService)
     {
         _processingRepository = processingRepository;
         _notificationProducer = notificationProducer;
+        _backgroundJobService = backgroundJobService;
     }
 
     public async Task ProcessOrderInWarehouseAsync(ProcessingOrderModel processingOrderModel)
     {
+        Log.Information("Постановка задачи на сборку товара с ID: {TaskId} в очередь", processingOrderModel.Id);
+        _backgroundJobService.Enqueue(() => ProcessOrderInWarehouseInternalAsync(processingOrderModel));
+    }
+
+    private async Task ProcessOrderInWarehouseInternalAsync(ProcessingOrderModel processingOrderModel)
+    {
         Log.Information("Начинаем сборку товара для задачи с ID: {TaskId}", processingOrderModel.Id);
-        
+
         await Task.Delay(1000);
         foreach (var item in processingOrderModel.Items)
         {
@@ -45,10 +54,15 @@ public class WorkerSimulator : IWorkerSimulator
 
         await Task.Delay(1000);
         Log.Information("Процесс сборки завершен для заказа с ID: {OrderId}", processingOrderModel.Id);
-
     }
 
     public async Task TransferOrderToDelivery(List<Guid> orders)
+    {
+        Log.Information("Постановка задачи на доставку заказов в очередь");
+        _backgroundJobService.Enqueue(() => TransferOrderToDeliveryInternal(orders));
+    }
+
+    private async Task TransferOrderToDeliveryInternal(List<Guid> orders)
     {
         Log.Information("Начинаю доставлять заказы");
 
@@ -64,26 +78,25 @@ public class WorkerSimulator : IWorkerSimulator
                 deliveryAddress);
 
             await _processingRepository.ChangeOrderStatusToDeliveredAsync(order, CancellationToken.None);
-            Log.Information("изменен статус заказа на {status}", ProcessingOrderStatus.Completed);
-            
+            Log.Information("Изменен статус заказа на {status}", ProcessingOrderStatus.Completed);
+
             var notificationKafkaModel = new NotificationKafkaModel()
             {
-                //попробовать добавить код вручения
                 OrderId = order,
                 Stage = Messaging.Kafka.Models.StageModel.Completed,
                 Code = GenerateCodeToDelivery()
             };
             await _notificationProducer.ProduceAsync(notificationKafkaModel, cancellationToken: default);
         }
-        
+
         Log.Information("Все заказы успешно доставлены.");
     }
 
     private string GenerateCodeToDelivery()
     {
-        Random random = new Random();
-        int code = random.Next(0, 10000);
-        string formattedCode = code.ToString("D4");
+        var random = new Random();
+        var code = random.Next(0, 10000);
+        var formattedCode = code.ToString("D4");
         return formattedCode;
     }
 
